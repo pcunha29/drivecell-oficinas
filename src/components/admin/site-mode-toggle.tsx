@@ -31,7 +31,7 @@ export function SiteModeToggle({ initialOn }: { initialOn: boolean }) {
           </p>
           <p className="text-sm text-muted-foreground">
             {on
-              ? "Ligado. Quem visita / ou /precos vê a página de espera. Tu (admin) continuas a ver o site real."
+              ? "Ligado. Quem visita o site público vê a página de espera (exceto /termos, /entrar e a app). Tu (admin) continuas a ver o site real."
               : "Desligado. O site público está aberto a todos."}
           </p>
         </div>

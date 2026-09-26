@@ -3,8 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getSupabaseAnonKey, getSupabaseUrl } from "./env";
 import { isAdminEmail } from "@/lib/admin/emails";
 import {
-  CONSTRUCTION_GATED_PATHS,
   CONSTRUCTION_PATH,
+  isAllowedDuringConstruction,
   readUnderConstruction,
 } from "@/lib/site-mode";
 
@@ -75,7 +75,7 @@ function redirectToLogin(request: NextRequest) {
 
 /**
  * Rotas públicas: /, /precos, /termos, /entrar, /login, /auth/*, /em-construcao
- * (/ e /precos passam a mostrar /em-construcao quando o modo está ligado, exceto ao admin)
+ * (com o modo "em construção" ligado, tudo fora de isAllowedDuringConstruction mostra /em-construcao, exceto ao admin)
  * (e qualquer outra fora das protegidas, que responde com 404 se não existir).
  * /admin/* exige sessão aqui; a página de admin valida depois se o email é de admin.
  * As rotas /api/* validam a sessão por si.
@@ -113,9 +113,9 @@ export async function updateSession(request: NextRequest) {
       },
     );
 
-    // Nas páginas públicas escondíveis, o estado do modo "em construção" é lido
+    // Nas páginas escondíveis (tudo fora da lista de exceções), o estado do modo "em construção" é lido
     // em paralelo com a sessão (uma leitura leve, sem cache: o toggle é imediato).
-    const gatedPath = CONSTRUCTION_GATED_PATHS.has(pathname) || pathname === CONSTRUCTION_PATH;
+    const gatedPath = !isAllowedDuringConstruction(pathname) || pathname === CONSTRUCTION_PATH;
     const [
       {
         data: { user },
@@ -148,7 +148,7 @@ export async function updateSession(request: NextRequest) {
 
     // Modo "em construção": o público vê a página de espera; o admin vê o site real
     // (e pode abrir /em-construcao diretamente para a pré-visualizar).
-    if (CONSTRUCTION_GATED_PATHS.has(pathname) && underConstruction && !isAdmin) {
+    if (!isAllowedDuringConstruction(pathname) && underConstruction && !isAdmin) {
       const url = request.nextUrl.clone();
       url.pathname = CONSTRUCTION_PATH;
       const rewrite = withCookies(NextResponse.rewrite(url, { request }), supabaseResponse);
