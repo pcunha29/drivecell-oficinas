@@ -1,0 +1,217 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  --ring: #0d2c4a;
+  --primary: #0d2c4a;
+  --primary-foreground: #f8fafc;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --radius: 0.625rem;
+  --content-max: 72rem;
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --border: #334155;
+  --ring: #c9a66b;
+  --primary: #c9a66b;
+  --primary-foreground: #0d2c4a;
+  --card: #1e293b;
+  --card-foreground: #f8fafc;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --font-sans: var(--font-geist), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-serif: var(--font-instrument-serif), Georgia, serif;
+  --radius-sm: calc(var(--radius) - 0.25rem);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 0.25rem);
+}
+
+/*
+ * Tokens da marca Drivecell (site público e páginas de marketing).
+ * Nomes distintos dos tokens shadcn (card, muted…) para não os sobrepor.
+ */
+@theme {
+  --color-paper: #f4f1ea;
+  --color-paper-card: #fbf9f4;
+  --color-line: #d8d1c3;
+  /* Marca DriveCell: azul-marinho #0D2C4A e dourado #B18D56 (contrastes AA verificados) */
+  --color-ink: #0f1d2b; /* texto principal, 15:1 no papel */
+  --color-ink-2: #344150;
+  --color-ink-muted: #5a6572; /* 5,3:1 no papel */
+  --color-accent: #86652f; /* dourado escuro: texto/links em fundo claro (4,8:1) e fundo com texto branco */
+  --color-accent-soft: #c9a66b; /* dourado claro para fundos azul-marinho (6,2:1) */
+  --color-gold: #b18d56; /* dourado da marca: fundos e detalhes, com texto azul-marinho */
+  --color-gold-tint: #efe6d6;
+  --color-night: #0d2c4a; /* azul-marinho da marca */
+  --color-night-2: #143a5e;
+  --color-night-line: #28506f;
+  --color-on-dark: #f4f1ea;
+  --color-on-dark-2: #c8d1db;
+  --color-on-dark-3: #98a8b9;
+  --color-paid: #9fd3b1;
+  --color-danger: #a3261b;
+  --color-danger-soft: #fbece9;
+  --color-field: #cfc7b7;
+
+  /* Títulos serif fluidos (390px → 1440px) */
+  --text-display-xl: clamp(3rem, 2rem + 5.2vw, 5.75rem); /* 48 → 92px */
+  --text-display-xl--line-height: 0.98;
+  --text-display-lg: clamp(2.5rem, 1.6rem + 3.2vw, 4rem); /* 40 → 64px */
+  --text-display-lg--line-height: 1.02;
+  --text-display-md: clamp(2.25rem, 1.5rem + 2.8vw, 3.5rem); /* 36 → 56px */
+  --text-display-md--line-height: 1.05;
+}
+
+/* Etiqueta em maiúsculas (Geist Mono, 12px, espaçada) */
+@utility eyebrow {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5e6068;
+}
+
+/* Títulos em Instrument Serif */
+@utility display-serif {
+  font-family: var(--font-instrument-serif), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* Âncoras (#secção) deslizam em vez de saltar; respeita "reduzir movimento" do sistema. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe areas (mobile / tablet com notch) */
+.pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+}
+
+.pt-safe {
+  padding-top: max(0px, env(safe-area-inset-top, 0px));
+}
+
+/* Kanban: scroll horizontal suave em mobile */
+.kanban-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+}
+
+.kanban-scroll > * {
+  scroll-snap-align: start;
+}
+
+@media (min-width: 768px) {
+  .kanban-scroll {
+    scroll-snap-type: none;
+  }
+
+  .kanban-scroll > * {
+    scroll-snap-align: unset;
+  }
+}
+
+/* Selo "PAGO" do quadro animado da landing */
+@keyframes hb-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  70% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+/* Foco visível comum no site público: azul-marinho em fundos claros, dourado claro em fundos azul-marinho. */
+@layer base {
+  .site {
+    --focus-ring: var(--color-night);
+  }
+  .site .bg-night {
+    --focus-ring: var(--color-accent-soft);
+  }
+  .site :is(a, button, summary, input, select, textarea, [role="button"]):focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+/* Teaser da página "Em construção": véu desfocado com uma lente que passeia. */
+@property --tz-x {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 24%;
+}
+@property --tz-y {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 38%;
+}
+
+@keyframes tz-roam {
+  0%,
+  100% { --tz-x: 24%; --tz-y: 38%; }
+  22% { --tz-x: 58%; --tz-y: 30%; }
+  45% { --tz-x: 80%; --tz-y: 55%; }
+  68% { --tz-x: 62%; --tz-y: 84%; }
+  84% { --tz-x: 30%; --tz-y: 70%; }
+}
+
+.teaser-veil {
+  --tz-r: clamp(70px, 14vw, 120px);
+  background: rgb(13 44 74 / 0.38);
+  -webkit-backdrop-filter: blur(7px) saturate(0.85);
+  backdrop-filter: blur(7px) saturate(0.85);
+  -webkit-mask-image: radial-gradient(circle var(--tz-r) at var(--tz-x) var(--tz-y), transparent 70%, #000 100%);
+  mask-image: radial-gradient(circle var(--tz-r) at var(--tz-x) var(--tz-y), transparent 70%, #000 100%);
+  animation: tz-roam 16s ease-in-out infinite;
+}
+
+.teaser-lens {
+  --tz-r: clamp(70px, 14vw, 120px);
+  left: var(--tz-x);
+  top: var(--tz-y);
+  width: calc(var(--tz-r) * 1.7);
+  height: calc(var(--tz-r) * 1.7);
+  translate: -50% -50%;
+  border: 1px solid rgb(201 166 107 / 0.45);
+  box-shadow: 0 0 0 6px rgb(201 166 107 / 0.06), 0 0 40px rgb(201 166 107 / 0.12);
+  animation: tz-roam 16s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .teaser-veil,
+  .teaser-lens {
+    animation: none;
+  }
+}

@@ -1,0 +1,38 @@
+name: DB Backup (quinzenal)
+
+on:
+  schedule:
+    - cron: "0 3 1,15 * *" # dias 1 e 15 de cada mês, 03:00 UTC (~quinzenal)
+  workflow_dispatch: {} # permite correr manualmente
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Dump (roles + schema + dados public/auth)
+        run: |
+          set -euo pipefail
+          STAMP=$(date -u +%Y%m%d-%H%M)
+          DIR="backup-$STAMP"
+          mkdir "$DIR"
+          supabase db dump --db-url "$SUPABASE_DB_URL" --role-only -f "$DIR/roles.sql"
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f "$DIR/schema.sql"
+          supabase db dump --db-url "$SUPABASE_DB_URL" --data-only --use-copy \
+            -s public -s auth -f "$DIR/data.sql"
+          tar -czf "$DIR.tar.gz" "$DIR"
+          gpg --batch --yes --symmetric --cipher-algo AES256 \
+            --passphrase "$BACKUP_GPG_PASSPHRASE" "$DIR.tar.gz"
+          echo "ARTIFACT=$DIR.tar.gz.gpg" >> "$GITHUB_ENV"
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_GPG_PASSPHRASE: ${{ secrets.BACKUP_GPG_PASSPHRASE }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT }}
+          path: ${{ env.ARTIFACT }}
+          retention-days: 90
