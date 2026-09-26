@@ -43,13 +43,40 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { formatEuro } from "@/lib/format";
 import { GripVertical, Plus, Trash2 } from "lucide-react";
 import {
   DialogDeleteConfirm,
   DialogFormActions,
 } from "@/components/ui/dialog-form-actions";
 import { ReadOnlyDialogFooter } from "@/components/layout/read-only-dialog-footer";
-import { useCanWrite } from "@/stores/workshop-store";
+import { useCanWrite, useTrackCosts } from "@/stores/workshop-store";
+
+/**
+ * Colunas das linhas de peças.
+ * sm+: pega · descrição · qtd. · preço · (custo) · total · remover, numa linha.
+ * Telemóvel: 1.ª linha pega · descrição · remover; 2.ª linha qtd. · preço · (custo), com rótulos.
+ */
+/** Números alinhados à direita e sem as setas do browser (que empurravam os valores). */
+const NUMBER_INPUT =
+  "text-right tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none";
+
+/** Símbolo € dentro do campo, à direita: o cabeçalho fica numa linha e os valores alinham. */
+function EuroSuffix() {
+  return (
+    <span
+      aria-hidden
+      className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-muted-foreground"
+    >
+      €
+    </span>
+  );
+}
+
+const ITEM_GRID =
+  "grid gap-2 grid-cols-[28px_repeat(3,minmax(0,1fr))_40px] sm:grid-cols-[28px_minmax(0,1fr)_84px_108px_96px_40px]";
+const ITEM_GRID_COST =
+  "grid gap-2 grid-cols-[28px_repeat(3,minmax(0,1fr))_40px] sm:grid-cols-[28px_minmax(0,1fr)_72px_100px_100px_96px_40px]";
 
 const STATUS_OPTIONS: { value: OrderStatus; label: string }[] = [
   { value: "waiting", label: "Em espera" },
@@ -72,6 +99,7 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
   const updateOrder = useOrderStore((s) => s.updateOrder);
   const deleteOrder = useOrderStore((s) => s.deleteOrder);
   const canWrite = useCanWrite();
+  const trackCosts = useTrackCosts();
   const customers = useCustomerStore((s) => s.customers);
   const getVehiclesByCustomerId = useVehicleStore(
     (s) => s.getVehiclesByCustomerId,
@@ -95,8 +123,9 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
                     description: i.description,
                     quantity: i.quantity,
                     unitPrice: i.unitPrice,
+                    unitCost: i.unitCost ?? null,
                   }))
-                : [{ description: "", quantity: 1, unitPrice: 0 }],
+                : [{ description: "", quantity: 1, unitPrice: 0, unitCost: null }],
           }
         : {
             customerId: "",
@@ -105,7 +134,7 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
             description: "",
             notes: "",
             paid: false,
-            items: [{ description: "", quantity: 1, unitPrice: 0 }],
+            items: [{ description: "", quantity: 1, unitPrice: 0, unitCost: null }],
           },
     [order],
   );
@@ -156,6 +185,19 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
 
   const customerField = register("customerId");
   const paid = watch("paid") ?? false;
+  const watchedItems = watch("items");
+  const orderTotal = (watchedItems ?? []).reduce((sum, item) => {
+    const line = Number(item?.quantity) * Number(item?.unitPrice);
+    return Number.isFinite(line) ? sum + line : sum;
+  }, 0);
+  // Linhas sem custo (ex.: mão de obra) contam como custo zero.
+  const orderCost = (watchedItems ?? []).reduce((sum, item) => {
+    if (item?.unitCost === null || item?.unitCost === undefined || item?.unitCost === "") return sum;
+    const line = Number(item?.quantity) * Number(item?.unitCost);
+    return Number.isFinite(line) ? sum + line : sum;
+  }, 0);
+  const orderMargin = orderTotal - orderCost;
+  const orderMarginPct = orderTotal > 0 ? (orderMargin / orderTotal) * 100 : null;
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -171,6 +213,11 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
           description: i.description,
           quantity: Number(i.quantity),
           unitPrice: Number(i.unitPrice),
+          // Com a opção desligada os custos já gravados mantêm-se (vêm nos valores do formulário).
+          unitCost:
+            i.unitCost === null || i.unitCost === undefined || i.unitCost === ""
+              ? null
+              : Number(i.unitCost),
         }));
 
       const payload = {
@@ -199,7 +246,7 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
   };
 
   const addItem = () => {
-    append({ description: "", quantity: 1, unitPrice: 0 });
+    append({ description: "", quantity: 1, unitPrice: 0, unitCost: null });
   };
 
   const removeItem = (index: number) => {
@@ -250,7 +297,7 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg sm:max-w-2xl lg:max-w-3xl">
         <DialogHeader>
           <DialogTitle>
             {!canWrite
@@ -288,7 +335,8 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
               disabled={!canWrite}
               className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0"
             >
-            <div className="grid gap-2">
+            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid content-start gap-2">
               <Label htmlFor="customerId">Cliente</Label>
               <Select
                 id="customerId"
@@ -314,7 +362,7 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
               )}
             </div>
 
-            <div className="grid gap-2">
+            <div className="grid content-start gap-2">
               <Label htmlFor="vehicleId">Viatura</Label>
               <Select id="vehicleId" {...register("vehicleId")}>
                 <option value="">Escolher…</option>
@@ -331,15 +379,6 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
               )}
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="status">Estado</Label>
-              <Select id="status" {...register("status")}>
-                {STATUS_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </Select>
             </div>
 
             <div className="grid gap-2">
@@ -356,18 +395,18 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
               )}
             </div>
 
+            <div className="grid gap-4 sm:grid-cols-2 sm:items-end">
             <div className="grid gap-2">
-              <Label htmlFor="notes">Notas</Label>
-              <textarea
-                id="notes"
-                rows={3}
-                placeholder="Observações internas…"
-                className="flex min-h-[88px] w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                {...register("notes")}
-              />
+              <Label htmlFor="status">Estado</Label>
+              <Select id="status" {...register("status")}>
+                {STATUS_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </Select>
             </div>
-
-            <div className="flex items-center justify-between gap-4 rounded-md border border-border p-3">
+            <div className="flex min-h-11 items-center justify-between gap-4 rounded-md border border-border px-3 py-2">
               <div className="grid gap-0.5">
                 <Label htmlFor="paid" className="cursor-pointer">
                   Serviço pago?
@@ -386,6 +425,8 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
               />
             </div>
 
+            </div>
+
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>Peças e mão de obra</Label>
@@ -400,11 +441,15 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
                 </Button>
               </div>
               <div className="space-y-3 rounded-md border border-border p-3">
-                <div className="grid grid-cols-[28px_1fr_72px_92px_40px] gap-2 items-center px-1 text-sm font-medium text-muted-foreground">
+                <div className={cn(trackCosts ? ITEM_GRID_COST : ITEM_GRID, "items-center px-1 text-sm font-medium text-muted-foreground")}>
                   <span aria-hidden />
-                  <span>Descrição</span>
-                  <span>Quantidade</span>
-                  <span>Preço (€)</span>
+                  <span className="col-span-3 sm:col-span-1">Descrição</span>
+                  <span className="hidden whitespace-nowrap text-right sm:block">Qtd.</span>
+                  {trackCosts && (
+                    <span className="hidden whitespace-nowrap text-right sm:block">Custo oficina</span>
+                  )}
+                  <span className="hidden whitespace-nowrap text-right sm:block">Preço cliente</span>
+                  <span className="hidden text-right sm:block">Total</span>
                   <span aria-hidden />
                 </div>
                 <DndContext
@@ -425,8 +470,14 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
                           defaultDescription={String(field.description ?? "")}
                           defaultQuantity={String(field.quantity ?? "")}
                           defaultUnitPrice={String(field.unitPrice ?? "")}
+                          defaultUnitCost={field.unitCost == null ? "" : String(field.unitCost)}
                           register={register}
                           errors={errors}
+                          trackCosts={trackCosts}
+                          lineTotal={
+                            Number(watchedItems?.[index]?.quantity) *
+                            Number(watchedItems?.[index]?.unitPrice)
+                          }
                           onRemove={() => removeItem(index)}
                           canRemove={fields.length > 1}
                         />
@@ -434,7 +485,51 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
                     </div>
                   </SortableContext>
                 </DndContext>
+                <div className="border-t border-border px-1 pt-3">
+                  <div className="flex items-baseline justify-between gap-4">
+                    <span className="text-sm text-muted-foreground">Total da ordem</span>
+                    <span className="text-lg font-semibold tabular-nums">{formatEuro(orderTotal)}</span>
+                  </div>
+                  {trackCosts && (
+                    <dl className="m-0 mt-2 grid gap-1 text-sm">
+                      <div className="flex items-baseline justify-between gap-4">
+                        <dt className="text-muted-foreground">Custo das peças</dt>
+                        <dd className="m-0 tabular-nums text-muted-foreground">{formatEuro(orderCost)}</dd>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-4">
+                        <dt className="text-muted-foreground">Margem</dt>
+                        <dd
+                          className={cn(
+                            "m-0 font-medium tabular-nums",
+                            orderMargin < 0 ? "text-red-600 dark:text-red-400" : "text-foreground",
+                          )}
+                        >
+                          {formatEuro(orderMargin)}
+                          {orderMarginPct !== null && (
+                            <span className="ml-1.5 font-normal text-muted-foreground">
+                              ({orderMarginPct.toLocaleString("pt-PT", { maximumFractionDigits: 0 })}%)
+                            </span>
+                          )}
+                        </dd>
+                      </div>
+                      <p className="m-0 text-xs text-muted-foreground">
+                        Linhas sem custo (como a mão de obra) contam como custo zero.
+                      </p>
+                    </dl>
+                  )}
+                </div>
               </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="notes">Notas</Label>
+              <textarea
+                id="notes"
+                rows={2}
+                placeholder="Observações internas…"
+                className="flex min-h-[64px] w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                {...register("notes")}
+              />
             </div>
 
             </fieldset>
@@ -471,10 +566,13 @@ type ServiceItemRowProps = {
   defaultDescription: string;
   defaultQuantity: string;
   defaultUnitPrice: string;
+  defaultUnitCost: string;
   register: UseFormRegister<OrderFormValues>;
   errors: FieldErrors<OrderFormValues>;
   onRemove: () => void;
   canRemove: boolean;
+  lineTotal: number;
+  trackCosts: boolean;
 };
 
 function ServiceItemRow({
@@ -483,10 +581,13 @@ function ServiceItemRow({
   defaultDescription,
   defaultQuantity,
   defaultUnitPrice,
+  defaultUnitCost,
   register,
   errors,
   onRemove,
   canRemove,
+  lineTotal,
+  trackCosts,
 }: ServiceItemRowProps) {
   const {
     attributes,
@@ -508,7 +609,8 @@ function ServiceItemRow({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "grid grid-cols-[28px_1fr_72px_92px_40px] gap-2 items-end",
+        trackCosts ? ITEM_GRID_COST : ITEM_GRID,
+        "items-end",
         isDragging && "relative z-10 opacity-80",
       )}
     >
@@ -522,7 +624,7 @@ function ServiceItemRow({
       >
         <GripVertical className="h-4 w-4" />
       </button>
-      <div className="space-y-1.5">
+      <div className="col-span-3 space-y-1.5 sm:col-span-1">
         <Label htmlFor={`items.${index}.description`} className="sr-only">
           Descrição
         </Label>
@@ -539,9 +641,13 @@ function ServiceItemRow({
           </p>
         )}
       </div>
-      <div className="space-y-1.5">
-        <Label htmlFor={`items.${index}.quantity`} className="sr-only">
-          Quantidade
+      <div className="col-start-2 space-y-1 sm:col-start-auto sm:space-y-1.5">
+        <Label
+          htmlFor={`items.${index}.quantity`}
+          className="text-xs font-normal text-muted-foreground whitespace-nowrap sm:sr-only"
+        >
+          <span aria-hidden className="sm:hidden">Qtd.</span>
+          <span className="sr-only">Quantidade</span>
         </Label>
         <Input
           id={`items.${index}.quantity`}
@@ -550,27 +656,67 @@ function ServiceItemRow({
           placeholder="1"
           defaultValue={defaultQuantity}
           {...register(`items.${index}.quantity`)}
+          inputMode="decimal"
+          className={NUMBER_INPUT}
         />
       </div>
-      <div className="space-y-1.5">
-        <Label htmlFor={`items.${index}.unitPrice`} className="sr-only">
-          Preço (€)
+      {trackCosts && (
+        <div className="space-y-1 sm:space-y-1.5">
+          <Label
+            htmlFor={`items.${index}.unitCost`}
+            className="text-xs font-normal text-muted-foreground whitespace-nowrap sm:sr-only"
+          >
+            <span aria-hidden className="sm:hidden">Custo</span>
+            <span className="sr-only">Custo oficina</span>
+          </Label>
+          <div className="relative">
+            <Input
+              id={`items.${index}.unitCost`}
+              type="number"
+              step="0.01"
+              min="0"
+              inputMode="decimal"
+              placeholder="0,00"
+              defaultValue={defaultUnitCost}
+              {...register(`items.${index}.unitCost`)}
+              className={cn(NUMBER_INPUT, "pr-7 text-muted-foreground")}
+            />
+            <EuroSuffix />
+          </div>
+        </div>
+      )}
+      <div className="space-y-1 sm:space-y-1.5">
+        <Label
+          htmlFor={`items.${index}.unitPrice`}
+          className="text-xs font-normal text-muted-foreground whitespace-nowrap sm:sr-only"
+        >
+          <span aria-hidden className="sm:hidden">Preço</span>
+          <span className="sr-only">Preço cliente</span>
         </Label>
-        <Input
-          id={`items.${index}.unitPrice`}
-          type="number"
-          step="0.01"
-          placeholder="0,00"
-          defaultValue={defaultUnitPrice}
-          {...register(`items.${index}.unitPrice`)}
-        />
+        <div className="relative">
+          <Input
+            id={`items.${index}.unitPrice`}
+            type="number"
+            step="0.01"
+            inputMode="decimal"
+            placeholder="0,00"
+            defaultValue={defaultUnitPrice}
+            {...register(`items.${index}.unitPrice`)}
+            className={cn(NUMBER_INPUT, "pr-7")}
+          />
+          <EuroSuffix />
+        </div>
       </div>
+      <span className="hidden h-11 items-center justify-end text-sm tabular-nums text-muted-foreground sm:flex">
+        {Number.isFinite(lineTotal) ? formatEuro(lineTotal) : "—"}
+      </span>
       <Button
         type="button"
         variant="ghost"
         size="icon"
         onClick={onRemove}
         disabled={!canRemove}
+        className="col-start-5 row-start-1 self-end sm:col-start-auto sm:row-start-auto"
         aria-label="Remover linha"
       >
         <Trash2 className="h-4 w-4 text-muted-foreground" />

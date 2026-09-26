@@ -4,6 +4,14 @@ export const serviceItemSchema = z.object({
   description: z.string(),
   quantity: z.coerce.number().min(0.01, "A quantidade tem de ser maior que 0"),
   unitPrice: z.coerce.number().min(0, "O preço não pode ser negativo"),
+  /** Custo unitário opcional: vazio = não registado. */
+  unitCost: z.preprocess(
+    (v) =>
+      v === "" || v === null || v === undefined || (typeof v === "number" && Number.isNaN(v))
+        ? null
+        : v,
+    z.coerce.number().min(0, "O custo não pode ser negativo").nullable(),
+  ).optional(),
 });
 
 export const orderFormSchema = z.object({

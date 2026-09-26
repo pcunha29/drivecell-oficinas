@@ -12,10 +12,15 @@ export type Workshop = Pick<
   | "trial_ends_at"
   | "current_period_end"
   | "is_demo"
+  | "track_costs"
 >;
 
-export const WORKSHOP_SELECT =
+/** Colunas essenciais (existem desde a primeira migração). */
+export const WORKSHOP_SELECT_BASE =
   "id, name, subscription_status, trial_ends_at, current_period_end, is_demo";
+
+/** Tudo o que a app usa, incluindo opções mais recentes (ex.: track_costs). */
+export const WORKSHOP_SELECT = `${WORKSHOP_SELECT_BASE}, track_costs`;
 
 const WRITABLE_STATUSES: SubscriptionStatusDb[] = ["active", "past_due"];
 

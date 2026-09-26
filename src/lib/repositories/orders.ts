@@ -54,6 +54,7 @@ function itemsToJson(items: ServiceItem[]) {
     description: item.description,
     quantity: item.quantity,
     unitPrice: item.unitPrice,
+    unitCost: item.unitCost ?? null,
   }));
 }
 

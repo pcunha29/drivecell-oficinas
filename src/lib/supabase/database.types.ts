@@ -24,6 +24,8 @@ export type WorkshopRow = {
   terms_version: string | null;
   terms_accepted_at: string | null;
   is_demo: boolean;
+  /** A oficina regista o custo das peças (margem). */
+  track_costs: boolean;
   admin_notes: string;
   created_at: string;
 };
@@ -80,5 +82,6 @@ export type ServiceOrderItemRow = {
   description: string;
   quantity: number;
   unit_price: number;
+  unit_cost: number | null;
   created_at: string;
 };

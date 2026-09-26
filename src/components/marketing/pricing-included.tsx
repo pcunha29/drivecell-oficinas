@@ -3,7 +3,7 @@ const INCLUDED = [
   "Quadro de ordens com arrastar e largar",
   "Peças e mão de obra em cada ordem",
   "Controlo do que está pago e por pagar",
-  "Faturação por mês e por ano",
+  "Faturação por mês e por ano, com margem opcional",
   "Computador, tablet e telemóvel",
   "Exportação de todos os dados",
   "Alojamento na UE com cópias de segurança diárias",

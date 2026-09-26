@@ -117,7 +117,7 @@ const features: { title: string; text: string; icon: React.ReactNode }[] = [
   },
   {
     title: "Faturação mensal",
-    text: "Totais por mês e por ano, em gráfico, a partir das ordens entregues.",
+    text: "Totais por mês e por ano, em gráfico. Se registares o custo das peças, vês também a margem.",
     icon: <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />,
   },
   {

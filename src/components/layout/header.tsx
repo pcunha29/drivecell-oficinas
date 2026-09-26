@@ -16,6 +16,7 @@ import {
   ChevronDown,
   UserCircle,
   CreditCard,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { pageContainer } from "@/lib/layout";
@@ -28,6 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ProfileDialog } from "@/components/layout/profile-dialog";
+import { WorkshopSettingsDialog } from "@/components/layout/workshop-settings-dialog";
 import { useWorkshop } from "@/stores/workshop-store";
 import { DrivecellIcon } from "@/components/brand/drivecell-logo";
 
@@ -64,6 +66,7 @@ export function Header() {
   const [userName, setUserName] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -199,6 +202,16 @@ export function Header() {
                 className="flex min-h-[44px] items-center gap-2 cursor-pointer"
                 onSelect={(e) => {
                   e.preventDefault();
+                  setSettingsOpen(true);
+                }}
+              >
+                <Settings className="h-4 w-4" />
+                Definições da oficina
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="flex min-h-[44px] items-center gap-2 cursor-pointer"
+                onSelect={(e) => {
+                  e.preventDefault();
                   setProfileOpen(true);
                 }}
               >
@@ -220,6 +233,8 @@ export function Header() {
         </div>
       </div>
     </header>
+
+    <WorkshopSettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
 
     <ProfileDialog
       open={profileOpen}

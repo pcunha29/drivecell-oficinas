@@ -33,6 +33,7 @@ function mapServiceItem(row: ServiceOrderItemRow): ServiceItem {
     description: row.description,
     quantity: Number(row.quantity),
     unitPrice: Number(row.unit_price),
+    unitCost: row.unit_cost == null ? null : Number(row.unit_cost),
   };
 }
 

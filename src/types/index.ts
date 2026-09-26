@@ -26,6 +26,8 @@ export type ServiceItem = {
   description: string;
   quantity: number;
   unitPrice: number;
+  /** Custo unitário (peças). null = não registado. */
+  unitCost?: number | null;
 };
 
 export type ServiceOrder = {

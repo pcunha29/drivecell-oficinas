@@ -28,7 +28,9 @@ export function DialogFormActions({
   return (
     <div
       className={cn(
-        "-mx-6 -mb-6 mt-2 border-t border-border bg-muted/30 px-6 py-4",
+        // A partir de sm fica colado ao fundo do modal quando há scroll (-bottom-6 compensa o padding).
+        // No telemóvel os botões empilhados ocupariam meio ecrã, por isso ficam no fim do formulário.
+        "-mx-6 -mb-6 mt-2 border-t border-border bg-background px-6 py-4 sm:sticky sm:-bottom-6 sm:z-10",
         showDelete && "rounded-b-lg",
       )}
     >
@@ -37,7 +39,7 @@ export function DialogFormActions({
           {error}
         </p>
       )}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row-reverse sm:items-center sm:justify-between">
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button
             type="button"
@@ -60,7 +62,7 @@ export function DialogFormActions({
           <Button
             type="button"
             variant="ghost"
-            className="min-h-[44px] text-destructive hover:bg-destructive/10 hover:text-destructive touch-manipulation"
+            className="min-h-[44px] text-destructive hover:bg-destructive/10 hover:text-destructive touch-manipulation sm:-ml-3"
             onClick={onDelete}
             disabled={isSubmitting}
           >

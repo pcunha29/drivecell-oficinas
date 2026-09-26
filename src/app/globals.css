@@ -8,6 +8,9 @@
   --border: #e2e8f0;
   --ring: #0d2c4a;
   --primary: #0d2c4a;
+  /* Gráficos de lucro: margem (azul) e custo (dourado). Validados para daltonismo e contraste. */
+  --chart-margin: #2a5a94;
+  --chart-cost: #c4903f;
   --primary-foreground: #f8fafc;
   --card: #ffffff;
   --card-foreground: #0f172a;
@@ -23,6 +26,8 @@
   --border: #334155;
   --ring: #c9a66b;
   --primary: #c9a66b;
+  --chart-margin: #5f8fd6;
+  --chart-cost: #b8862f;
   --primary-foreground: #0d2c4a;
   --card: #1e293b;
   --card-foreground: #f8fafc;
