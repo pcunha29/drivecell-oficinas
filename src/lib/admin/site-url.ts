@@ -6,7 +6,7 @@ export function getSiteUrl(): string {
   const url = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (!url) {
     if (process.env.NODE_ENV !== "production") return "http://localhost:3000";
-    throw new Error("Falta NEXT_PUBLIC_SITE_URL (ex.: https://oficinas.drivecell.pt).");
+    throw new Error("Falta NEXT_PUBLIC_SITE_URL (ex.: https://drivecell.pt).");
   }
   return url.replace(/\/+$/, "");
 }

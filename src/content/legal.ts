@@ -26,7 +26,7 @@ export const termsClauses: readonly TermsClause[] = [
     id: "t1",
     number: "01",
     title: "Quem somos",
-    body: "O DriveCell Oficinas é prestado pela Flachbau Unipessoal, Lda, NIF [NIF], com sede em [MORADA]. Contacto: [EMAIL].",
+    body: "O DriveCell Oficinas é prestado pela Flachbau Unipessoal, Lda, NIF 518094650, com sede em Paços de Ferreira. Contacto: pcunhadev@gmail.com.",
   },
   {
     id: "t2",
@@ -83,10 +83,10 @@ export const privacySections: readonly PrivacySection[] = [
   },
   {
     title: "Onde ficam e com quem",
-    body: "Alojados na União Europeia. Subcontratantes: Supabase (base de dados), Vercel (alojamento), Stripe (pagamentos) e [FORNECEDOR DE EMAIL] (envio de emails).",
+    body: "Alojados na União Europeia. Subcontratantes: Supabase (base de dados), Vercel (alojamento), Stripe (pagamentos) e Gmail (envio de emails).",
   },
   {
     title: "Os teus direitos",
-    body: "Podes pedir acesso, retificação, portabilidade ou eliminação dos teus dados através de [EMAIL], e apresentar reclamação à CNPD.",
+    body: "Podes pedir acesso, retificação, portabilidade ou eliminação dos teus dados através de pcunhadev@gmail.com, e apresentar reclamação à CNPD.",
   },
 ];
