@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next"
 
 const geist = Geist({
   subsets: ["latin"],
@@ -38,6 +39,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    <>
+    <Analytics />
     <html
       lang="pt-PT"
       data-scroll-behavior="smooth"
@@ -52,5 +55,6 @@ export default function RootLayout({
         <Toaster richColors position="bottom-right" />
       </body>
     </html>
+    </>
   );
 }
