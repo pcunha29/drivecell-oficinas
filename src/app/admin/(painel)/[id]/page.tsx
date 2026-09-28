@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { FormMessage } from "@/components/admin/form-feedback";
 import { ResendInviteButton } from "@/components/admin/resend-invite-button";
 import { ResetDemoDialog } from "@/components/admin/reset-demo-dialog";
+import { DeleteWorkshopDialog } from "@/components/admin/delete-workshop-dialog";
 import { DemoBadge, StatusBadge } from "@/components/admin/status-badge";
 import { WorkshopEditForm } from "@/components/admin/workshop-edit-form";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { requireAdminPage } from "@/lib/admin/auth";
-import { getWorkshopDetail, type AdminWorkshopDetail } from "@/lib/admin/data";
+import { getWorkshopDetail, purgeDate, type AdminWorkshopDetail } from "@/lib/admin/data";
 import { formatDate, formatDateTime, toLisbonDateInput } from "@/lib/admin/format";
 
 export const dynamic = "force-dynamic";
@@ -58,6 +59,7 @@ export default async function AdminWorkshopDetailPage({
   if (!workshop) notFound();
 
   const createdMessage = typeof criada === "string" ? CREATED_MESSAGES[criada] : undefined;
+  const scheduledPurge = purgeDate(workshop);
 
   return (
     <div className="space-y-6">
@@ -82,6 +84,14 @@ export default async function AdminWorkshopDetailPage({
       </div>
 
       {createdMessage && <FormMessage state={{ status: "success", message: createdMessage }} />}
+      {scheduledPurge && (
+        <FormMessage
+          state={{
+            status: "error",
+            message: `Oficina cancelada: os dados são eliminados automaticamente a ${formatDate(scheduledPurge.toISOString())} (90 dias depois do fim do acesso). Para evitar, reativa a subscrição.`,
+          }}
+        />
+      )}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <WorkshopEditForm
@@ -164,6 +174,25 @@ export default async function AdminWorkshopDetailPage({
               </CardContent>
             </Card>
           )}
+
+          <Card className="border-red-200 dark:border-red-900">
+            <CardHeader>
+              <CardTitle>Eliminar oficina</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Para pedidos de eliminação (RGPD) ou contas de teste. Apaga clientes, viaturas, ordens
+                e membros, e fica registado no registo de ações.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <DeleteWorkshopDialog
+                workshopId={workshop.id}
+                workshopName={workshop.name}
+                customerCount={workshop.customerCount}
+                orderCount={workshop.orderCount}
+                memberCount={workshop.members.length}
+              />
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

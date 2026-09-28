@@ -14,6 +14,8 @@ export type AdminWorkshop = {
   is_demo: boolean;
   admin_notes: string;
   created_at: string;
+  /** Preenchido pela BD quando o estado passa a "canceled". */
+  canceled_at: string | null;
 };
 
 export type AdminWorkshopListItem = AdminWorkshop & {
@@ -39,7 +41,7 @@ export type AdminWorkshopDetail = AdminWorkshop & {
 };
 
 const WORKSHOP_COLUMNS =
-  "id, name, phone, nif, subscription_status, trial_ends_at, current_period_end, is_demo, admin_notes, created_at";
+  "id, name, phone, nif, subscription_status, trial_ends_at, current_period_end, is_demo, admin_notes, created_at, canceled_at";
 
 type CountEmbed = { count: number }[] | null | undefined;
 type MemberEmbed = { user_id: string; role: string }[] | null | undefined;
@@ -187,4 +189,34 @@ export async function getWorkshopDetail(id: string): Promise<AdminWorkshopDetail
     orderCount: embeddedCount(service_orders),
     members,
   };
+}
+
+
+/** Data em que a retenção de 90 dias elimina a oficina (espelha workshop_purge_date na BD). */
+export function purgeDate(workshop: Pick<AdminWorkshop, "subscription_status" | "canceled_at" | "current_period_end" | "is_demo">): Date | null {
+  if (workshop.subscription_status !== "canceled" || !workshop.canceled_at || workshop.is_demo) return null;
+  const canceled = new Date(workshop.canceled_at).getTime();
+  const periodEnd = workshop.current_period_end ? new Date(workshop.current_period_end).getTime() : canceled;
+  return new Date(Math.max(canceled, periodEnd) + 90 * 86_400_000);
+}
+
+export type AdminAuditEntry = {
+  id: number;
+  created_at: string;
+  actor: string;
+  action: string;
+  workshop_id: string | null;
+  workshop_name: string | null;
+  details: Record<string, unknown>;
+};
+
+export async function listAuditLog(limit = 20): Promise<AdminAuditEntry[]> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("admin_audit_log")
+    .select("id, created_at, actor, action, workshop_id, workshop_name, details")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw new Error(`Erro ao carregar o registo: ${error.message}`);
+  return (data ?? []) as AdminAuditEntry[];
 }

@@ -14,8 +14,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { requireAdminPage } from "@/lib/admin/auth";
-import { listWorkshops, type AdminWorkshopListItem } from "@/lib/admin/data";
-import { formatDate } from "@/lib/admin/format";
+import {
+  listAuditLog,
+  listWorkshops,
+  purgeDate,
+  type AdminAuditEntry,
+  type AdminWorkshopListItem,
+} from "@/lib/admin/data";
+import { AUDIT_ACTION_LABELS } from "@/lib/admin/audit";
+import { formatDate, formatDateTime } from "@/lib/admin/format";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +40,15 @@ export default async function AdminWorkshopsPage() {
       error instanceof Error ? error.message : "Erro ao carregar oficinas.";
   }
   const hasDemo = workshops.some((w) => w.is_demo);
+
+  // O registo é secundário: se falhar (migração em falta), a lista de oficinas continua.
+  let audit: AdminAuditEntry[] = [];
+  let auditError: string | null = null;
+  try {
+    audit = await listAuditLog(15);
+  } catch (error) {
+    auditError = error instanceof Error ? error.message : "Erro ao carregar o registo.";
+  }
 
   return (
     <div className="space-y-6">
@@ -102,6 +118,11 @@ export default async function AdminWorkshopsPage() {
                           status={w.subscription_status}
                           trialEndsAt={w.trial_ends_at}
                         />
+                        {purgeDate(w) && (
+                          <div className="mt-1 text-xs text-red-700 dark:text-red-400">
+                            Eliminada a {formatDate(purgeDate(w)!.toISOString())}
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell className="text-right tabular-nums">
                         {w.customerCount}
@@ -120,6 +141,45 @@ export default async function AdminWorkshopsPage() {
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardContent className="p-0">
+          <div className="border-b border-border px-4 py-3">
+            <h2 className="text-base font-semibold">Registo de ações</h2>
+            <p className="text-sm text-muted-foreground">
+              Últimas 15 ações no admin e eliminações automáticas.
+            </p>
+          </div>
+          {auditError ? (
+            <p className="p-4 text-sm text-muted-foreground">
+              {auditError} (Aplicaste a migração 20260930100000_retencao_registo_avatars.sql?)
+            </p>
+          ) : audit.length === 0 ? (
+            <p className="p-4 text-sm text-muted-foreground">Ainda não há ações registadas.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Quando</TableHead>
+                  <TableHead>Ação</TableHead>
+                  <TableHead>Oficina</TableHead>
+                  <TableHead>Quem</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {audit.map((e) => (
+                  <TableRow key={e.id}>
+                    <TableCell className="whitespace-nowrap">{formatDateTime(e.created_at)}</TableCell>
+                    <TableCell>{AUDIT_ACTION_LABELS[e.action] ?? e.action}</TableCell>
+                    <TableCell>{e.workshop_name ?? "—"}</TableCell>
+                    <TableCell className="text-muted-foreground">{e.actor}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

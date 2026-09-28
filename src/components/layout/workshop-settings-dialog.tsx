@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +19,7 @@ type WorkshopSettingsDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-/** Definições da oficina. Por agora: registo do custo das peças (margem). */
+/** Definições da oficina: registo do custo das peças (margem) e exportação dos dados. */
 export function WorkshopSettingsDialog({ open, onOpenChange }: WorkshopSettingsDialogProps) {
   const workshop = useWorkshopStore((s) => s.workshop);
   const role = useWorkshopStore((s) => s.role);
@@ -80,6 +81,31 @@ export function WorkshopSettingsDialog({ open, onOpenChange }: WorkshopSettingsD
               {error}
             </p>
           )}
+
+          <div className="space-y-3 rounded-md border border-border p-4">
+            <div className="grid gap-1">
+              <p className="m-0 text-sm font-medium">Exportar dados</p>
+              <p className="m-0 text-sm text-muted-foreground">
+                Ficheiros CSV que abrem no Excel. Disponível mesmo com a conta em só-leitura.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  ["clientes", "Clientes"],
+                  ["viaturas", "Viaturas"],
+                  ["ordens", "Ordens e linhas"],
+                ] as const
+              ).map(([tipo, label]) => (
+                <Button key={tipo} asChild variant="outline" size="sm">
+                  <a href={`/api/exportar?tipo=${tipo}`} download>
+                    <Download aria-hidden />
+                    {label}
+                  </a>
+                </Button>
+              ))}
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

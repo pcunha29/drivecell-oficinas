@@ -21,6 +21,8 @@ import {
 } from "@/lib/admin/schemas";
 import { buildConfirmLink, getInviteRedirectUrl } from "@/lib/admin/site-url";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { logAdminEvent } from "@/lib/admin/audit";
+import { isAdminEmail } from "@/lib/admin/emails";
 
 // Todas as actions começam por requireAdmin(): o layout de /admin não protege
 // chamadas diretas às server actions.
@@ -54,7 +56,7 @@ export async function createWorkshopAction(
   _prev: AdminFormState,
   formData: FormData,
 ): Promise<AdminFormState> {
-  await requireAdmin();
+  const actor = await requireAdmin();
 
   const parsed = newWorkshopSchema.safeParse({
     name: formString(formData, "name"),
@@ -124,6 +126,13 @@ export async function createWorkshopAction(
       };
     }
     workshopId = row.id;
+    await logAdminEvent(admin, {
+      actor: actor.email ?? "admin",
+      action: "workshop.create",
+      workshopId,
+      workshopName: input.name,
+      details: { owner: input.ownerEmail, status: input.initialStatus, demo: input.isDemo, invited },
+    });
   } catch (error) {
     return { status: "error", message: errorMessage(error) };
   }
@@ -140,7 +149,7 @@ export async function updateWorkshopAction(
   _prev: AdminFormState,
   formData: FormData,
 ): Promise<AdminFormState> {
-  await requireAdmin();
+  const actor = await requireAdmin();
 
   const parsed = updateWorkshopSchema.safeParse({
     id: formString(formData, "id"),
@@ -176,6 +185,17 @@ export async function updateWorkshopAction(
       .select("id");
     if (error) return { status: "error", message: `Não foi possível guardar: ${error.message}` };
     if (!data || data.length === 0) return { status: "error", message: "Oficina não encontrada." };
+    await logAdminEvent(admin, {
+      actor: actor.email ?? "admin",
+      action: "workshop.update",
+      workshopId: input.id,
+      workshopName: input.name,
+      details: {
+        status: input.subscriptionStatus,
+        trial_ends_at: input.trialEndsAt || null,
+        current_period_end: input.currentPeriodEnd || null,
+      },
+    });
   } catch (error) {
     return { status: "error", message: errorMessage(error) };
   }
@@ -275,7 +295,7 @@ export async function resendInviteAction(
 export async function resetDemoDataAction(
   workshopId: string,
 ): Promise<{ status: "success" | "error"; message: string }> {
-  await requireAdmin();
+  const actor = await requireAdmin();
 
   if (!uuidSchema.safeParse(workshopId).success) {
     return { status: "error", message: "Oficina inválida." };
@@ -296,6 +316,11 @@ export async function resetDemoDataAction(
 
     const { error } = await admin.rpc("seed_demo_data", { p_workshop_id: workshopId });
     if (error) return { status: "error", message: `Não foi possível repor os dados: ${error.message}` };
+    await logAdminEvent(admin, {
+      actor: actor.email ?? "admin",
+      action: "workshop.reset_demo",
+      workshopId,
+    });
   } catch (error) {
     return { status: "error", message: errorMessage(error) };
   }
@@ -448,4 +473,85 @@ export async function setInteressadoContactedAction(
 
   revalidatePath("/admin/site");
   return { status: "success", message: contacted ? "Marcado como contactado." : "Marcado como por contactar." };
+}
+
+// ---------------------------------------------------------------------------
+// Eliminar oficina a pedido (RGPD): apaga a oficina e, opcionalmente, as contas
+// de acesso que não pertençam a outra oficina. Fica registado no admin_audit_log.
+// ---------------------------------------------------------------------------
+
+export async function deleteWorkshopAction(
+  workshopId: string,
+  confirmName: string,
+  deleteUsers: boolean,
+): Promise<SimpleActionResult> {
+  const actor = await requireAdmin();
+  if (!uuidSchema.safeParse(workshopId).success) return { status: "error", message: "Pedido inválido." };
+
+  const admin = createAdminClient();
+  try {
+    const { data: workshop, error: fetchError } = await admin
+      .from("workshops")
+      .select("id, name, subscription_status, is_demo, workshop_members(user_id)")
+      .eq("id", workshopId)
+      .maybeSingle();
+    if (fetchError) return { status: "error", message: fetchError.message };
+    if (!workshop) return { status: "error", message: "Oficina não encontrada." };
+
+    if (confirmName.trim() !== String(workshop.name).trim()) {
+      return { status: "error", message: "O nome escrito não corresponde ao da oficina." };
+    }
+
+    const memberIds = ((workshop.workshop_members ?? []) as { user_id: string }[]).map((m) => m.user_id);
+
+    const { error: deleteError } = await admin.from("workshops").delete().eq("id", workshopId);
+    if (deleteError) return { status: "error", message: `Não foi possível eliminar: ${deleteError.message}` };
+
+    const deletedUsers: string[] = [];
+    const keptUsers: string[] = [];
+    if (deleteUsers) {
+      for (const userId of memberIds) {
+        const { data: remaining } = await admin
+          .from("workshop_members")
+          .select("workshop_id")
+          .eq("user_id", userId)
+          .limit(1);
+        const { data: userData } = await admin.auth.admin.getUserById(userId);
+        const email = userData?.user?.email ?? userId;
+        if ((remaining ?? []).length > 0 || isAdminEmail(userData?.user?.email)) {
+          keptUsers.push(email);
+          continue;
+        }
+        // Foto de perfil (avatars/<id>/…) antes de apagar a conta.
+        const { data: files } = await admin.storage.from("avatars").list(userId);
+        if (files && files.length > 0) {
+          await admin.storage.from("avatars").remove(files.map((f) => `${userId}/${f.name}`));
+        }
+        const { error: userError } = await admin.auth.admin.deleteUser(userId);
+        if (userError) keptUsers.push(`${email} (erro: ${userError.message})`);
+        else deletedUsers.push(email);
+      }
+    }
+
+    await logAdminEvent(admin, {
+      actor: actor.email ?? "admin",
+      action: "workshop.delete",
+      workshopId,
+      workshopName: workshop.name,
+      details: {
+        status: workshop.subscription_status,
+        demo: workshop.is_demo,
+        deleted_users: deletedUsers,
+        kept_users: keptUsers,
+      },
+    });
+
+    revalidatePath("/admin");
+    const usersNote = deleteUsers
+      ? ` Contas apagadas: ${deletedUsers.length}${keptUsers.length ? `; mantidas: ${keptUsers.length}` : ""}.`
+      : "";
+    return { status: "success", message: `Oficina «${workshop.name}» eliminada.${usersNote}` };
+  } catch (error) {
+    return { status: "error", message: errorMessage(error) };
+  }
 }
