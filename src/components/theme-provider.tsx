@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 
-/** Rotas que respeitam o tema escolhido; marketing, /entrar, /registar e /onboarding são sempre claras. */
+/** Rotas que respeitam o tema escolhido; marketing e /entrar são sempre claras. */
 function supportsDarkMode(pathname: string | null): boolean {
   if (!pathname) return false;
   return (

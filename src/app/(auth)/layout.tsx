@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 /**
- * Layout partilhado das páginas de autenticação (/registar, /entrar).
+ * Layout partilhado das páginas de autenticação (/entrar).
  * Sem SiteHeader/SiteFooter; o ecrã dividido vive em `<AuthSplit>`.
  */
 export default function AuthLayout({ children }: { children: ReactNode }) {

@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/dialog-form-actions";
 import { ReadOnlyDialogFooter } from "@/components/layout/read-only-dialog-footer";
 import { useCanWrite } from "@/stores/workshop-store";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 

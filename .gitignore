@@ -43,5 +43,3 @@ next-env.d.ts
 # gravações em bruto da demo (os vídeos finais vão para public/demo)
 /demo-recordings/
 
-# ficheiros retirados do projeto (arquivo local)
-/_retirados/
