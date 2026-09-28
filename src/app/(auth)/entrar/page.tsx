@@ -5,7 +5,7 @@ import { ContactMenu } from "@/components/marketing/contact-menu";
 import { HeroBoard } from "@/components/marketing/hero-board";
 
 export const metadata: Metadata = {
-  title: "Entrar — DriveCell Oficinas",
+  title: "Entrar",
   description: "Entra na tua oficina no DriveCell Oficinas com Google ou com email e palavra-passe.",
 };
 

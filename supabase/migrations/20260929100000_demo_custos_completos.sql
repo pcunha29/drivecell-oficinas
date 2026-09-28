@@ -12,11 +12,11 @@ set search_path = public
 as $$
 declare
   v_customers text[][] := array[
-    ['Roberto Mendes', '915 678 901', 'roberto.mendes@exemplo.pt', 'Frota da empresa — 3 viaturas'],
+    ['Roberto Mendes', '915 678 901', 'roberto.mendes@exemplo.pt', 'Frota da empresa - 3 viaturas'],
     ['Ana Paula Silva', '912 345 678', 'ana.silva@exemplo.pt', 'Prefere contacto por WhatsApp'],
     ['Carlos Eduardo Santos', '913 456 789', 'carlos.santos@exemplo.pt', ''],
     ['Marta Figueiredo', '961 222 333', 'marta.figueiredo@exemplo.pt', 'Vem sempre ao sábado de manhã'],
-    ['Transportes Lemos, Lda', '253 111 222', 'oficina@transporteslemos.pt', 'Faturar à empresa — NIF na ficha'],
+    ['Transportes Lemos, Lda', '253 111 222', 'oficina@transporteslemos.pt', 'Faturar à empresa - NIF na ficha'],
     ['João Carvalho', '934 555 666', 'joao.carvalho@exemplo.pt', ''],
     ['Inês Rocha', '918 777 888', 'ines.rocha@exemplo.pt', 'Carro de substituição quando possível'],
     ['Rui Batista', '927 999 000', 'rui.batista@exemplo.pt', '']
@@ -40,8 +40,8 @@ declare
     ['1', 'waiting', 'f', '0', 'Troca de pastilhas e discos dianteiros', 'Cliente deixa o carro amanhã às 9h'],
     ['4', 'waiting', 'f', '1', 'Revisão completa do sistema de travões', ''],
     ['10', 'waiting', 'f', '1', 'Ruído na suspensão dianteira', 'Verificar casquilhos'],
-    ['2', 'in_progress', 'f', '2', 'Pastilhas traseiras', 'Peças encomendadas — chegam hoje'],
-    ['5', 'in_progress', 'f', '3', 'Desgaste irregular — verificar pinças', ''],
+    ['2', 'in_progress', 'f', '2', 'Pastilhas traseiras', 'Peças encomendadas - chegam hoje'],
+    ['5', 'in_progress', 'f', '3', 'Desgaste irregular - verificar pinças', ''],
     ['7', 'in_progress', 'f', '2', 'Revisão dos 60 000 km', ''],
     ['3', 'done', 'f', '4', 'Substituição de discos dianteiros', 'Avisar cliente por telefone'],
     ['9', 'done', 't', '5', 'Mudança de óleo e filtros', ''],

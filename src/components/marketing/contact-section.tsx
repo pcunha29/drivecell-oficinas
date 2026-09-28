@@ -2,6 +2,7 @@ import { mailtoUrl, whatsappUrl } from "@/lib/contact";
 import { buttonClasses } from "./button-link";
 import { Container } from "./container";
 import { MailIcon, WhatsAppIcon } from "./contact-icons";
+import { TrackedContactLink } from "./tracked-contact-link";
 
 /** Bloco final da landing: marcar uma demonstração (sem registo self-service). */
 export function ContactSection() {
@@ -28,7 +29,9 @@ export function ContactSection() {
         </div>
 
         <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
-            <a
+            <TrackedContactLink
+              channel="whatsapp"
+              origin="bloco-contacto"
               href={whatsappUrl(
                 "Olá! Gostava de marcar uma demonstração do DriveCell Oficinas.",
               )}
@@ -38,8 +41,10 @@ export function ContactSection() {
             >
               <WhatsAppIcon />
               WhatsApp
-            </a>
-            <a
+            </TrackedContactLink>
+            <TrackedContactLink
+              channel="email"
+              origin="bloco-contacto"
               href={mailtoUrl("Demonstração DriveCell Oficinas")}
               className={buttonClasses(
                 "light",
@@ -49,7 +54,7 @@ export function ContactSection() {
             >
               <MailIcon />
               Email
-            </a>
+            </TrackedContactLink>
         </div>
       </section>
     </Container>

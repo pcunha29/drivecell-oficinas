@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { OnboardingFlow } from "@/components/onboarding/onboarding-flow";
 
 export const metadata: Metadata = {
-  title: "Criar a oficina — DriveCell Oficinas",
+  title: "Criar a oficina",
   description: "Dá um nome à tua oficina e começa os 7 dias de teste do DriveCell Oficinas, sem cartão.",
   robots: { index: false, follow: false },
 };

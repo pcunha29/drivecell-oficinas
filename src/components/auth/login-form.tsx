@@ -14,7 +14,11 @@ import { Turnstile, TURNSTILE_SITE_KEY } from "@/components/auth/turnstile";
 /** Página onde o link de recuperação (fluxo PKCE via /auth/callback) deixa o utilizador. */
 const RESET_PASSWORD_PATH = "/conta/definir-palavra-passe";
 
-const emailField = z.string().trim().min(1, "Indica o teu email.").pipe(z.email("Indica um email válido."));
+const emailField = z
+  .string()
+  .trim()
+  .min(1, "Indica o teu email.")
+  .pipe(z.email("Indica um email válido."));
 
 const loginSchema = z.object({
   email: emailField,
@@ -27,19 +31,25 @@ type RecoverValues = z.infer<typeof recoverSchema>;
 
 const MESSAGES = {
   invalid: "Email ou palavra-passe incorretos.",
-  unconfirmed: "Confirma primeiro o teu email — enviámos-te um link.",
+  unconfirmed: "Confirma primeiro o teu email - enviámos-te um link.",
   captcha: "A verificação de segurança falhou. Tenta outra vez.",
   captcha_missing: "Conclui a verificação de segurança antes de continuar.",
   rate_limit: "Demasiadas tentativas. Espera um pouco e tenta outra vez.",
   login_generic: "Não foi possível entrar. Tenta outra vez dentro de momentos.",
-  recover_generic: "Não foi possível enviar o link. Tenta outra vez dentro de momentos.",
+  recover_generic:
+    "Não foi possível enviar o link. Tenta outra vez dentro de momentos.",
 } as const;
 
 function mapCommonError(error: AuthError): string | null {
   const code = error.code ?? "";
   const message = error.message.toLowerCase();
-  if (code === "captcha_failed" || message.includes("captcha")) return MESSAGES.captcha;
-  if (code === "over_email_send_rate_limit" || code === "over_request_rate_limit" || error.status === 429) {
+  if (code === "captcha_failed" || message.includes("captcha"))
+    return MESSAGES.captcha;
+  if (
+    code === "over_email_send_rate_limit" ||
+    code === "over_request_rate_limit" ||
+    error.status === 429
+  ) {
     return MESSAGES.rate_limit;
   }
   return null;
@@ -48,8 +58,13 @@ function mapCommonError(error: AuthError): string | null {
 function mapLoginError(error: AuthError): string {
   const code = error.code ?? "";
   const message = error.message.toLowerCase();
-  if (code === "invalid_credentials" || message.includes("invalid login credentials")) return MESSAGES.invalid;
-  if (code === "email_not_confirmed" || message.includes("email not confirmed")) return MESSAGES.unconfirmed;
+  if (
+    code === "invalid_credentials" ||
+    message.includes("invalid login credentials")
+  )
+    return MESSAGES.invalid;
+  if (code === "email_not_confirmed" || message.includes("email not confirmed"))
+    return MESSAGES.unconfirmed;
   return mapCommonError(error) ?? MESSAGES.login_generic;
 }
 
@@ -63,7 +78,8 @@ const inputClass =
 const fieldErrorClass = "m-0 text-[13px] text-danger";
 const textButtonClass =
   "cursor-pointer border-0 bg-transparent p-0 font-[inherit] underline hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink";
-const headingClass = "display-serif m-0 text-[40px] leading-[1.05] outline-none sm:text-[48px]";
+const headingClass =
+  "display-serif m-0 text-[40px] leading-[1.05] outline-none sm:text-[48px]";
 const submitClass = `${buttonClasses("primary", "md")} w-full cursor-pointer disabled:cursor-wait disabled:opacity-70`;
 
 /** Login com Google só aparece quando o provider está ativo no Supabase. */
@@ -72,10 +88,22 @@ const GOOGLE_ENABLED = process.env.NEXT_PUBLIC_AUTH_GOOGLE_ENABLED === "true";
 function GoogleIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-      <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.4h6.5a5.6 5.6 0 0 1-2.4 3.6v3h3.9c2.3-2.1 3.5-5.2 3.5-8.7z" />
-      <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-2.9l-3.9-3c-1.1.7-2.5 1.2-4.1 1.2-3.1 0-5.8-2.1-6.7-5H1.3v3.1A12 12 0 0 0 12 24z" />
-      <path fill="#FBBC05" d="M5.3 14.3a7.2 7.2 0 0 1 0-4.6V6.6H1.3a12 12 0 0 0 0 10.8l4-3.1z" />
-      <path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4A12 12 0 0 0 1.3 6.6l4 3.1c.9-2.9 3.6-4.9 6.7-4.9z" />
+      <path
+        fill="#4285F4"
+        d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.4h6.5a5.6 5.6 0 0 1-2.4 3.6v3h3.9c2.3-2.1 3.5-5.2 3.5-8.7z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 24c3.2 0 6-1.1 8-2.9l-3.9-3c-1.1.7-2.5 1.2-4.1 1.2-3.1 0-5.8-2.1-6.7-5H1.3v3.1A12 12 0 0 0 12 24z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.3 14.3a7.2 7.2 0 0 1 0-4.6V6.6H1.3a12 12 0 0 0 0 10.8l4-3.1z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4A12 12 0 0 0 1.3 6.6l4 3.1c.9-2.9 3.6-4.9 6.7-4.9z"
+      />
     </svg>
   );
 }
@@ -93,7 +121,8 @@ function ErrorBox({ message }: { message: string | null }) {
   );
 }
 
-const describedBy = (...ids: (string | false | undefined)[]) => ids.filter(Boolean).join(" ") || undefined;
+const describedBy = (...ids: (string | false | undefined)[]) =>
+  ids.filter(Boolean).join(" ") || undefined;
 
 type Mode = "login" | "recover";
 
@@ -151,9 +180,15 @@ function LoginMode({
   initialError,
   defaultEmail,
   onForgot,
-}: ModeProps & { next: string; initialError?: string; onForgot: (email: string) => void }) {
+}: ModeProps & {
+  next: string;
+  initialError?: string;
+  onForgot: (email: string) => void;
+}) {
   const router = useRouter();
-  const [formError, setFormError] = useState<string | null>(initialError ?? null);
+  const [formError, setFormError] = useState<string | null>(
+    initialError ?? null,
+  );
   const [googleLoading, setGoogleLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -216,7 +251,11 @@ function LoginMode({
   const busy = isSubmitting || redirecting || googleLoading;
 
   return (
-    <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-[22px]">
+    <form
+      noValidate
+      onSubmit={handleSubmit(onSubmit)}
+      className="flex flex-col gap-[22px]"
+    >
       <div className="flex flex-col gap-2.5">
         <span className="eyebrow">Entrar</span>
         <h2 ref={headingRef} tabIndex={-1} className={headingClass}>
@@ -226,21 +265,24 @@ function LoginMode({
 
       {GOOGLE_ENABLED && (
         <>
-      <button
-        type="button"
-        onClick={onGoogle}
-        disabled={busy}
-        className="flex h-[52px] cursor-pointer items-center justify-center gap-3 rounded-[4px] border border-ink bg-transparent font-sans text-[15px] font-medium text-ink transition-colors hover:bg-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink disabled:cursor-wait disabled:opacity-70"
-      >
-        <GoogleIcon />
-        {googleLoading ? "A abrir a Google…" : "Continuar com Google"}
-      </button>
+          <button
+            type="button"
+            onClick={onGoogle}
+            disabled={busy}
+            className="flex h-[52px] cursor-pointer items-center justify-center gap-3 rounded-[4px] border border-ink bg-transparent font-sans text-[15px] font-medium text-ink transition-colors hover:bg-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink disabled:cursor-wait disabled:opacity-70"
+          >
+            <GoogleIcon />
+            {googleLoading ? "A abrir a Google…" : "Continuar com Google"}
+          </button>
 
-      <div className="flex items-center gap-3.5 text-[13px] text-ink-muted" aria-hidden="true">
-        <div className="h-px grow bg-line" />
-        <span>ou com email</span>
-        <div className="h-px grow bg-line" />
-      </div>
+          <div
+            className="flex items-center gap-3.5 text-[13px] text-ink-muted"
+            aria-hidden="true"
+          >
+            <div className="h-px grow bg-line" />
+            <span>ou com email</span>
+            <div className="h-px grow bg-line" />
+          </div>
         </>
       )}
 
@@ -301,14 +343,23 @@ function LoginMode({
 
       <Turnstile onToken={setCaptchaToken} resetKey={captchaResetKey} />
 
-      <button type="submit" disabled={busy} aria-busy={isSubmitting || redirecting || undefined} className={submitClass}>
+      <button
+        type="submit"
+        disabled={busy}
+        aria-busy={isSubmitting || redirecting || undefined}
+        className={submitClass}
+      >
         {isSubmitting || redirecting ? "A entrar…" : "Entrar"}
       </button>
     </form>
   );
 }
 
-function RecoverMode({ headingRef, defaultEmail, onBack }: ModeProps & { onBack: (email: string) => void }) {
+function RecoverMode({
+  headingRef,
+  defaultEmail,
+  onBack,
+}: ModeProps & { onBack: (email: string) => void }) {
   const [sent, setSent] = useState(false);
 
   useEffect(() => {
@@ -355,7 +406,11 @@ function RecoverMode({ headingRef, defaultEmail, onBack }: ModeProps & { onBack:
   };
 
   const backButton = (
-    <button type="button" onClick={() => onBack(getValues("email"))} className={`${textButtonClass} text-[14px] text-ink`}>
+    <button
+      type="button"
+      onClick={() => onBack(getValues("email"))}
+      className={`${textButtonClass} text-[14px] text-ink`}
+    >
       Voltar a entrar
     </button>
   );
@@ -370,7 +425,8 @@ function RecoverMode({ headingRef, defaultEmail, onBack }: ModeProps & { onBack:
           </h2>
         </div>
         <p role="status" className="m-0 text-[16px] leading-[1.6] text-ink-2">
-          Se existir uma conta com este email, enviámos um link para definires uma nova palavra-passe.
+          Se existir uma conta com este email, enviámos um link para definires
+          uma nova palavra-passe.
         </p>
         <p className="m-0">{backButton}</p>
       </div>
@@ -378,7 +434,11 @@ function RecoverMode({ headingRef, defaultEmail, onBack }: ModeProps & { onBack:
   }
 
   return (
-    <form noValidate onSubmit={handleSubmit(onRecover)} className="flex flex-col gap-[22px]">
+    <form
+      noValidate
+      onSubmit={handleSubmit(onRecover)}
+      className="flex flex-col gap-[22px]"
+    >
       <div className="flex flex-col gap-2.5">
         <span className="eyebrow">Recuperar palavra-passe</span>
         <h2 ref={headingRef} tabIndex={-1} className={headingClass}>
@@ -386,7 +446,8 @@ function RecoverMode({ headingRef, defaultEmail, onBack }: ModeProps & { onBack:
         </h2>
       </div>
       <p className="m-0 text-[16px] leading-[1.6] text-ink-2">
-        Indica o email da tua conta. Enviamos-te um link para definires uma nova palavra-passe.
+        Indica o email da tua conta. Enviamos-te um link para definires uma nova
+        palavra-passe.
       </p>
 
       <div className="flex flex-col gap-2">
@@ -417,7 +478,12 @@ function RecoverMode({ headingRef, defaultEmail, onBack }: ModeProps & { onBack:
 
       <Turnstile onToken={setCaptchaToken} resetKey={captchaResetKey} />
 
-      <button type="submit" disabled={isSubmitting} aria-busy={isSubmitting || undefined} className={submitClass}>
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        aria-busy={isSubmitting || undefined}
+        className={submitClass}
+      >
         {isSubmitting ? "A enviar…" : "Enviar link"}
       </button>
 

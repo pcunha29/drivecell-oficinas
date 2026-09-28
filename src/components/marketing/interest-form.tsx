@@ -7,6 +7,7 @@ import {
   registerInterestAction,
   type InterestState,
 } from "@/app/em-construcao/actions";
+import { trackInterestSignup } from "@/lib/analytics/events";
 
 const initialState: InterestState = { status: "idle" };
 
@@ -16,7 +17,10 @@ export function InterestForm() {
   const successRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
-    if (state.status === "success") successRef.current?.focus();
+    if (state.status === "success") {
+      successRef.current?.focus();
+      trackInterestSignup();
+    }
   }, [state.status]);
 
   if (state.status === "success") {

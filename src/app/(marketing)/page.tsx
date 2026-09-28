@@ -4,12 +4,17 @@ import { ArrowRightIcon, ButtonLink } from "@/components/marketing/button-link";
 import { ContactSection } from "@/components/marketing/contact-section";
 import { Container } from "@/components/marketing/container";
 import { HeroBoard } from "@/components/marketing/hero-board";
-import { HowItWorks, type HowItWorksStep } from "@/components/marketing/how-it-works";
-import { PRICE_LABEL, SETUP_NOTE } from "@/lib/pricing";
+import {
+  HowItWorks,
+  type HowItWorksStep,
+} from "@/components/marketing/how-it-works";
+import { PRICE_LABEL, PRICING, SETUP_NOTE } from "@/lib/pricing";
+import { CONTACT_EMAIL, CONTACT_PHONE } from "@/lib/contact";
+import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
-const title = "DriveCell Oficinas — Gestão simples para oficinas";
+const title = "DriveCell Oficinas - Gestão simples para oficinas";
 const description =
   "Ordens de reparação, clientes, viaturas e pagamentos num só quadro. Software simples para oficinas independentes, no computador ou no telemóvel. Pede uma demonstração.";
 
@@ -63,9 +68,18 @@ function stepsWithVideo(): HowItWorksStep[] | null {
   const dir = join(process.cwd(), "public", "demo");
   const withVideo = steps.map((step, i) => {
     const base = `passo-${i + 1}`;
-    const ok = ["mp4", "webm", "jpg"].every((ext) => existsSync(join(dir, `${base}.${ext}`)));
+    const ok = ["mp4", "webm", "jpg"].every((ext) =>
+      existsSync(join(dir, `${base}.${ext}`)),
+    );
     return ok
-      ? { ...step, video: { mp4: `/demo/${base}.mp4`, webm: `/demo/${base}.webm`, poster: `/demo/${base}.jpg` } }
+      ? {
+          ...step,
+          video: {
+            mp4: `/demo/${base}.mp4`,
+            webm: `/demo/${base}.webm`,
+            poster: `/demo/${base}.jpg`,
+          },
+        }
       : null;
   });
   return withVideo.every(Boolean) ? (withVideo as HowItWorksStep[]) : null;
@@ -151,11 +165,66 @@ const faqs = [
   },
 ];
 
+/** Dados estruturados (schema.org) para os motores de busca. */
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organizacao`,
+      name: "DriveCell",
+      legalName: "Flachbau Unipessoal, Lda",
+      url: SITE_URL,
+      logo: `${SITE_URL}/logos/logo-full-color.png`,
+      email: CONTACT_EMAIL,
+      telephone: CONTACT_PHONE,
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Paços de Ferreira",
+        addressCountry: "PT",
+      },
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${SITE_URL}/#app`,
+      name: SITE_NAME,
+      description:
+        SITE_TAGLINE +
+        " Ordens de reparação, clientes, viaturas e pagamentos num só quadro.",
+      url: SITE_URL,
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      inLanguage: "pt-PT",
+      publisher: { "@id": `${SITE_URL}/#organizacao` },
+      offers: [
+        {
+          "@type": "Offer",
+          name: "Mensal",
+          price: String(PRICING.monthly),
+          priceCurrency: "EUR",
+          url: `${SITE_URL}/precos`,
+        },
+        {
+          "@type": "Offer",
+          name: "Anual",
+          price: String(PRICING.yearly),
+          priceCurrency: "EUR",
+          url: `${SITE_URL}/precos`,
+        },
+      ],
+    },
+  ],
+}).replace(/</g, "\\u003c");
+
 export default function LandingPage() {
   const videoSteps = stepsWithVideo();
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd }}
+      />
       {/* Hero */}
       <Container className="grid grid-cols-1 items-center gap-y-14 pt-14 pb-20 md:pt-24 md:pb-28 lg:grid-cols-12 lg:gap-x-6">
         <div className="flex flex-col gap-7 md:gap-8 lg:col-span-6">
@@ -166,8 +235,8 @@ export default function LandingPage() {
             <em className="text-accent">Sem papelada.</em>
           </h1>
           <p className="m-0 max-w-[520px] text-lg leading-[1.55] text-ink-2 md:text-xl">
-            Ordens de reparação, clientes, viaturas e pagamentos num só quadro. No
-            computador da receção ou no telemóvel, ao lado do elevador.
+            Ordens de reparação, clientes, viaturas e pagamentos num só quadro.
+            No computador da receção ou no telemóvel, ao lado do elevador.
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <ButtonLink href="/#contacto">
@@ -200,8 +269,8 @@ export default function LandingPage() {
               Três perguntas que fazes todos os dias.
             </h2>
             <p className="m-0 max-w-[420px] text-[17px] leading-[1.6] text-ink-2">
-              Com papel, quadro branco e WhatsApp, a resposta demora. Aqui fica a um
-              toque.
+              Com papel, quadro branco e WhatsApp, a resposta demora. Aqui fica
+              a um toque.
             </p>
           </div>
           <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-6">
@@ -213,7 +282,9 @@ export default function LandingPage() {
                 <span className="display-serif text-[30px] leading-[1.15] italic md:text-[34px]">
                   {item.q}
                 </span>
-                <p className="m-0 text-base leading-[1.6] text-ink-2">{item.a}</p>
+                <p className="m-0 text-base leading-[1.6] text-ink-2">
+                  {item.a}
+                </p>
               </div>
             ))}
           </div>
@@ -241,7 +312,9 @@ export default function LandingPage() {
                   {step.n}
                 </span>
                 <h3 className="m-0 text-[22px] font-semibold">{step.title}</h3>
-                <p className="m-0 text-base leading-[1.6] text-ink-2">{step.text}</p>
+                <p className="m-0 text-base leading-[1.6] text-ink-2">
+                  {step.text}
+                </p>
               </div>
             ))}
           </div>
@@ -259,8 +332,8 @@ export default function LandingPage() {
               </h2>
             </div>
             <p className="m-0 max-w-[380px] text-[17px] leading-[1.6] text-on-dark-2">
-              Funciona no navegador. Não há nada para instalar nem servidores para
-              manter.
+              Funciona no navegador. Não há nada para instalar nem servidores
+              para manter.
             </p>
           </div>
           <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 md:gap-12 lg:grid-cols-3">
@@ -284,7 +357,9 @@ export default function LandingPage() {
                   {f.icon}
                 </svg>
                 <h3 className="m-0 text-xl font-semibold">{f.title}</h3>
-                <p className="m-0 text-[15px] leading-[1.6] text-on-dark-2">{f.text}</p>
+                <p className="m-0 text-[15px] leading-[1.6] text-on-dark-2">
+                  {f.text}
+                </p>
               </div>
             ))}
           </div>
@@ -295,12 +370,16 @@ export default function LandingPage() {
       <Container className="grid grid-cols-1 items-center gap-y-12 py-20 md:py-28 lg:grid-cols-12 lg:gap-x-6">
         <div className="flex flex-col gap-5 lg:col-span-5">
           <span className="eyebrow">Preço</span>
-          <h2 className="display-serif m-0 text-display-md">Um plano. Tudo incluído.</h2>
+          <h2 className="display-serif m-0 text-display-md">
+            Um plano. Tudo incluído.
+          </h2>
           <p className="m-0 text-[17px] leading-[1.6] text-ink-2">
-            Começas com um período de experiência combinado connosco. Depois, escolhes
-            mensal ou anual e cancelas quando quiseres.
+            Começas com um período de experiência combinado connosco. Depois,
+            escolhes mensal ou anual e cancelas quando quiseres.
           </p>
-          <p className="m-0 text-[15px] leading-[1.6] text-ink-muted">{SETUP_NOTE}</p>
+          <p className="m-0 text-[15px] leading-[1.6] text-ink-muted">
+            {SETUP_NOTE}
+          </p>
           <Link
             href="/precos"
             className="inline-flex min-h-11 items-center self-start text-[15px] font-medium underline underline-offset-4 transition-colors hover:text-accent"
@@ -344,7 +423,9 @@ export default function LandingPage() {
         <Container className="grid grid-cols-1 gap-y-10 py-20 md:py-28 lg:grid-cols-12 lg:gap-x-6">
           <div className="flex flex-col gap-4 lg:col-span-4">
             <span className="eyebrow">Perguntas</span>
-            <h2 className="display-serif m-0 text-display-md">Antes de começares.</h2>
+            <h2 className="display-serif m-0 text-display-md">
+              Antes de começares.
+            </h2>
           </div>
           <div className="flex flex-col border-b border-line lg:col-span-7 lg:col-start-6">
             {faqs.map((item) => (
@@ -353,7 +434,9 @@ export default function LandingPage() {
                 className="flex flex-col gap-2.5 border-t border-line py-7"
               >
                 <h3 className="m-0 text-xl font-semibold">{item.q}</h3>
-                <p className="m-0 text-base leading-[1.6] text-ink-2">{item.a}</p>
+                <p className="m-0 text-base leading-[1.6] text-ink-2">
+                  {item.a}
+                </p>
               </div>
             ))}
           </div>

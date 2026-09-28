@@ -20,7 +20,7 @@ from auth.users u
 where u.email is not null
 on conflict (email) do nothing;
 
--- 2. Auth Hook — bloqueia criação de conta se o email não estiver na lista
+-- 2. Auth Hook - bloqueia criação de conta se o email não estiver na lista
 create or replace function public.hook_before_user_created(event jsonb)
 returns jsonb
 language plpgsql
@@ -57,7 +57,7 @@ $$;
 grant execute on function public.hook_before_user_created to supabase_auth_admin;
 revoke execute on function public.hook_before_user_created from authenticated, anon, public;
 
--- 3. RPC — verificação em cada pedido (middleware da app)
+-- 3. RPC - verificação em cada pedido (middleware da app)
 create or replace function public.is_current_user_allowed()
 returns boolean
 language sql

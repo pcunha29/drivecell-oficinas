@@ -18,11 +18,11 @@ Não é preciso `supabase link` nem integração GitHub↔Supabase. O workflow l
 à BD apenas pela connection string. Em _GitHub → Settings → Secrets and variables
 → Actions_, cria:
 
-- `SUPABASE_DB_URL` — connection string do Dashboard
+- `SUPABASE_DB_URL` - connection string do Dashboard
   (_Project Settings → Database → Connection string_, modo **Session** ou
   **Direct**, porta **5432**; a porta 6543/transaction **não** serve para `pg_dump`).
-- `BACKUP_GPG_PASSPHRASE` — frase forte usada para encriptar/desencriptar o backup.
-  Guarda-a num gestor de palavras-passe — **sem ela não há restauro possível**.
+- `BACKUP_GPG_PASSPHRASE` - frase forte usada para encriptar/desencriptar o backup.
+  Guarda-a num gestor de palavras-passe - **sem ela não há restauro possível**.
 
 ## Restauro
 
@@ -45,7 +45,7 @@ psql "$SUPABASE_DB_URL" -f backup-XXXX/data.sql
 
 - Os artifacts contêm **dados pessoais de clientes** (RGPD): por isso vão sempre
   encriptados. Não desencriptes para pastas partilhadas/repos.
-- Ficheiros do Storage (avatares) **não** são incluídos neste backup — só a BD
+- Ficheiros do Storage (avatares) **não** são incluídos neste backup - só a BD
   Postgres. Se for preciso, pode ser adicionado depois.
 - Para histórico mais longo que 90 dias, trocar o destino do artifact por
   armazenamento externo (Cloudflare R2 / Backblaze B2) sem alterar o resto.

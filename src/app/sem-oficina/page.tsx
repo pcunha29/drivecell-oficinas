@@ -54,14 +54,17 @@ export default async function SemOficinaPage() {
             A tua conta
             {user.email ? (
               <>
-                {" "}(<strong className="font-medium text-ink">{user.email}</strong>)
+                {" "}
+                (<strong className="font-medium text-ink">{user.email}</strong>)
               </>
             ) : null}{" "}
             ainda não está associada a uma oficina. Fala connosco.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
             <a
-              href={whatsappUrl("Olá! A minha conta DriveCell Oficinas ainda não tem oficina associada.")}
+              href={whatsappUrl(
+                "Olá! A minha conta DriveCell Oficinas ainda não tem oficina associada.",
+              )}
               target="_blank"
               rel="noopener noreferrer"
               className={buttonClasses("primary", "md", "sm:flex-1")}
@@ -69,7 +72,7 @@ export default async function SemOficinaPage() {
               WhatsApp
             </a>
             <a
-              href={mailtoUrl("Conta sem oficina — DriveCell Oficinas")}
+              href={mailtoUrl("Conta sem oficina - DriveCell Oficinas")}
               className={buttonClasses("ghost", "md", "sm:flex-1")}
             >
               Email

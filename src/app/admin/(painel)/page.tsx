@@ -29,7 +29,8 @@ export default async function AdminWorkshopsPage() {
   try {
     workshops = await listWorkshops();
   } catch (error) {
-    loadError = error instanceof Error ? error.message : "Erro ao carregar oficinas.";
+    loadError =
+      error instanceof Error ? error.message : "Erro ao carregar oficinas.";
   }
   const hasDemo = workshops.some((w) => w.is_demo);
 
@@ -39,7 +40,9 @@ export default async function AdminWorkshopsPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Oficinas</h1>
           <p className="text-sm text-muted-foreground">
-            {loadError ? "—" : `${workshops.length} oficina${workshops.length === 1 ? "" : "s"}`}
+            {loadError
+              ? "-"
+              : `${workshops.length} oficina${workshops.length === 1 ? "" : "s"}`}
           </p>
         </div>
         <Button asChild>
@@ -50,7 +53,9 @@ export default async function AdminWorkshopsPage() {
         </Button>
       </div>
 
-      {loadError && <FormMessage state={{ status: "error", message: loadError }} />}
+      {loadError && (
+        <FormMessage state={{ status: "error", message: loadError }} />
+      )}
 
       {!loadError && <DemoAccountCard hasDemo={hasDemo} />}
 
@@ -88,14 +93,25 @@ export default async function AdminWorkshopsPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {w.ownerEmails.length > 0 ? w.ownerEmails.join(", ") : "—"}
+                        {w.ownerEmails.length > 0
+                          ? w.ownerEmails.join(", ")
+                          : "-"}
                       </TableCell>
                       <TableCell>
-                        <StatusBadge status={w.subscription_status} trialEndsAt={w.trial_ends_at} />
+                        <StatusBadge
+                          status={w.subscription_status}
+                          trialEndsAt={w.trial_ends_at}
+                        />
                       </TableCell>
-                      <TableCell className="text-right tabular-nums">{w.customerCount}</TableCell>
-                      <TableCell className="text-right tabular-nums">{w.orderCount}</TableCell>
-                      <TableCell className="whitespace-nowrap">{formatDate(w.created_at)}</TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {w.customerCount}
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {w.orderCount}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {formatDate(w.created_at)}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

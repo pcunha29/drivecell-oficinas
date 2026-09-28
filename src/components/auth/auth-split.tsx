@@ -22,13 +22,20 @@ type AuthSplitProps = {
  * formulário à direita. Abaixo de 1024 px o painel escuro passa a uma faixa
  * compacta no topo (logótipo + título).
  */
-export function AuthSplit({ headline, aside, asideFooter, mobileAside, topRight, children }: AuthSplitProps) {
+export function AuthSplit({
+  headline,
+  aside,
+  asideFooter,
+  mobileAside,
+  topRight,
+  children,
+}: AuthSplitProps) {
   return (
     <div className="grid min-h-dvh grid-cols-1 grid-rows-[auto_1fr] lg:grid-cols-2 lg:grid-rows-1">
       <aside className="flex flex-col gap-5 bg-night px-5 pt-5 pb-7 text-on-dark sm:gap-6 sm:px-10 sm:pt-6 sm:pb-9 lg:justify-between lg:gap-10 lg:px-12 lg:py-12 xl:px-20">
         <Link
           href="/"
-          aria-label="DriveCell Oficinas — início"
+          aria-label="DriveCell Oficinas - início"
           className="flex w-fit items-center rounded-[2px] text-on-dark no-underline hover:text-on-dark focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-soft"
         >
           <DrivecellLogo variant="white" height={24} product priority />
@@ -42,7 +49,11 @@ export function AuthSplit({ headline, aside, asideFooter, mobileAside, topRight,
           {aside ? <div className="hidden lg:block">{aside}</div> : null}
         </div>
 
-        {asideFooter ? <div className="hidden lg:block">{asideFooter}</div> : <span aria-hidden="true" className="hidden lg:block" />}
+        {asideFooter ? (
+          <div className="hidden lg:block">{asideFooter}</div>
+        ) : (
+          <span aria-hidden="true" className="hidden lg:block" />
+        )}
       </aside>
 
       <main className="flex flex-col px-5 pt-8 pb-10 sm:px-10 sm:pt-12 lg:px-12 lg:py-12 xl:px-20">
@@ -51,7 +62,9 @@ export function AuthSplit({ headline, aside, asideFooter, mobileAside, topRight,
             {topRight}
           </div>
         ) : null}
-        <div className="mx-auto w-full max-w-[440px] lg:my-auto lg:pt-10">{children}</div>
+        <div className="mx-auto w-full max-w-[440px] lg:my-auto lg:pt-10">
+          {children}
+        </div>
       </main>
     </div>
   );

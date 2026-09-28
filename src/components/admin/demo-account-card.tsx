@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useActionState, useTransition, type FormEvent } from "react";
 import { Copy, KeyRound } from "lucide-react";
 import { toast } from "sonner";
-import { createDemoAccountAction, type DemoAccountState } from "@/app/admin/actions";
+import {
+  createDemoAccountAction,
+  type DemoAccountState,
+} from "@/app/admin/actions";
 import { FieldError, FormMessage } from "@/components/admin/form-feedback";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +21,10 @@ const initialState: DemoAccountState = { status: "idle" };
  * existir) para que as credenciais continuem visíveis após o revalidatePath.
  */
 export function DemoAccountCard({ hasDemo }: { hasDemo: boolean }) {
-  const [state, formAction, isPending] = useActionState(createDemoAccountAction, initialState);
+  const [state, formAction, isPending] = useActionState(
+    createDemoAccountAction,
+    initialState,
+  );
   const [, startTransition] = useTransition();
   const credentials = state.credentials;
 
@@ -48,8 +54,9 @@ export function DemoAccountCard({ hasDemo }: { hasDemo: boolean }) {
             Conta de demonstração criada
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Guarda agora a palavra-passe (ex.: no gestor de palavras-passe). Não volta a ser
-            mostrada — se a perderes, gera um link em «Reenviar convite» no detalhe da oficina.
+            Guarda agora a palavra-passe (ex.: no gestor de palavras-passe). Não
+            volta a ser mostrada - se a perderes, gera um link em «Reenviar
+            convite» no detalhe da oficina.
           </p>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -74,7 +81,9 @@ export function DemoAccountCard({ hasDemo }: { hasDemo: boolean }) {
             </div>
           ))}
           <Button asChild variant="link" className="px-0">
-            <Link href={`/admin/${credentials.workshopId}`}>Ver oficina de demonstração</Link>
+            <Link href={`/admin/${credentials.workshopId}`}>
+              Ver oficina de demonstração
+            </Link>
           </Button>
         </CardContent>
       </Card>
@@ -86,8 +95,9 @@ export function DemoAccountCard({ hasDemo }: { hasDemo: boolean }) {
       <CardHeader>
         <CardTitle>Criar conta demo</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Cria um utilizador com palavra-passe gerada e a oficina «Oficina Ferreira &amp; Filhos»
-          (ativa, com dados de exemplo) para mostrar a clientes.
+          Cria um utilizador com palavra-passe gerada e a oficina «Oficina
+          Ferreira &amp; Filhos» (ativa, com dados de exemplo) para mostrar a
+          clientes.
         </p>
       </CardHeader>
       <CardContent>

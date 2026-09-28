@@ -1,6 +1,10 @@
 export const LISBON_TZ = "Europe/Lisbon";
 
-export type SubscriptionStatus = "trialing" | "active" | "past_due" | "canceled";
+export type SubscriptionStatus =
+  | "trialing"
+  | "active"
+  | "past_due"
+  | "canceled";
 
 export const SUBSCRIPTION_STATUSES: readonly SubscriptionStatus[] = [
   "trialing",
@@ -34,16 +38,16 @@ const dateTimeFormatter = new Intl.DateTimeFormat("pt-PT", {
 
 /** "26/09/2026" (hora de Lisboa). */
 export function formatDate(iso: string | null | undefined): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const date = new Date(iso);
-  return Number.isNaN(date.getTime()) ? "—" : dateFormatter.format(date);
+  return Number.isNaN(date.getTime()) ? "-" : dateFormatter.format(date);
 }
 
 /** "26/09/2026, 14:05" (hora de Lisboa). */
 export function formatDateTime(iso: string | null | undefined): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const date = new Date(iso);
-  return Number.isNaN(date.getTime()) ? "—" : dateTimeFormatter.format(date);
+  return Number.isNaN(date.getTime()) ? "-" : dateTimeFormatter.format(date);
 }
 
 /** Valor para <input type="date"> (YYYY-MM-DD no dia de Lisboa). */
@@ -94,7 +98,10 @@ export function describeStatus(
     case "trialing": {
       const ends = trialEndsAt ? new Date(trialEndsAt) : null;
       if (ends && ends.getTime() > now.getTime()) {
-        return { label: `Em teste até ${formatDate(trialEndsAt)}`, tone: "trial" };
+        return {
+          label: `Em teste até ${formatDate(trialEndsAt)}`,
+          tone: "trial",
+        };
       }
       return { label: "Só-leitura (teste expirado)", tone: "muted" };
     }

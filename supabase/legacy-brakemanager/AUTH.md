@@ -5,7 +5,7 @@ Login **apenas com Google**. Só entram emails presentes em `public.allowed_emai
 ## 1. Google Cloud Console
 
 1. [Google Cloud Console](https://console.cloud.google.com/) → **APIs & Services** → **Credentials**.
-2. Criar **OAuth 2.0 Client ID** (tipo *Web application*).
+2. Criar **OAuth 2.0 Client ID** (tipo _Web application_).
 3. **Authorized redirect URI**:
    ```
    https://<PROJECT_REF>.supabase.co/auth/v1/callback
@@ -17,10 +17,10 @@ Login **apenas com Google**. Só entram emails presentes em `public.allowed_emai
 
 ### Authentication → Providers
 
-| Definição | Valor |
-|-----------|--------|
-| **Google** | Enabled — colar Client ID + Secret |
-| **Email** | Disable sign ups (e desligar provider se quiseres forçar só Google) |
+| Definição  | Valor                                                               |
+| ---------- | ------------------------------------------------------------------- |
+| **Google** | Enabled - colar Client ID + Secret                                  |
+| **Email**  | Disable sign ups (e desligar provider se quiseres forçar só Google) |
 
 ### Authentication → URL Configuration
 
@@ -31,14 +31,14 @@ Login **apenas com Google**. Só entram emails presentes em `public.allowed_emai
 
 ### Authentication → Settings
 
-- Ativar **Automatic linking** — contas email/password existentes associam-se ao Google pelo mesmo email.
+- Ativar **Automatic linking** - contas email/password existentes associam-se ao Google pelo mesmo email.
 
 ### Authentication → Auth Hooks
 
-| Campo | Valor |
-|-------|--------|
-| Hook | `before-user-created` |
-| Tipo | Postgres function |
+| Campo  | Valor                             |
+| ------ | --------------------------------- |
+| Hook   | `before-user-created`             |
+| Tipo   | Postgres function                 |
 | Função | `public.hook_before_user_created` |
 
 > Correr primeiro [`migrations/004-auth-allowlist.sql`](migrations/004-auth-allowlist.sql) no SQL Editor.
@@ -51,6 +51,7 @@ psql "$SUPABASE_DB_URL" -f supabase/migrations/004-auth-allowlist.sql
 ```
 
 A migração:
+
 - Cria `allowed_emails` e faz seed dos emails já em `auth.users`.
 - Cria o hook e a função `is_current_user_allowed()` usada pelo middleware.
 
@@ -79,4 +80,4 @@ Emails guardados sempre em **minúsculas**.
 
 ## 6. Variáveis de ambiente
 
-Ver [`.env.example`](../.env.example). Não são necessárias chaves Google na app — só no Supabase Dashboard.
+Ver [`.env.example`](../.env.example). Não são necessárias chaves Google na app - só no Supabase Dashboard.

@@ -125,7 +125,14 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
                     unitPrice: i.unitPrice,
                     unitCost: i.unitCost ?? null,
                   }))
-                : [{ description: "", quantity: 1, unitPrice: 0, unitCost: null }],
+                : [
+                    {
+                      description: "",
+                      quantity: 1,
+                      unitPrice: 0,
+                      unitCost: null,
+                    },
+                  ],
           }
         : {
             customerId: "",
@@ -134,7 +141,9 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
             description: "",
             notes: "",
             paid: false,
-            items: [{ description: "", quantity: 1, unitPrice: 0, unitCost: null }],
+            items: [
+              { description: "", quantity: 1, unitPrice: 0, unitCost: null },
+            ],
           },
     [order],
   );
@@ -192,12 +201,18 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
   }, 0);
   // Linhas sem custo (ex.: mão de obra) contam como custo zero.
   const orderCost = (watchedItems ?? []).reduce((sum, item) => {
-    if (item?.unitCost === null || item?.unitCost === undefined || item?.unitCost === "") return sum;
+    if (
+      item?.unitCost === null ||
+      item?.unitCost === undefined ||
+      item?.unitCost === ""
+    )
+      return sum;
     const line = Number(item?.quantity) * Number(item?.unitCost);
     return Number.isFinite(line) ? sum + line : sum;
   }, 0);
   const orderMargin = orderTotal - orderCost;
-  const orderMarginPct = orderTotal > 0 ? (orderMargin / orderTotal) * 100 : null;
+  const orderMarginPct =
+    orderTotal > 0 ? (orderMargin / orderTotal) * 100 : null;
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -285,9 +300,7 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
       onOpenChange(false);
     } catch (err) {
       setSubmitError(
-        err instanceof Error
-          ? err.message
-          : "Erro ao eliminar a ordem",
+        err instanceof Error ? err.message : "Erro ao eliminar a ordem",
       );
       setDeleteStep("confirm");
     } finally {
@@ -335,203 +348,230 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
               disabled={!canWrite}
               className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0"
             >
-            <div className="grid gap-4 sm:grid-cols-2">
-            <div className="grid content-start gap-2">
-              <Label htmlFor="customerId">Cliente</Label>
-              <Select
-                id="customerId"
-                name={customerField.name}
-                ref={customerField.ref}
-                onBlur={customerField.onBlur}
-                onChange={(e) => {
-                  customerField.onChange(e);
-                  handleCustomerChange(e.target.value);
-                }}
-              >
-                <option value="">Escolher…</option>
-                {customers.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </Select>
-              {errors.customerId && (
-                <p className="text-sm text-red-600">
-                  {errors.customerId.message}
-                </p>
-              )}
-            </div>
-
-            <div className="grid content-start gap-2">
-              <Label htmlFor="vehicleId">Viatura</Label>
-              <Select id="vehicleId" {...register("vehicleId")}>
-                <option value="">Escolher…</option>
-                {availableVehicles.map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {v.plate} - {v.make} {v.model} ({v.year})
-                  </option>
-                ))}
-              </Select>
-              {errors.vehicleId && (
-                <p className="text-sm text-red-600">
-                  {errors.vehicleId.message}
-                </p>
-              )}
-            </div>
-
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="description">Descrição do serviço</Label>
-              <Input
-                id="description"
-                placeholder="Ex.: Troca de pastilhas dianteiras"
-                {...register("description")}
-              />
-              {errors.description && (
-                <p className="text-sm text-red-600">
-                  {errors.description.message}
-                </p>
-              )}
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2 sm:items-end">
-            <div className="grid gap-2">
-              <Label htmlFor="status">Estado</Label>
-              <Select id="status" {...register("status")}>
-                {STATUS_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            <div className="flex min-h-11 items-center justify-between gap-4 rounded-md border border-border px-3 py-2">
-              <div className="grid gap-0.5">
-                <Label htmlFor="paid" className="cursor-pointer">
-                  Serviço pago?
-                </Label>
-                <span className="text-xs text-muted-foreground">
-                  {paid ? "Marcado como pago" : "Por pagar"}
-                </span>
-              </div>
-              <Switch
-                id="paid"
-                checked={paid}
-                onCheckedChange={(value) =>
-                  setValue("paid", value, { shouldDirty: true })
-                }
-                aria-label="Serviço pago"
-              />
-            </div>
-
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>Peças e mão de obra</Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={addItem}
-                >
-                  <Plus className="h-4 w-4" />
-                  Adicionar
-                </Button>
-              </div>
-              <div className="space-y-3 rounded-md border border-border p-3">
-                <div className={cn(trackCosts ? ITEM_GRID_COST : ITEM_GRID, "items-center px-1 text-sm font-medium text-muted-foreground")}>
-                  <span aria-hidden />
-                  <span className="col-span-3 sm:col-span-1">Descrição</span>
-                  <span className="hidden whitespace-nowrap text-right sm:block">Qtd.</span>
-                  {trackCosts && (
-                    <span className="hidden whitespace-nowrap text-right sm:block">Custo oficina</span>
-                  )}
-                  <span className="hidden whitespace-nowrap text-right sm:block">Preço cliente</span>
-                  <span className="hidden text-right sm:block">Total</span>
-                  <span aria-hidden />
-                </div>
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleItemsDragEnd}
-                >
-                  <SortableContext
-                    items={fields.map((f) => f.id)}
-                    strategy={verticalListSortingStrategy}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid content-start gap-2">
+                  <Label htmlFor="customerId">Cliente</Label>
+                  <Select
+                    id="customerId"
+                    name={customerField.name}
+                    ref={customerField.ref}
+                    onBlur={customerField.onBlur}
+                    onChange={(e) => {
+                      customerField.onChange(e);
+                      handleCustomerChange(e.target.value);
+                    }}
                   >
-                    <div className="space-y-3">
-                      {fields.map((field, index) => (
-                        <ServiceItemRow
-                          key={field.id}
-                          id={field.id}
-                          index={index}
-                          defaultDescription={String(field.description ?? "")}
-                          defaultQuantity={String(field.quantity ?? "")}
-                          defaultUnitPrice={String(field.unitPrice ?? "")}
-                          defaultUnitCost={field.unitCost == null ? "" : String(field.unitCost)}
-                          register={register}
-                          errors={errors}
-                          trackCosts={trackCosts}
-                          lineTotal={
-                            Number(watchedItems?.[index]?.quantity) *
-                            Number(watchedItems?.[index]?.unitPrice)
-                          }
-                          onRemove={() => removeItem(index)}
-                          canRemove={fields.length > 1}
-                        />
-                      ))}
-                    </div>
-                  </SortableContext>
-                </DndContext>
-                <div className="border-t border-border px-1 pt-3">
-                  <div className="flex items-baseline justify-between gap-4">
-                    <span className="text-sm text-muted-foreground">Total da ordem</span>
-                    <span className="text-lg font-semibold tabular-nums">{formatEuro(orderTotal)}</span>
-                  </div>
-                  {trackCosts && (
-                    <dl className="m-0 mt-2 grid gap-1 text-sm">
-                      <div className="flex items-baseline justify-between gap-4">
-                        <dt className="text-muted-foreground">Custo das peças</dt>
-                        <dd className="m-0 tabular-nums text-muted-foreground">{formatEuro(orderCost)}</dd>
-                      </div>
-                      <div className="flex items-baseline justify-between gap-4">
-                        <dt className="text-muted-foreground">Margem</dt>
-                        <dd
-                          className={cn(
-                            "m-0 font-medium tabular-nums",
-                            orderMargin < 0 ? "text-red-600 dark:text-red-400" : "text-foreground",
-                          )}
-                        >
-                          {formatEuro(orderMargin)}
-                          {orderMarginPct !== null && (
-                            <span className="ml-1.5 font-normal text-muted-foreground">
-                              ({orderMarginPct.toLocaleString("pt-PT", { maximumFractionDigits: 0 })}%)
-                            </span>
-                          )}
-                        </dd>
-                      </div>
-                      <p className="m-0 text-xs text-muted-foreground">
-                        Linhas sem custo (como a mão de obra) contam como custo zero.
-                      </p>
-                    </dl>
+                    <option value="">Escolher…</option>
+                    {customers.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </Select>
+                  {errors.customerId && (
+                    <p className="text-sm text-red-600">
+                      {errors.customerId.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid content-start gap-2">
+                  <Label htmlFor="vehicleId">Viatura</Label>
+                  <Select id="vehicleId" {...register("vehicleId")}>
+                    <option value="">Escolher…</option>
+                    {availableVehicles.map((v) => (
+                      <option key={v.id} value={v.id}>
+                        {v.plate} - {v.make} {v.model} ({v.year})
+                      </option>
+                    ))}
+                  </Select>
+                  {errors.vehicleId && (
+                    <p className="text-sm text-red-600">
+                      {errors.vehicleId.message}
+                    </p>
                   )}
                 </div>
               </div>
-            </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="notes">Notas</Label>
-              <textarea
-                id="notes"
-                rows={2}
-                placeholder="Observações internas…"
-                className="flex min-h-[64px] w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                {...register("notes")}
-              />
-            </div>
+              <div className="grid gap-2">
+                <Label htmlFor="description">Descrição do serviço</Label>
+                <Input
+                  id="description"
+                  placeholder="Ex.: Troca de pastilhas dianteiras"
+                  {...register("description")}
+                />
+                {errors.description && (
+                  <p className="text-sm text-red-600">
+                    {errors.description.message}
+                  </p>
+                )}
+              </div>
 
+              <div className="grid gap-4 sm:grid-cols-2 sm:items-end">
+                <div className="grid gap-2">
+                  <Label htmlFor="status">Estado</Label>
+                  <Select id="status" {...register("status")}>
+                    {STATUS_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                <div className="flex min-h-11 items-center justify-between gap-4 rounded-md border border-border px-3 py-2">
+                  <div className="grid gap-0.5">
+                    <Label htmlFor="paid" className="cursor-pointer">
+                      Serviço pago?
+                    </Label>
+                    <span className="text-xs text-muted-foreground">
+                      {paid ? "Marcado como pago" : "Por pagar"}
+                    </span>
+                  </div>
+                  <Switch
+                    id="paid"
+                    checked={paid}
+                    onCheckedChange={(value) =>
+                      setValue("paid", value, { shouldDirty: true })
+                    }
+                    aria-label="Serviço pago"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Peças e mão de obra</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addItem}
+                  >
+                    <Plus className="h-4 w-4" />
+                    Adicionar
+                  </Button>
+                </div>
+                <div className="space-y-3 rounded-md border border-border p-3">
+                  <div
+                    className={cn(
+                      trackCosts ? ITEM_GRID_COST : ITEM_GRID,
+                      "items-center px-1 text-sm font-medium text-muted-foreground",
+                    )}
+                  >
+                    <span aria-hidden />
+                    <span className="col-span-3 sm:col-span-1">Descrição</span>
+                    <span className="hidden whitespace-nowrap text-right sm:block">
+                      Qtd.
+                    </span>
+                    {trackCosts && (
+                      <span className="hidden whitespace-nowrap text-right sm:block">
+                        Custo oficina
+                      </span>
+                    )}
+                    <span className="hidden whitespace-nowrap text-right sm:block">
+                      Preço cliente
+                    </span>
+                    <span className="hidden text-right sm:block">Total</span>
+                    <span aria-hidden />
+                  </div>
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleItemsDragEnd}
+                  >
+                    <SortableContext
+                      items={fields.map((f) => f.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="space-y-3">
+                        {fields.map((field, index) => (
+                          <ServiceItemRow
+                            key={field.id}
+                            id={field.id}
+                            index={index}
+                            defaultDescription={String(field.description ?? "")}
+                            defaultQuantity={String(field.quantity ?? "")}
+                            defaultUnitPrice={String(field.unitPrice ?? "")}
+                            defaultUnitCost={
+                              field.unitCost == null
+                                ? ""
+                                : String(field.unitCost)
+                            }
+                            register={register}
+                            errors={errors}
+                            trackCosts={trackCosts}
+                            lineTotal={
+                              Number(watchedItems?.[index]?.quantity) *
+                              Number(watchedItems?.[index]?.unitPrice)
+                            }
+                            onRemove={() => removeItem(index)}
+                            canRemove={fields.length > 1}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                  <div className="border-t border-border px-1 pt-3">
+                    <div className="flex items-baseline justify-between gap-4">
+                      <span className="text-sm text-muted-foreground">
+                        Total da ordem
+                      </span>
+                      <span className="text-lg font-semibold tabular-nums">
+                        {formatEuro(orderTotal)}
+                      </span>
+                    </div>
+                    {trackCosts && (
+                      <dl className="m-0 mt-2 grid gap-1 text-sm">
+                        <div className="flex items-baseline justify-between gap-4">
+                          <dt className="text-muted-foreground">
+                            Custo das peças
+                          </dt>
+                          <dd className="m-0 tabular-nums text-muted-foreground">
+                            {formatEuro(orderCost)}
+                          </dd>
+                        </div>
+                        <div className="flex items-baseline justify-between gap-4">
+                          <dt className="text-muted-foreground">Margem</dt>
+                          <dd
+                            className={cn(
+                              "m-0 font-medium tabular-nums",
+                              orderMargin < 0
+                                ? "text-red-600 dark:text-red-400"
+                                : "text-foreground",
+                            )}
+                          >
+                            {formatEuro(orderMargin)}
+                            {orderMarginPct !== null && (
+                              <span className="ml-1.5 font-normal text-muted-foreground">
+                                (
+                                {orderMarginPct.toLocaleString("pt-PT", {
+                                  maximumFractionDigits: 0,
+                                })}
+                                %)
+                              </span>
+                            )}
+                          </dd>
+                        </div>
+                        <p className="m-0 text-xs text-muted-foreground">
+                          Linhas sem custo (como a mão de obra) contam como
+                          custo zero.
+                        </p>
+                      </dl>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="notes">Notas</Label>
+                <textarea
+                  id="notes"
+                  rows={2}
+                  placeholder="Observações internas…"
+                  className="flex min-h-[64px] w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  {...register("notes")}
+                />
+              </div>
             </fieldset>
 
             {canWrite ? (
@@ -646,7 +686,9 @@ function ServiceItemRow({
           htmlFor={`items.${index}.quantity`}
           className="text-xs font-normal text-muted-foreground whitespace-nowrap sm:sr-only"
         >
-          <span aria-hidden className="sm:hidden">Qtd.</span>
+          <span aria-hidden className="sm:hidden">
+            Qtd.
+          </span>
           <span className="sr-only">Quantidade</span>
         </Label>
         <Input
@@ -666,7 +708,9 @@ function ServiceItemRow({
             htmlFor={`items.${index}.unitCost`}
             className="text-xs font-normal text-muted-foreground whitespace-nowrap sm:sr-only"
           >
-            <span aria-hidden className="sm:hidden">Custo</span>
+            <span aria-hidden className="sm:hidden">
+              Custo
+            </span>
             <span className="sr-only">Custo oficina</span>
           </Label>
           <div className="relative">
@@ -690,7 +734,9 @@ function ServiceItemRow({
           htmlFor={`items.${index}.unitPrice`}
           className="text-xs font-normal text-muted-foreground whitespace-nowrap sm:sr-only"
         >
-          <span aria-hidden className="sm:hidden">Preço</span>
+          <span aria-hidden className="sm:hidden">
+            Preço
+          </span>
           <span className="sr-only">Preço cliente</span>
         </Label>
         <div className="relative">
@@ -708,7 +754,7 @@ function ServiceItemRow({
         </div>
       </div>
       <span className="hidden h-11 items-center justify-end text-sm tabular-nums text-muted-foreground sm:flex">
-        {Number.isFinite(lineTotal) ? formatEuro(lineTotal) : "—"}
+        {Number.isFinite(lineTotal) ? formatEuro(lineTotal) : "-"}
       </span>
       <Button
         type="button"

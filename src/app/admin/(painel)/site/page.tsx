@@ -31,7 +31,11 @@ type Interessado = {
 async function loadSiteData() {
   const admin = createAdminClient();
   const [settings, list] = await Promise.all([
-    admin.from("site_settings").select("under_construction, updated_at").eq("id", 1).maybeSingle(),
+    admin
+      .from("site_settings")
+      .select("under_construction, updated_at")
+      .eq("id", 1)
+      .maybeSingle(),
     admin
       .from("interessados")
       .select("id, email, created_at, contacted_at")
@@ -58,13 +62,16 @@ export default async function AdminSitePage() {
     loadError = error instanceof Error ? error.message : "Erro ao carregar.";
   }
 
-  const porContactar = data?.interessados.filter((i) => !i.contacted_at).length ?? 0;
+  const porContactar =
+    data?.interessados.filter((i) => !i.contacted_at).length ?? 0;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Site público</h1>
-        <p className="text-sm text-muted-foreground">Modo em construção e lista de interessados.</p>
+        <p className="text-sm text-muted-foreground">
+          Modo em construção e lista de interessados.
+        </p>
       </div>
 
       {loadError && (
@@ -82,7 +89,9 @@ export default async function AdminSitePage() {
             <CardContent className="space-y-4 p-6">
               <SiteModeToggle initialOn={data.underConstruction} />
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                {data.updatedAt && <span>Alterado em {formatDateTime(data.updatedAt)}</span>}
+                {data.updatedAt && (
+                  <span>Alterado em {formatDateTime(data.updatedAt)}</span>
+                )}
                 <Link
                   href="/em-construcao"
                   target="_blank"
@@ -97,10 +106,13 @@ export default async function AdminSitePage() {
 
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold tracking-tight">Interessados</h2>
+              <h2 className="text-lg font-semibold tracking-tight">
+                Interessados
+              </h2>
               <p className="text-sm text-muted-foreground">
-                {data.interessados.length} email{data.interessados.length === 1 ? "" : "s"} ·{" "}
-                {porContactar} por contactar
+                {data.interessados.length} email
+                {data.interessados.length === 1 ? "" : "s"} · {porContactar} por
+                contactar
               </p>
             </div>
             {data.interessados.length > 0 && (
@@ -117,7 +129,8 @@ export default async function AdminSitePage() {
             <CardContent className="p-0">
               {data.interessados.length === 0 ? (
                 <p className="p-6 text-sm text-muted-foreground">
-                  Ainda ninguém deixou o email. Aparecem aqui assim que alguém o fizer na página de espera.
+                  Ainda ninguém deixou o email. Aparecem aqui assim que alguém o
+                  fizer na página de espera.
                 </p>
               ) : (
                 <Table>
@@ -135,16 +148,24 @@ export default async function AdminSitePage() {
                     {data.interessados.map((i) => (
                       <TableRow key={i.id}>
                         <TableCell>
-                          <a href={`mailto:${i.email}`} className="font-medium underline-offset-4 hover:underline">
+                          <a
+                            href={`mailto:${i.email}`}
+                            className="font-medium underline-offset-4 hover:underline"
+                          >
                             {i.email}
                           </a>
                         </TableCell>
-                        <TableCell className="whitespace-nowrap">{formatDateTime(i.created_at)}</TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {formatDateTime(i.created_at)}
+                        </TableCell>
                         <TableCell className="whitespace-nowrap text-muted-foreground">
-                          {i.contacted_at ? formatDate(i.contacted_at) : "—"}
+                          {i.contacted_at ? formatDate(i.contacted_at) : "-"}
                         </TableCell>
                         <TableCell>
-                          <InteressadoActions id={i.id} contacted={Boolean(i.contacted_at)} />
+                          <InteressadoActions
+                            id={i.id}
+                            contacted={Boolean(i.contacted_at)}
+                          />
                         </TableCell>
                       </TableRow>
                     ))}

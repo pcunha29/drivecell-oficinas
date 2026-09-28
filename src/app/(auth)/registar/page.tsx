@@ -4,7 +4,7 @@ import { AuthSplit } from "@/components/auth/auth-split";
 import { SignupForm } from "@/components/auth/signup-form";
 
 export const metadata: Metadata = {
-  title: "Criar conta — DriveCell Oficinas",
+  title: "Criar conta",
   description:
     "Cria a conta da tua oficina no DriveCell Oficinas e experimenta 7 dias sem cartão. Depois, 49 € por mês ou 490 € por ano, IVA incluído.",
 };

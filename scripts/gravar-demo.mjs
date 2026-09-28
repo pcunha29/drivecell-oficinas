@@ -13,7 +13,13 @@
  * Saída: demo-recordings/raw/passo-N.webm + demo-recordings/manifest.json
  * Depois: npm run demo:converter  (precisa de ffmpeg) → public/demo/
  */
-import { readFileSync, existsSync, mkdirSync, renameSync, writeFileSync } from "node:fs";
+import {
+  readFileSync,
+  existsSync,
+  mkdirSync,
+  renameSync,
+  writeFileSync,
+} from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
@@ -29,7 +35,10 @@ if (existsSync(envPath)) {
     if (!t || t.startsWith("#") || !t.includes("=")) continue;
     const i = t.indexOf("=");
     const k = t.slice(0, i).trim();
-    const v = t.slice(i + 1).trim().replace(/^["']|["']$/g, "");
+    const v = t
+      .slice(i + 1)
+      .trim()
+      .replace(/^["']|["']$/g, "");
     if (!process.env[k]) process.env[k] = v;
   }
 }
@@ -38,7 +47,8 @@ const BASE = process.env.DEMO_BASE_URL ?? "http://localhost:3000";
 const EMAIL = process.env.DEMO_EMAIL;
 const PASSWORD = process.env.DEMO_PASSWORD;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY;
+const SERVICE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY;
 const VIEWPORT = { width: 1280, height: 800 };
 const HEADED = process.env.DEMO_HEADED === "1";
 
@@ -67,10 +77,15 @@ async function resetDemo() {
     .limit(1)
     .maybeSingle();
   if (error || !ws) {
-    console.warn("Oficina demo não encontrada:", error?.message ?? "nenhuma com is_demo");
+    console.warn(
+      "Oficina demo não encontrada:",
+      error?.message ?? "nenhuma com is_demo",
+    );
     return;
   }
-  const { error: seedErr } = await admin.rpc("seed_demo_data", { p_workshop_id: ws.id });
+  const { error: seedErr } = await admin.rpc("seed_demo_data", {
+    p_workshop_id: ws.id,
+  });
   if (seedErr) throw seedErr;
   console.log(`Dados de "${ws.name}" repostos.`);
 }
@@ -143,10 +158,15 @@ async function warmUp() {
   process.stdout.write("A preparar as páginas");
   for (const p of paths) {
     try {
-      await fetch(`${BASE}${p}`, { redirect: "manual", signal: AbortSignal.timeout(90000) });
+      await fetch(`${BASE}${p}`, {
+        redirect: "manual",
+        signal: AbortSignal.timeout(90000),
+      });
     } catch (e) {
       if (p === "/entrar") {
-        console.error(`\nNão consegui abrir ${BASE}${p} — o npm run dev está a correr? (${e.message})`);
+        console.error(
+          `\nNão consegui abrir ${BASE}${p} - o npm run dev está a correr? (${e.message})`,
+        );
         process.exit(1);
       }
     }
@@ -166,28 +186,60 @@ async function login(browser) {
     await page.locator('form button[type="submit"]').first().click();
 
     // Espera por uma de três coisas: entrou na app, conta sem oficina, ou erro no formulário.
-    const alert = page.locator('[role="alert"]').filter({ hasText: /\S/ }).first();
+    const alert = page
+      .locator('[role="alert"]')
+      .filter({ hasText: /\S/ })
+      .first();
     // As esperas que perdem a corrida são ignoradas (não rebentam o processo).
-    const settle = (promise, value) => promise.then(() => value, () => new Promise(() => {}));
+    const settle = (promise, value) =>
+      promise.then(
+        () => value,
+        () => new Promise(() => {}),
+      );
     const outcome = await Promise.race([
-      settle(page.waitForURL((u) => u.pathname.startsWith("/app"), { timeout: 90000, waitUntil: "commit" }), "app"),
-      settle(page.waitForURL((u) => u.pathname.startsWith("/sem-oficina"), { timeout: 90000, waitUntil: "commit" }), "sem-oficina"),
+      settle(
+        page.waitForURL((u) => u.pathname.startsWith("/app"), {
+          timeout: 90000,
+          waitUntil: "commit",
+        }),
+        "app",
+      ),
+      settle(
+        page.waitForURL((u) => u.pathname.startsWith("/sem-oficina"), {
+          timeout: 90000,
+          waitUntil: "commit",
+        }),
+        "sem-oficina",
+      ),
       settle(alert.waitFor({ timeout: 90000 }), "erro"),
-      new Promise((_, reject) => setTimeout(() => reject(new Error("Sem resposta do login em 90 s.")), 92000)),
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error("Sem resposta do login em 90 s.")),
+          92000,
+        ),
+      ),
     ]);
 
     if (outcome === "erro") {
-      throw new Error(`O login falhou: "${(await alert.innerText()).trim()}". Confirma DEMO_EMAIL e DEMO_PASSWORD no .env.local.`);
+      throw new Error(
+        `O login falhou: "${(await alert.innerText()).trim()}". Confirma DEMO_EMAIL e DEMO_PASSWORD no .env.local.`,
+      );
     }
     if (outcome === "sem-oficina") {
-      throw new Error("A conta demo entrou mas não tem oficina associada. Cria-a em /admin → Criar conta demo, com este email.");
+      throw new Error(
+        "A conta demo entrou mas não tem oficina associada. Cria-a em /admin → Criar conta demo, com este email.",
+      );
     }
-    await page.getByRole("button", { name: "Nova ordem" }).waitFor({ timeout: 60000 });
+    await page
+      .getByRole("button", { name: "Nova ordem" })
+      .waitFor({ timeout: 60000 });
     return await ctx.storageState();
   } catch (e) {
     const shot = resolve(outDir, "erro-login.png");
     await page.screenshot({ path: shot }).catch(() => {});
-    console.error(`\nFalhou no login (URL atual: ${page.url()}). Captura em demo-recordings/erro-login.png`);
+    console.error(
+      `\nFalhou no login (URL atual: ${page.url()}). Captura em demo-recordings/erro-login.png`,
+    );
     throw e;
   } finally {
     await ctx.close();
@@ -204,8 +256,13 @@ const STEPS = {
       await type(page, page.locator("#name"), "Sofia Marques");
       await type(page, page.locator("#phone"), "914 202 118");
       await type(page, page.locator("#email"), "sofia.marques@exemplo.pt");
-      await click(page, page.getByRole("button", { name: "Criar", exact: true }));
-      await page.getByRole("dialog").waitFor({ state: "hidden", timeout: 15000 });
+      await click(
+        page,
+        page.getByRole("button", { name: "Criar", exact: true }),
+      );
+      await page
+        .getByRole("dialog")
+        .waitFor({ state: "hidden", timeout: 15000 });
       await pause(900);
       await page.goto(`${BASE}/app/viaturas`);
       await page.getByRole("button", { name: "Nova viatura" }).waitFor();
@@ -216,8 +273,13 @@ const STEPS = {
       await type(page, page.locator("#make"), "Renault");
       await type(page, page.locator("#model"), "Captur");
       await type(page, page.locator("#year"), "2021");
-      await click(page, page.getByRole("button", { name: "Criar", exact: true }));
-      await page.getByRole("dialog").waitFor({ state: "hidden", timeout: 15000 });
+      await click(
+        page,
+        page.getByRole("button", { name: "Criar", exact: true }),
+      );
+      await page
+        .getByRole("dialog")
+        .waitFor({ state: "hidden", timeout: 15000 });
       await pause(1600);
     },
   },
@@ -231,14 +293,22 @@ const STEPS = {
       await click(page, vehicle);
       await vehicle.selectOption({ index: 1 });
       await pause(350);
-      await type(page, page.locator("#description"), "Pastilhas e discos dianteiros");
+      await type(
+        page,
+        page.locator("#description"),
+        "Pastilhas e discos dianteiros",
+      );
       const lines = [
         ["Pastilhas dianteiras", "1", "58"],
         ["Discos dianteiros", "2", "64"],
         ["Mão de obra", "1.5", "35"],
       ];
       for (let i = 0; i < lines.length; i++) {
-        if (i > 0) await click(page, page.getByRole("button", { name: "Adicionar", exact: true }));
+        if (i > 0)
+          await click(
+            page,
+            page.getByRole("button", { name: "Adicionar", exact: true }),
+          );
         const [d, q, p] = lines[i];
         await type(page, page.locator(`[id="items.${i}.description"]`), d);
         const qty = page.locator(`[id="items.${i}.quantity"]`);
@@ -252,8 +322,13 @@ const STEPS = {
         await pause(300);
       }
       await pause(700);
-      await click(page, page.getByRole("button", { name: "Criar ordem", exact: true }));
-      await page.getByRole("dialog").waitFor({ state: "hidden", timeout: 15000 });
+      await click(
+        page,
+        page.getByRole("button", { name: "Criar ordem", exact: true }),
+      );
+      await page
+        .getByRole("dialog")
+        .waitFor({ state: "hidden", timeout: 15000 });
       await pause(1800);
     },
   },
@@ -261,7 +336,9 @@ const STEPS = {
     title: "Arrastar até Entregue",
     url: "/app",
     async run(page) {
-      const card = page.locator('[data-status="in_progress"] [data-order-id]').first();
+      const card = page
+        .locator('[data-status="in_progress"] [data-order-id]')
+        .first();
       await card.waitFor();
       const handle = card.getByRole("button", { name: "Arrastar" });
       const target = page.locator('[data-status="delivered"]');
@@ -296,7 +373,10 @@ async function record(browser, state, n) {
   const page = await ctx.newPage();
   await page.goto(`${BASE}${step.url}`);
   await page.waitForLoadState("networkidle");
-  await page.getByText("A carregar dados...").waitFor({ state: "hidden" }).catch(() => {});
+  await page
+    .getByText("A carregar dados...")
+    .waitFor({ state: "hidden" })
+    .catch(() => {});
   await page.mouse.move(VIEWPORT.width * 0.62, VIEWPORT.height * 0.55);
   await pause(700);
   const start = (Date.now() - t0) / 1000;
@@ -309,8 +389,14 @@ async function record(browser, state, n) {
       .locator('[role="dialog"] .text-red-600, [role="alert"]')
       .allInnerTexts()
       .catch(() => []);
-    console.error(`\nO passo ${n} falhou em ${page.url()}. Captura em demo-recordings/erro-passo-${n}.png`);
-    if (msgs.filter((m) => m.trim()).length) console.error("Mensagens no ecrã:", msgs.filter((m) => m.trim()).join(" | "));
+    console.error(
+      `\nO passo ${n} falhou em ${page.url()}. Captura em demo-recordings/erro-passo-${n}.png`,
+    );
+    if (msgs.filter((m) => m.trim()).length)
+      console.error(
+        "Mensagens no ecrã:",
+        msgs.filter((m) => m.trim()).join(" | "),
+      );
     await ctx.close().catch(() => {});
     throw e;
   }
@@ -320,26 +406,38 @@ async function record(browser, state, n) {
   const tmp = await video.path();
   const dest = resolve(rawDir, `passo-${n}.webm`);
   renameSync(tmp, dest);
-  console.log(`Passo ${n} (${step.title}) gravado: ${(end - start).toFixed(1)} s`);
+  console.log(
+    `Passo ${n} (${step.title}) gravado: ${(end - start).toFixed(1)} s`,
+  );
   return { file: `raw/passo-${n}.webm`, start, end, title: step.title };
 }
 
-const only = process.argv.slice(2).map(Number).filter((n) => STEPS[n]);
+const only = process.argv
+  .slice(2)
+  .map(Number)
+  .filter((n) => STEPS[n]);
 const which = only.length ? only : [1, 2, 3];
 
 const browser = await chromium.launch({ headless: !HEADED });
 const manifestPath = resolve(outDir, "manifest.json");
-const manifest = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, "utf8")) : {};
+const manifest = existsSync(manifestPath)
+  ? JSON.parse(readFileSync(manifestPath, "utf8"))
+  : {};
 try {
   await warmUp();
   const state = await login(browser);
   for (const n of which) {
     await resetDemo();
     manifest[n] = await record(browser, state, n);
-    writeFileSync(manifestPath, JSON.stringify({ ...manifest, viewport: VIEWPORT }, null, 2));
+    writeFileSync(
+      manifestPath,
+      JSON.stringify({ ...manifest, viewport: VIEWPORT }, null, 2),
+    );
   }
 } finally {
   await browser.close();
-  await resetDemo().catch((e) => console.warn("Falhou repor a demo:", e.message));
+  await resetDemo().catch((e) =>
+    console.warn("Falhou repor a demo:", e.message),
+  );
 }
 console.log("\nFeito. Agora: npm run demo:converter");

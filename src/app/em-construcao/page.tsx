@@ -9,7 +9,7 @@ import { TeaserBoard } from "@/components/marketing/teaser-board";
  * estiver ligado no /admin/site (reescrita feita no middleware).
  */
 export const metadata: Metadata = {
-  title: "DriveCell Oficinas — Brevemente",
+  title: { absolute: "DriveCell Oficinas - Brevemente" },
   description:
     "Estamos a afinar uma ferramenta para a tua oficina. Deixa o email e sabe primeiro quando abrirmos.",
   robots: { index: false, follow: false },
@@ -42,8 +42,9 @@ export default function EmConstrucaoPage() {
               <em className="text-accent-soft">para a tua oficina.</em>
             </h1>
             <p className="m-0 max-w-[520px] text-[17px] leading-relaxed text-on-dark-2">
-              Um quadro simples para saberes, a qualquer hora, que carros tens na oficina, o que falta
-              fazer e quem já pagou. Deixa o email e és dos primeiros a experimentar.
+              Um quadro simples para saberes, a qualquer hora, que carros tens
+              na oficina, o que falta fazer e quem já pagou. Deixa o email e és
+              dos primeiros a experimentar.
             </p>
             <div className="pt-2">
               <InterestForm />
@@ -59,7 +60,10 @@ export default function EmConstrucaoPage() {
           <span>© {new Date().getFullYear()} DriveCell Oficinas</span>
           <span>
             Já és cliente?{" "}
-            <Link href="/entrar" className="inline-flex min-h-11 items-center text-on-dark-2 underline underline-offset-4 hover:text-on-dark">
+            <Link
+              href="/entrar"
+              className="inline-flex min-h-11 items-center text-on-dark-2 underline underline-offset-4 hover:text-on-dark"
+            >
               Entrar
             </Link>
           </span>

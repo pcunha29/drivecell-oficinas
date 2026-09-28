@@ -4,8 +4,8 @@
  * utilizador aceita os termos (ex.: no registo).
  */
 
-export const TERMS_VERSION = "[VERSÃO]";
-export const TERMS_UPDATED_AT = "[DATA]";
+export const TERMS_VERSION = "1.0.0";
+export const TERMS_UPDATED_AT = "2026-09-28";
 
 export type TermsClause = {
   /** Âncora na página /termos (ex.: "t1"). */
@@ -56,7 +56,7 @@ export const termsClauses: readonly TermsClause[] = [
     id: "t6",
     number: "06",
     title: "Dados dos teus clientes",
-    body: "Os dados que registas sobre os clientes da oficina pertencem à oficina, que é responsável pelo seu tratamento. Nós tratamo-los apenas para prestar o serviço, como subcontratante, nos termos do artigo 28.º do RGPD e do acordo de subcontratação anexo a estes termos.",
+    body: "Os dados que registas sobre os clientes da oficina pertencem à oficina, que é responsável pelo seu tratamento. Nós tratamo-los apenas para prestar o serviço, como subcontratante, nos termos do artigo 28.º do RGPD.",
   },
   {
     id: "t7",
@@ -79,11 +79,11 @@ export const privacySections: readonly PrivacySection[] = [
   },
   {
     title: "Para que os usamos",
-    body: "Para prestar o serviço, gerir a subscrição, enviar avisos da conta e cumprir obrigações legais. O email da lista de interessados serve só para avisar do lançamento e é apagado a pedido. Não vendemos dados nem fazemos publicidade com eles.",
+    body: "Para prestar o serviço, gerir a subscrição, enviar avisos da conta e cumprir obrigações legais. O email da lista de interessados serve só para avisar do lançamento e é apagado a pedido. Medimos as visitas ao site de forma anónima e sem cookies (Vercel Web Analytics), para saber que páginas são vistas. Não vendemos dados nem fazemos publicidade com eles.",
   },
   {
     title: "Onde ficam e com quem",
-    body: "Alojados na União Europeia. Subcontratantes: Supabase (base de dados), Vercel (alojamento), Stripe (pagamentos) e Gmail (envio de emails).",
+    body: "A base de dados e as cópias de segurança ficam guardadas na União Europeia. Subcontratantes: Supabase (base de dados), Vercel (alojamento do site), Stripe (pagamentos) e Gmail (envio de emails). Alguns destes fornecedores podem tratar dados fora da União Europeia, sempre com as garantias previstas no RGPD, como as cláusulas contratuais-tipo.",
   },
   {
     title: "Os teus direitos",

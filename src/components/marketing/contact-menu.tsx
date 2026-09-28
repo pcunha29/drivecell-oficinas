@@ -3,11 +3,12 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { mailtoUrl, whatsappUrl, CONTACT_EMAIL } from "@/lib/contact";
 import { cn } from "@/lib/utils";
+import { trackDemoRequest, type DemoOrigin } from "@/lib/analytics/events";
 import { MailIcon, WhatsAppIcon } from "./contact-icons";
 
 type ContactMenuProps = {
   /** Texto do botão que abre o menu. */
-  label?: string;
+  label?: React.ReactNode;
   /** Mensagem pré-preenchida no WhatsApp. */
   whatsappText?: string;
   /** Assunto do email. */
@@ -16,6 +17,8 @@ type ContactMenuProps = {
   triggerClassName?: string;
   /** Lado para onde o painel abre. */
   align?: "left" | "right";
+  /** Onde está o menu (para as estatísticas de pedidos de demonstração). */
+  origin?: DemoOrigin;
 };
 
 /**
@@ -28,6 +31,7 @@ export function ContactMenu({
   emailSubject = "Demonstração DriveCell Oficinas",
   triggerClassName,
   align = "right",
+  origin = "entrar",
 }: ContactMenuProps) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
@@ -101,7 +105,10 @@ export function ContactMenu({
           href={whatsappUrl(whatsappText)}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() => setOpen(false)}
+          onClick={() => {
+            trackDemoRequest("whatsapp", origin);
+            setOpen(false);
+          }}
           className={cn(option, "bg-night text-paper hover:bg-night-2")}
         >
           <WhatsAppIcon />
@@ -112,7 +119,10 @@ export function ContactMenu({
         </a>
         <a
           href={mailtoUrl(emailSubject)}
-          onClick={() => setOpen(false)}
+          onClick={() => {
+            trackDemoRequest("email", origin);
+            setOpen(false);
+          }}
           className={cn(option, "mt-1.5 border border-line text-ink hover:border-night hover:bg-paper")}
         >
           <MailIcon />

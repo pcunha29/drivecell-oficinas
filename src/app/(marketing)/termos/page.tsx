@@ -9,7 +9,7 @@ import {
 } from "@/content/legal";
 
 export const metadata: Metadata = {
-  title: "Termos e privacidade — DriveCell Oficinas",
+  title: "Termos e privacidade",
   description:
     "Termos de serviço e política de privacidade do DriveCell Oficinas: período de experiência, preço e pagamento, cancelamento, dados dos teus clientes e os teus direitos ao abrigo do RGPD.",
 };
@@ -100,7 +100,7 @@ export default function TermosPage() {
 
       <Container>
         <div className="grid grid-cols-1 items-start gap-y-8 pt-10 pb-16 lg:grid-cols-12 lg:gap-x-6 lg:pt-16 lg:pb-28">
-          {/* Índice — mobile/tablet: colapsável acima do conteúdo */}
+          {/* Índice - mobile/tablet: colapsável acima do conteúdo */}
           <details className="group rounded-[4px] border border-line bg-paper-card lg:hidden">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-[15px] font-medium text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent [&::-webkit-details-marker]:hidden">
               Índice
@@ -117,7 +117,7 @@ export default function TermosPage() {
             </nav>
           </details>
 
-          {/* Índice — desktop: fixo à esquerda */}
+          {/* Índice - desktop: fixo à esquerda */}
           <nav
             aria-label="Índice"
             className="sticky top-28 hidden flex-col lg:col-span-3 lg:flex"

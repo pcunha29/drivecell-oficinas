@@ -21,7 +21,7 @@ export async function getAdminUser(): Promise<User | null> {
 
 /**
  * Para server actions: lança erro se quem chama não for admin.
- * Chamar no início de CADA action — o layout não protege as actions.
+ * Chamar no início de CADA action - o layout não protege as actions.
  */
 export async function requireAdmin(): Promise<User> {
   const user = await getAdminUser();

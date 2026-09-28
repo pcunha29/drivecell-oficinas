@@ -20,10 +20,15 @@ const PAGE = 8;
 /** Abaixo disto a margem aparece destacada. */
 const LOW_MARGIN_PCT = 20;
 
-const dateFmt = new Intl.DateTimeFormat("pt-PT", { day: "2-digit", month: "2-digit" });
+const dateFmt = new Intl.DateTimeFormat("pt-PT", {
+  day: "2-digit",
+  month: "2-digit",
+});
 
 function pct(value: number | null) {
-  return value === null ? "—" : `${value.toLocaleString("pt-PT", { maximumFractionDigits: 0 })}%`;
+  return value === null
+    ? "-"
+    : `${value.toLocaleString("pt-PT", { maximumFractionDigits: 0 })}%`;
 }
 
 /** Margem por ordem entregue: mostra que trabalhos renderam pouco. */
@@ -33,10 +38,13 @@ export function OrderMarginTable({ rows, customerName, plate }: Props) {
 
   const sorted = useMemo(() => {
     const copy = [...rows];
-    if (sort === "recentes") copy.sort((a, b) => b.order.createdAt.localeCompare(a.order.createdAt));
+    if (sort === "recentes")
+      copy.sort((a, b) => b.order.createdAt.localeCompare(a.order.createdAt));
     else {
       const dir = sort === "pior" ? 1 : -1;
-      copy.sort((a, b) => dir * ((a.marginPct ?? Infinity) - (b.marginPct ?? Infinity)));
+      copy.sort(
+        (a, b) => dir * ((a.marginPct ?? Infinity) - (b.marginPct ?? Infinity)),
+      );
     }
     return copy;
   }, [rows, sort]);
@@ -72,40 +80,74 @@ export function OrderMarginTable({ rows, customerName, plate }: Props) {
               <table className="w-full text-sm sm:min-w-[520px]">
                 <thead>
                   <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                    <th scope="col" className="px-6 py-2 font-medium sm:pl-0">Ordem</th>
-                    <th scope="col" className="px-2 py-2 text-right font-medium">Faturado</th>
-                    <th scope="col" className="hidden px-2 py-2 text-right font-medium sm:table-cell">Custo</th>
-                    <th scope="col" className="px-6 py-2 text-right font-medium sm:pr-0">Margem</th>
+                    <th scope="col" className="px-6 py-2 font-medium sm:pl-0">
+                      Ordem
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-2 py-2 text-right font-medium"
+                    >
+                      Faturado
+                    </th>
+                    <th
+                      scope="col"
+                      className="hidden px-2 py-2 text-right font-medium sm:table-cell"
+                    >
+                      Custo
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-2 text-right font-medium sm:pr-0"
+                    >
+                      Margem
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {visible.map((r) => {
-                    const low = r.marginPct !== null && r.marginPct < LOW_MARGIN_PCT;
+                    const low =
+                      r.marginPct !== null && r.marginPct < LOW_MARGIN_PCT;
                     return (
-                      <tr key={r.order.id} className="border-b border-border last:border-0">
+                      <tr
+                        key={r.order.id}
+                        className="border-b border-border last:border-0"
+                      >
                         <td className="px-6 py-2.5 sm:pl-0">
-                          <div className="font-medium">{customerName(r.order.customerId)}</div>
+                          <div className="font-medium">
+                            {customerName(r.order.customerId)}
+                          </div>
                           <div className="text-xs text-muted-foreground">
-                            {dateFmt.format(new Date(r.order.createdAt))} · {plate(r.order.vehicleId)} ·{" "}
-                            {r.order.description}
+                            {dateFmt.format(new Date(r.order.createdAt))} ·{" "}
+                            {plate(r.order.vehicleId)} · {r.order.description}
                           </div>
                         </td>
-                        <td className="px-2 py-2.5 text-right tabular-nums">{formatEuro(r.total)}</td>
+                        <td className="px-2 py-2.5 text-right tabular-nums">
+                          {formatEuro(r.total)}
+                        </td>
                         <td className="hidden px-2 py-2.5 text-right tabular-nums text-muted-foreground sm:table-cell">
                           {formatEuro(r.cost)}
                         </td>
                         <td className="px-6 py-2.5 text-right tabular-nums sm:pr-0">
-                          <div className={cn("font-medium", r.margin < 0 && "text-red-600 dark:text-red-400")}>
+                          <div
+                            className={cn(
+                              "font-medium",
+                              r.margin < 0 && "text-red-600 dark:text-red-400",
+                            )}
+                          >
                             {formatEuro(r.margin)}
                           </div>
                           <div
                             className={cn(
                               "text-xs",
-                              low ? "font-medium text-amber-700 dark:text-amber-400" : "text-muted-foreground",
+                              low
+                                ? "font-medium text-amber-700 dark:text-amber-400"
+                                : "text-muted-foreground",
                             )}
                           >
                             {pct(r.marginPct)}
-                            {low && <span className="sr-only"> (margem baixa)</span>}
+                            {low && (
+                              <span className="sr-only"> (margem baixa)</span>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -116,8 +158,14 @@ export function OrderMarginTable({ rows, customerName, plate }: Props) {
             </div>
             {sorted.length > PAGE && (
               <div className="px-6 pt-2 sm:px-0">
-                <Button variant="ghost" size="sm" onClick={() => setShowAll((v) => !v)}>
-                  {showAll ? "Mostrar menos" : `Mostrar todas (${sorted.length})`}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAll((v) => !v)}
+                >
+                  {showAll
+                    ? "Mostrar menos"
+                    : `Mostrar todas (${sorted.length})`}
                 </Button>
               </div>
             )}

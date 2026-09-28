@@ -10,7 +10,7 @@ export const CONSTRUCTION_PATH = "/em-construcao";
 
 /**
  * Caminhos que continuam acessíveis com o modo ligado (e respetivos subcaminhos).
- * Tudo o resto — páginas públicas atuais e futuras, rotas inexistentes — mostra a
+ * Tudo o resto - páginas públicas atuais e futuras, rotas inexistentes - mostra a
  * página de espera. Assim uma página nova nunca fica exposta por esquecimento.
  */
 const CONSTRUCTION_ALLOWED_PREFIXES = [
@@ -37,14 +37,18 @@ export function isAllowedDuringConstruction(pathname: string): boolean {
   // Ficheiros (robots.txt, vídeos, manifest, imagens…): último segmento com extensão.
   const last = pathname.slice(pathname.lastIndexOf("/") + 1);
   if (last.includes(".")) return true;
-  return CONSTRUCTION_ALLOWED_PREFIXES.some((prefix) => matchesPrefix(pathname, prefix));
+  return CONSTRUCTION_ALLOWED_PREFIXES.some((prefix) =>
+    matchesPrefix(pathname, prefix),
+  );
 }
 
 /**
  * Lê o estado atual. Em caso de erro devolve false (o site normal continua
  * visível em vez de ficar tudo escondido por uma falha de rede).
  */
-export async function readUnderConstruction(supabase: SupabaseClient): Promise<boolean> {
+export async function readUnderConstruction(
+  supabase: SupabaseClient,
+): Promise<boolean> {
   try {
     const { data, error } = await supabase
       .from("site_settings")

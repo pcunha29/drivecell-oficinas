@@ -22,7 +22,10 @@ type WorkshopStore = {
   setTrackCosts: (value: boolean) => Promise<void>;
 };
 
-type MembershipRow = { role: WorkshopRole; workshops: Workshop | Workshop[] | null };
+type MembershipRow = {
+  role: WorkshopRole;
+  workshops: Workshop | Workshop[] | null;
+};
 
 export const useWorkshopStore = create<WorkshopStore>((set, get) => ({
   workshop: null,
@@ -60,7 +63,7 @@ export const useWorkshopStore = create<WorkshopStore>((set, get) => ({
       // opcionais em vez de deixar a app inteira em só-leitura.
       if (error?.code === "42703") {
         console.warn(
-          "[oficina] Falta uma coluna na tabela workshops — aplica as migrações em falta.",
+          "[oficina] Falta uma coluna na tabela workshops - aplica as migrações em falta.",
           error.message,
         );
         ({ data, error } = await fetchMembership(WORKSHOP_SELECT_BASE));
@@ -70,7 +73,9 @@ export const useWorkshopStore = create<WorkshopStore>((set, get) => ({
 
       const membership = data as MembershipRow | null;
       const embedded = membership?.workshops ?? null;
-      const workshop = Array.isArray(embedded) ? (embedded[0] ?? null) : embedded;
+      const workshop = Array.isArray(embedded)
+        ? (embedded[0] ?? null)
+        : embedded;
 
       set({
         workshop,
@@ -81,7 +86,8 @@ export const useWorkshopStore = create<WorkshopStore>((set, get) => ({
     } catch (err) {
       set({
         isLoading: false,
-        error: err instanceof Error ? err.message : "Erro ao carregar a oficina",
+        error:
+          err instanceof Error ? err.message : "Erro ao carregar a oficina",
       });
     }
   },

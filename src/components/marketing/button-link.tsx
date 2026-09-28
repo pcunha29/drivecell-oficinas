@@ -18,11 +18,11 @@ export const buttonVariants = {
 } as const;
 
 export const buttonSizes = {
-  /** 52px — tamanho por omissão */
+  /** 52px - tamanho por omissão */
   md: "h-[52px] px-6 text-[15px]",
-  /** 44px — cabeçalho */
+  /** 44px - cabeçalho */
   sm: "h-11 px-[18px] text-sm",
-  /** 56px — bloco de chamada final */
+  /** 56px - bloco de chamada final */
   lg: "h-14 px-7 text-base",
 } as const;
 
@@ -48,7 +48,9 @@ export function ButtonLink({
   className,
   ...props
 }: ButtonLinkProps) {
-  return <Link className={buttonClasses(variant, size, className)} {...props} />;
+  return (
+    <Link className={buttonClasses(variant, size, className)} {...props} />
+  );
 }
 
 export function ArrowRightIcon({ className }: { className?: string }) {

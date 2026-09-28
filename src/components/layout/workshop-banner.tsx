@@ -32,13 +32,15 @@ export function WorkshopBanner() {
           </p>
           <div className="flex shrink-0 items-center gap-4 pl-6 font-medium sm:pl-0">
             <a
-              href={mailtoUrl(`Reativar conta — ${workshop.name}`)}
+              href={mailtoUrl(`Reativar conta - ${workshop.name}`)}
               className="underline underline-offset-4 hover:no-underline"
             >
               Email
             </a>
             <a
-              href={whatsappUrl(`Olá! Quero reativar a conta da oficina ${workshop.name}.`)}
+              href={whatsappUrl(
+                `Olá! Quero reativar a conta da oficina ${workshop.name}.`,
+              )}
               target="_blank"
               rel="noopener noreferrer"
               className="underline underline-offset-4 hover:no-underline"
@@ -66,8 +68,12 @@ export function WorkshopBanner() {
             "flex items-center gap-2 py-2.5 text-sm",
           )}
         >
-          <Clock className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-          O teu período de teste termina a {formatDatePt(workshop.trial_ends_at)}.
+          <Clock
+            className="h-4 w-4 shrink-0 text-muted-foreground"
+            aria-hidden
+          />
+          O teu período de teste termina a{" "}
+          {formatDatePt(workshop.trial_ends_at)}.
         </p>
       </div>
     );

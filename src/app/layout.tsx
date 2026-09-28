@@ -3,7 +3,8 @@ import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
-import { Analytics } from "@vercel/analytics/next"
+import { SiteAnalytics } from "@/components/site-analytics";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -26,11 +27,19 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "DriveCell Oficinas",
-    template: "%s · DriveCell Oficinas",
+    default: SITE_NAME,
+    template: `%s · ${SITE_NAME}`,
   },
   description: "Gestão simples para oficinas independentes.",
+  applicationName: SITE_NAME,
+  openGraph: {
+    siteName: SITE_NAME,
+    locale: "pt_PT",
+    type: "website",
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({
@@ -39,8 +48,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
-    <Analytics />
     <html
       lang="pt-PT"
       data-scroll-behavior="smooth"
@@ -53,8 +60,8 @@ export default function RootLayout({
       >
         <ThemeProvider>{children}</ThemeProvider>
         <Toaster richColors position="bottom-right" />
+        <SiteAnalytics />
       </body>
     </html>
-    </>
   );
 }
