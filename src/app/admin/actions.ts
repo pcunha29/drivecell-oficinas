@@ -22,6 +22,7 @@ import {
 import { buildConfirmLink, getInviteRedirectUrl } from "@/lib/admin/site-url";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logAdminEvent } from "@/lib/admin/audit";
+import { customerKey, IMPORT_MAX_ROWS } from "@/lib/import/customers-csv";
 import { isAdminEmail } from "@/lib/admin/emails";
 
 // Todas as actions começam por requireAdmin(): o layout de /admin não protege
@@ -551,6 +552,313 @@ export async function deleteWorkshopAction(
       ? ` Contas apagadas: ${deletedUsers.length}${keptUsers.length ? `; mantidas: ${keptUsers.length}` : ""}.`
       : "";
     return { status: "success", message: `Oficina «${workshop.name}» eliminada.${usersNote}` };
+  } catch (error) {
+    return { status: "error", message: errorMessage(error) };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Importar clientes e viaturas (CSV já lido e validado no browser; volta a
+// validar aqui). Reaproveita clientes com o mesmo nome e telefone e ignora
+// matrículas que a oficina já tem.
+// ---------------------------------------------------------------------------
+
+const importRowSchema = z.object({
+  line: z.number().int(),
+  nome: z.string().trim().min(1).max(120),
+  telefone: z.string().max(40),
+  email: z.string().max(200),
+  notas: z.string().max(2000),
+  matricula: z.string().max(20),
+  marca: z.string().max(60),
+  modelo: z.string().max(60),
+  ano: z.number().int().min(1900).max(2100).nullable(),
+});
+
+const CHUNK = 500;
+
+export async function importCustomersAction(
+  workshopId: string,
+  rawRows: unknown,
+): Promise<SimpleActionResult> {
+  const actor = await requireAdmin();
+  if (!uuidSchema.safeParse(workshopId).success) return { status: "error", message: "Pedido inválido." };
+
+  const parsed = z.array(importRowSchema).max(IMPORT_MAX_ROWS).safeParse(rawRows);
+  if (!parsed.success) return { status: "error", message: "Dados do ficheiro inválidos. Volta a escolher o ficheiro." };
+  const rows = parsed.data;
+  if (rows.length === 0) return { status: "error", message: "Não há linhas para importar." };
+
+  const admin = createAdminClient();
+  try {
+    const { data: workshop, error: wsError } = await admin
+      .from("workshops")
+      .select("id, name")
+      .eq("id", workshopId)
+      .maybeSingle();
+    if (wsError) return { status: "error", message: wsError.message };
+    if (!workshop) return { status: "error", message: "Oficina não encontrada." };
+
+    const [{ data: existingCustomers, error: cErr }, { data: existingVehicles, error: vErr }] = await Promise.all([
+      admin.from("customers").select("id, name, phone").eq("workshop_id", workshopId),
+      admin.from("vehicles").select("plate").eq("workshop_id", workshopId),
+    ]);
+    if (cErr) return { status: "error", message: cErr.message };
+    if (vErr) return { status: "error", message: vErr.message };
+
+    const customerIdByKey = new Map<string, string>();
+    for (const c of existingCustomers ?? []) customerIdByKey.set(customerKey(c.name, c.phone ?? ""), c.id);
+    const reusedKeys = new Set<string>();
+
+    // 1) Clientes novos (dados da primeira linha de cada cliente, completados pelas seguintes).
+    const newCustomers = new Map<string, { name: string; phone: string; email: string; notes: string }>();
+    for (const r of rows) {
+      const key = customerKey(r.nome, r.telefone);
+      if (customerIdByKey.has(key)) {
+        reusedKeys.add(key);
+        continue;
+      }
+      const current = newCustomers.get(key);
+      if (!current) {
+        newCustomers.set(key, { name: r.nome, phone: r.telefone, email: r.email, notes: r.notas });
+      } else {
+        current.email ||= r.email;
+        current.notes ||= r.notas;
+      }
+    }
+
+    const toInsert = [...newCustomers.entries()];
+    for (let i = 0; i < toInsert.length; i += CHUNK) {
+      const chunk = toInsert.slice(i, i + CHUNK);
+      const { data, error } = await admin
+        .from("customers")
+        .insert(chunk.map(([, c]) => ({ workshop_id: workshopId, slug: "", ...c })))
+        .select("id, name, phone");
+      if (error) return { status: "error", message: `Erro ao criar clientes: ${error.message}` };
+      for (const c of data ?? []) customerIdByKey.set(customerKey(c.name, c.phone ?? ""), c.id);
+    }
+
+    // 2) Viaturas: ignora matrículas repetidas no ficheiro ou já existentes na oficina.
+    const knownPlates = new Set((existingVehicles ?? []).map((v) => String(v.plate).toUpperCase()));
+    let skippedPlates = 0;
+    const vehicles: Record<string, unknown>[] = [];
+    for (const r of rows) {
+      if (!r.matricula) continue;
+      const plate = r.matricula.toUpperCase();
+      if (knownPlates.has(plate)) {
+        skippedPlates += 1;
+        continue;
+      }
+      const customerId = customerIdByKey.get(customerKey(r.nome, r.telefone));
+      if (!customerId) continue;
+      knownPlates.add(plate);
+      vehicles.push({
+        workshop_id: workshopId,
+        customer_id: customerId,
+        plate,
+        make: r.marca,
+        model: r.modelo,
+        year: r.ano,
+      });
+    }
+    for (let i = 0; i < vehicles.length; i += CHUNK) {
+      const { error } = await admin.from("vehicles").insert(vehicles.slice(i, i + CHUNK));
+      if (error) {
+        return {
+          status: "error",
+          message: `Clientes criados (${toInsert.length}), mas houve um erro nas viaturas: ${error.message}`,
+        };
+      }
+    }
+
+    await logAdminEvent(admin, {
+      actor: actor.email ?? "admin",
+      action: "workshop.import",
+      workshopId,
+      workshopName: workshop.name,
+      details: {
+        rows: rows.length,
+        customers_created: toInsert.length,
+        customers_reused: reusedKeys.size,
+        vehicles_created: vehicles.length,
+        plates_skipped: skippedPlates,
+      },
+    });
+
+    revalidatePath("/admin");
+    revalidatePath(`/admin/${workshopId}`);
+    const parts = [
+      `${toInsert.length} clientes criados`,
+      reusedKeys.size ? `${reusedKeys.size} já existiam` : null,
+      `${vehicles.length} viaturas criadas`,
+      skippedPlates ? `${skippedPlates} matrículas já existiam e foram ignoradas` : null,
+    ].filter(Boolean);
+    return { status: "success", message: `Importação concluída: ${parts.join(", ")}.` };
+  } catch (error) {
+    return { status: "error", message: errorMessage(error) };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Membros: adicionar (mecânico ou outro dono) e remover.
+// O convite é um link gerado aqui (não depende do template de email do Supabase):
+// o admin envia-o por WhatsApp/email; o link abre /auth/confirm → definir palavra-passe.
+// ---------------------------------------------------------------------------
+
+export type AddMemberState = AdminFormState & {
+  /** Link de convite para enviar à mão (quando é uma conta nova). */
+  link?: string;
+  email?: string;
+};
+
+const addMemberSchema = z.object({
+  workshopId: z.uuid(),
+  fullName: z.string().trim().max(120),
+  email: z.email("Email inválido.").trim().toLowerCase(),
+  role: z.enum(["member", "owner"]),
+});
+
+export async function addMemberAction(
+  _prev: AddMemberState,
+  formData: FormData,
+): Promise<AddMemberState> {
+  const actor = await requireAdmin();
+
+  const parsed = addMemberSchema.safeParse({
+    workshopId: formString(formData, "workshopId"),
+    fullName: formString(formData, "fullName"),
+    email: formString(formData, "email"),
+    role: formString(formData, "role") || "member",
+  });
+  if (!parsed.success) return validationError(parsed.error);
+  const input = parsed.data;
+
+  const admin = createAdminClient();
+  try {
+    const { data: workshop, error: wsError } = await admin
+      .from("workshops")
+      .select("id, name")
+      .eq("id", input.workshopId)
+      .maybeSingle();
+    if (wsError) return { status: "error", message: wsError.message };
+    if (!workshop) return { status: "error", message: "Oficina não encontrada." };
+
+    let user = await findUserByEmail(admin, input.email);
+    let link: string | undefined;
+
+    if (user) {
+      const membership = await findMembershipForUser(admin, user.id);
+      if (membership) {
+        return {
+          status: "error",
+          message:
+            membership.workshopId === input.workshopId
+              ? `${input.email} já é membro desta oficina.`
+              : `${input.email} já pertence à oficina «${membership.workshopName}». Cada utilizador só pode ter uma oficina.`,
+          fieldErrors: { email: ["Este utilizador já tem oficina."] },
+        };
+      }
+    } else {
+      const { data, error } = await admin.auth.admin.generateLink({
+        type: "invite",
+        email: input.email,
+        options: {
+          redirectTo: getInviteRedirectUrl(),
+          data: input.fullName ? { full_name: input.fullName } : undefined,
+        },
+      });
+      if (error || !data.user || !data.properties?.hashed_token) {
+        return { status: "error", message: `Não foi possível criar o convite: ${error?.message ?? "sem resposta."}` };
+      }
+      user = data.user;
+      link = buildConfirmLink(data.properties.hashed_token, data.properties.verification_type || "invite");
+    }
+
+    const { error: memberError } = await admin
+      .from("workshop_members")
+      .insert({ workshop_id: input.workshopId, user_id: user.id, role: input.role });
+    if (memberError) return { status: "error", message: `Não foi possível adicionar: ${memberError.message}` };
+
+    await logAdminEvent(admin, {
+      actor: actor.email ?? "admin",
+      action: "workshop.member_add",
+      workshopId: input.workshopId,
+      workshopName: workshop.name,
+      details: { email: input.email, role: input.role, new_account: Boolean(link) },
+    });
+
+    revalidatePath(`/admin/${input.workshopId}`);
+    return {
+      status: "success",
+      message: link
+        ? `${input.email} adicionado. Envia-lhe este link para definir a palavra-passe (uso único):`
+        : `${input.email} já tinha conta e foi adicionado. Pode entrar com a palavra-passe que já tem.`,
+      link,
+      email: input.email,
+    };
+  } catch (error) {
+    return { status: "error", message: errorMessage(error) };
+  }
+}
+
+export async function removeMemberAction(
+  workshopId: string,
+  userId: string,
+): Promise<SimpleActionResult> {
+  const actor = await requireAdmin();
+  if (!uuidSchema.safeParse(workshopId).success || !uuidSchema.safeParse(userId).success) {
+    return { status: "error", message: "Pedido inválido." };
+  }
+
+  const admin = createAdminClient();
+  try {
+    const { data: members, error } = await admin
+      .from("workshop_members")
+      .select("user_id, role, workshops(name)")
+      .eq("workshop_id", workshopId);
+    if (error) return { status: "error", message: error.message };
+    const member = (members ?? []).find((m) => m.user_id === userId);
+    if (!member) return { status: "error", message: "Este utilizador não é membro desta oficina." };
+    const owners = (members ?? []).filter((m) => m.role === "owner");
+    if (member.role === "owner" && owners.length <= 1) {
+      return { status: "error", message: "É o único dono: adiciona outro dono antes de o remover." };
+    }
+
+    const { error: deleteError } = await admin
+      .from("workshop_members")
+      .delete()
+      .eq("workshop_id", workshopId)
+      .eq("user_id", userId);
+    if (deleteError) return { status: "error", message: deleteError.message };
+
+    // Conta sem nenhuma oficina (e que não é de admin): apaga-a, com a foto de perfil.
+    const { data: userData } = await admin.auth.admin.getUserById(userId);
+    const email = userData?.user?.email ?? userId;
+    const remaining = await findMembershipForUser(admin, userId);
+    let accountDeleted = false;
+    if (!remaining && !isAdminEmail(userData?.user?.email)) {
+      const { data: files } = await admin.storage.from("avatars").list(userId);
+      if (files && files.length > 0) {
+        await admin.storage.from("avatars").remove(files.map((f) => `${userId}/${f.name}`));
+      }
+      const { error: userError } = await admin.auth.admin.deleteUser(userId);
+      accountDeleted = !userError;
+    }
+
+    const embed = member.workshops as unknown as { name: string } | { name: string }[] | null;
+    await logAdminEvent(admin, {
+      actor: actor.email ?? "admin",
+      action: "workshop.member_remove",
+      workshopId,
+      workshopName: Array.isArray(embed) ? embed[0]?.name : embed?.name,
+      details: { email, role: member.role, account_deleted: accountDeleted },
+    });
+
+    revalidatePath(`/admin/${workshopId}`);
+    return {
+      status: "success",
+      message: accountDeleted ? `${email} removido e conta apagada.` : `${email} removido da oficina.`,
+    };
   } catch (error) {
     return { status: "error", message: errorMessage(error) };
   }

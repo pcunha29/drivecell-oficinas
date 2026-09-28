@@ -5,7 +5,10 @@ export type AuditAction =
   | "workshop.update"
   | "workshop.delete"
   | "workshop.reset_demo"
-  | "workshop.purge";
+  | "workshop.purge"
+  | "workshop.import"
+  | "workshop.member_add"
+  | "workshop.member_remove";
 
 /** Texto das ações no painel. */
 export const AUDIT_ACTION_LABELS: Record<string, string> = {
@@ -14,6 +17,9 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   "workshop.delete": "Oficina eliminada",
   "workshop.reset_demo": "Demonstração reposta",
   "workshop.purge": "Eliminada (retenção de 90 dias)",
+  "workshop.import": "Clientes importados (CSV)",
+  "workshop.member_add": "Membro adicionado",
+  "workshop.member_remove": "Membro removido",
 };
 
 /**

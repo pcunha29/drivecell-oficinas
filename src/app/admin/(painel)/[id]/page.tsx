@@ -5,6 +5,9 @@ import { FormMessage } from "@/components/admin/form-feedback";
 import { ResendInviteButton } from "@/components/admin/resend-invite-button";
 import { ResetDemoDialog } from "@/components/admin/reset-demo-dialog";
 import { DeleteWorkshopDialog } from "@/components/admin/delete-workshop-dialog";
+import { ImportCustomersCard } from "@/components/admin/import-customers-card";
+import { AddMemberForm } from "@/components/admin/add-member-form";
+import { RemoveMemberButton } from "@/components/admin/remove-member-button";
 import { DemoBadge, StatusBadge } from "@/components/admin/status-badge";
 import { WorkshopEditForm } from "@/components/admin/workshop-edit-form";
 import { Badge } from "@/components/ui/badge";
@@ -123,6 +126,9 @@ export default async function AdminWorkshopDetailPage({
                       <TableHead>Email</TableHead>
                       <TableHead>Papel</TableHead>
                       <TableHead>Último login</TableHead>
+                      <TableHead>
+                        <span className="sr-only">Ações</span>
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -152,11 +158,21 @@ export default async function AdminWorkshopDetailPage({
                         <TableCell className="align-top whitespace-nowrap">
                           {m.lastSignInAt ? formatDateTime(m.lastSignInAt) : "Nunca"}
                         </TableCell>
+                        <TableCell className="align-top text-right">
+                          {!(m.role === "owner" && workshop.members.filter((x) => x.role === "owner").length <= 1) && (
+                            <RemoveMemberButton
+                              workshopId={workshop.id}
+                              userId={m.userId}
+                              label={m.email ?? "membro"}
+                            />
+                          )}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               )}
+              <AddMemberForm workshopId={workshop.id} workshopName={workshop.name} />
             </CardContent>
           </Card>
 
@@ -174,6 +190,8 @@ export default async function AdminWorkshopDetailPage({
               </CardContent>
             </Card>
           )}
+
+          <ImportCustomersCard workshopId={workshop.id} />
 
           <Card className="border-red-200 dark:border-red-900">
             <CardHeader>
