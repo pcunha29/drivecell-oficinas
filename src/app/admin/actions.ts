@@ -1,5 +1,6 @@
 "use server";
 
+import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -53,6 +54,50 @@ const uuidSchema = z.uuid();
 // Nova oficina: convida o dono por email e cria a oficina.
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Convites: o email é enviado pelo SMTP do Supabase e o admin tem sempre um link
+// de acesso para enviar à mão (WhatsApp). O link é do tipo "recovery", por isso
+// não invalida o link do email de convite (tokens diferentes) e confirma o email.
+// ---------------------------------------------------------------------------
+
+type InviteOutcome =
+  | { ok: true; user: User; emailed: boolean; emailError?: string }
+  | { ok: false; code?: string; message: string };
+
+/** Convida por email; se o envio falhar, cria a conta na mesma (o admin usa o link). */
+async function inviteUser(admin: SupabaseClient, email: string, fullName?: string): Promise<InviteOutcome> {
+  const metadata = fullName ? { full_name: fullName } : undefined;
+  const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
+    data: metadata,
+    redirectTo: getInviteRedirectUrl(),
+  });
+  if (!error && data.user) return { ok: true, user: data.user, emailed: true };
+  if (error?.code === "email_exists") return { ok: false, code: "email_exists", message: error.message };
+
+  const { data: created, error: createError } = await admin.auth.admin.generateLink({
+    type: "invite",
+    email,
+    options: { redirectTo: getInviteRedirectUrl(), data: metadata },
+  });
+  if (createError || !created.user) {
+    return { ok: false, message: `Não foi possível criar a conta: ${createError?.message ?? error?.message ?? "sem resposta."}` };
+  }
+  return { ok: true, user: created.user, emailed: false, emailError: error?.message };
+}
+
+/** Link de acesso de uso único: define (ou redefine) a palavra-passe. */
+async function accessLink(admin: SupabaseClient, email: string): Promise<string> {
+  const { data, error } = await admin.auth.admin.generateLink({
+    type: "recovery",
+    email,
+    options: { redirectTo: getInviteRedirectUrl() },
+  });
+  if (error || !data.properties?.hashed_token) {
+    throw new Error(`Não foi possível gerar o link: ${error?.message ?? "sem resposta."}`);
+  }
+  return buildConfirmLink(data.properties.hashed_token, data.properties.verification_type || "recovery");
+}
+
 export async function createWorkshopAction(
   _prev: AdminFormState,
   formData: FormData,
@@ -75,26 +120,22 @@ export async function createWorkshopAction(
   const admin = createAdminClient();
   let workshopId: string;
   let invited = false;
+  let emailFailed = false; // só para o registo de ações
 
   try {
     let user = await findUserByEmail(admin, input.ownerEmail);
 
     if (!user) {
-      const { data, error } = await admin.auth.admin.inviteUserByEmail(input.ownerEmail, {
-        data: { full_name: input.ownerName },
-        redirectTo: getInviteRedirectUrl(),
-      });
-      if (error?.code === "email_exists") {
+      const outcome = await inviteUser(admin, input.ownerEmail, input.ownerName);
+      if (!outcome.ok && outcome.code === "email_exists") {
         // Criado entretanto (corrida): usa o existente sem reenviar.
         user = await findUserByEmail(admin, input.ownerEmail);
-      } else if (error || !data.user) {
-        return {
-          status: "error",
-          message: `Não foi possível enviar o convite: ${error?.message ?? "sem resposta do Supabase."}`,
-        };
+      } else if (!outcome.ok) {
+        return { status: "error", message: outcome.message };
       } else {
-        user = data.user;
+        user = outcome.user;
         invited = true;
+        emailFailed = !outcome.emailed;
       }
       if (!user) {
         return { status: "error", message: "Não foi possível obter o utilizador do dono." };
@@ -132,7 +173,7 @@ export async function createWorkshopAction(
       action: "workshop.create",
       workshopId,
       workshopName: input.name,
-      details: { owner: input.ownerEmail, status: input.initialStatus, demo: input.isDemo, invited },
+      details: { owner: input.ownerEmail, status: input.initialStatus, demo: input.isDemo, invited, email_failed: emailFailed },
     });
   } catch (error) {
     return { status: "error", message: errorMessage(error) };
@@ -744,7 +785,8 @@ export async function addMemberAction(
     if (!workshop) return { status: "error", message: "Oficina não encontrada." };
 
     let user = await findUserByEmail(admin, input.email);
-    let link: string | undefined;
+    let invited = false;
+    let emailFailed = false;
 
     if (user) {
       const membership = await findMembershipForUser(admin, user.id);
@@ -759,19 +801,11 @@ export async function addMemberAction(
         };
       }
     } else {
-      const { data, error } = await admin.auth.admin.generateLink({
-        type: "invite",
-        email: input.email,
-        options: {
-          redirectTo: getInviteRedirectUrl(),
-          data: input.fullName ? { full_name: input.fullName } : undefined,
-        },
-      });
-      if (error || !data.user || !data.properties?.hashed_token) {
-        return { status: "error", message: `Não foi possível criar o convite: ${error?.message ?? "sem resposta."}` };
-      }
-      user = data.user;
-      link = buildConfirmLink(data.properties.hashed_token, data.properties.verification_type || "invite");
+      const outcome = await inviteUser(admin, input.email, input.fullName || undefined);
+      if (!outcome.ok) return { status: "error", message: outcome.message };
+      user = outcome.user;
+      invited = true;
+      emailFailed = !outcome.emailed;
     }
 
     const { error: memberError } = await admin
@@ -784,15 +818,17 @@ export async function addMemberAction(
       action: "workshop.member_add",
       workshopId: input.workshopId,
       workshopName: workshop.name,
-      details: { email: input.email, role: input.role, new_account: Boolean(link) },
+      details: { email: input.email, role: input.role, invited, email_failed: emailFailed },
     });
+
+    const link = await accessLink(admin, input.email);
 
     revalidatePath(`/admin/${input.workshopId}`);
     return {
       status: "success",
-      message: link
-        ? `${input.email} adicionado. Envia-lhe este link para definir a palavra-passe (uso único):`
-        : `${input.email} já tinha conta e foi adicionado. Pode entrar com a palavra-passe que já tem.`,
+      message: invited
+        ? `${input.email} adicionado e convidado por email. Link de acesso (também podes enviar por WhatsApp):`
+        : `${input.email} já tinha conta e foi adicionado. Link de acesso, se precisar de nova palavra-passe:`,
       link,
       email: input.email,
     };
@@ -858,6 +894,50 @@ export async function removeMemberAction(
     return {
       status: "success",
       message: accountDeleted ? `${email} removido e conta apagada.` : `${email} removido da oficina.`,
+    };
+  } catch (error) {
+    return { status: "error", message: errorMessage(error) };
+  }
+}
+
+/** Link de acesso de um membro, para enviar à mão (convite ou palavra-passe esquecida). */
+export async function generateAccessLinkAction(
+  workshopId: string,
+  userId: string,
+): Promise<ResendInviteResult> {
+  const actor = await requireAdmin();
+  if (!uuidSchema.safeParse(workshopId).success || !uuidSchema.safeParse(userId).success) {
+    return { status: "error", message: "Pedido inválido." };
+  }
+
+  try {
+    const admin = createAdminClient();
+    const { data: member, error: memberError } = await admin
+      .from("workshop_members")
+      .select("user_id")
+      .eq("workshop_id", workshopId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (memberError) return { status: "error", message: memberError.message };
+    if (!member) return { status: "error", message: "Este utilizador não é membro desta oficina." };
+
+    const { data: userData, error: userError } = await admin.auth.admin.getUserById(userId);
+    const user = userData?.user;
+    if (userError || !user?.email) return { status: "error", message: "Utilizador não encontrado." };
+
+    const link = await accessLink(admin, user.email);
+
+    await logAdminEvent(admin, {
+      actor: actor.email ?? "admin",
+      action: "workshop.access_link",
+      workshopId,
+      details: { email: user.email },
+    });
+
+    return {
+      status: "success",
+      message: `Link de acesso para ${user.email} (uso único; abre a página para definir a palavra-passe):`,
+      link,
     };
   } catch (error) {
     return { status: "error", message: errorMessage(error) };

@@ -15,3 +15,8 @@ export function mailtoUrl(subject?: string): string {
   const base = `mailto:${CONTACT_EMAIL}`;
   return subject ? `${base}?subject=${encodeURIComponent(subject)}` : base;
 }
+
+/** Partilhar um texto no WhatsApp escolhendo o contacto (não abre a conversa com a DriveCell). */
+export function whatsappShareUrl(text: string): string {
+  return `https://wa.me/?text=${encodeURIComponent(text)}`;
+}

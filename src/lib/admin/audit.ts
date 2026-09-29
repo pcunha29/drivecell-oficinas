@@ -8,7 +8,8 @@ export type AuditAction =
   | "workshop.purge"
   | "workshop.import"
   | "workshop.member_add"
-  | "workshop.member_remove";
+  | "workshop.member_remove"
+  | "workshop.access_link";
 
 /** Texto das ações no painel. */
 export const AUDIT_ACTION_LABELS: Record<string, string> = {
@@ -20,6 +21,7 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   "workshop.import": "Clientes importados (CSV)",
   "workshop.member_add": "Membro adicionado",
   "workshop.member_remove": "Membro removido",
+  "workshop.access_link": "Link de acesso gerado",
 };
 
 /**

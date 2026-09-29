@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
-import { whatsappUrl } from "@/lib/contact";
+import { whatsappShareUrl } from "@/lib/contact";
 
 const initialState: AddMemberState = { status: "idle", message: "" };
 
@@ -86,7 +86,7 @@ export function AddMemberForm({ workshopId, workshopName }: { workshopId: string
           </div>
           <div className="flex flex-wrap gap-2">
             <Button asChild variant="outline" size="sm">
-              <a href={whatsappUrl(inviteText)} target="_blank" rel="noopener noreferrer">
+              <a href={whatsappShareUrl(inviteText)} target="_blank" rel="noopener noreferrer">
                 Enviar por WhatsApp
               </a>
             </Button>

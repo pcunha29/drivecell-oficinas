@@ -31,7 +31,8 @@ export const metadata = { title: "Oficina · Admin" };
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const CREATED_MESSAGES: Record<string, string> = {
-  convite: "Oficina criada. O dono recebeu um convite por email para definir a palavra-passe.",
+  convite:
+    "Oficina criada e convite enviado por email ao dono. Em «Membros» tens também o link de acesso para lhe enviares por WhatsApp.",
   existente:
     "Oficina criada e associada a uma conta que já existia (não foi enviado convite).",
 };
@@ -149,6 +150,11 @@ export default async function AdminWorkshopDetailPage({
                                   : "Nunca entrou"}
                               </p>
                               <ResendInviteButton workshopId={workshop.id} userId={m.userId} />
+                            </div>
+                          )}
+                          {m.lastSignInAt && m.email && (
+                            <div className="mt-2">
+                              <ResendInviteButton workshopId={workshop.id} userId={m.userId} showEmail={false} />
                             </div>
                           )}
                         </TableCell>
