@@ -20,3 +20,9 @@ export function mailtoUrl(subject?: string): string {
 export function whatsappShareUrl(text: string): string {
   return `https://wa.me/?text=${encodeURIComponent(text)}`;
 }
+
+/** Perfis públicos nas redes sociais (rodapé e dados estruturados). */
+export const SOCIAL_LINKS = {
+  instagram: "https://www.instagram.com/drivecell.pt/",
+  facebook: "https://www.facebook.com/profile.php?id=61594923510482",
+} as const;

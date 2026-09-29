@@ -9,7 +9,7 @@ import {
   type HowItWorksStep,
 } from "@/components/marketing/how-it-works";
 import { PRICE_LABEL, PRICING, SETUP_NOTE } from "@/lib/pricing";
-import { CONTACT_EMAIL, CONTACT_PHONE } from "@/lib/contact";
+import { CONTACT_EMAIL, CONTACT_PHONE, SOCIAL_LINKS } from "@/lib/contact";
 import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
@@ -177,6 +177,7 @@ const jsonLd = JSON.stringify({
       url: SITE_URL,
       logo: `${SITE_URL}/logos/logo-full-color.png`,
       email: CONTACT_EMAIL,
+      sameAs: [SOCIAL_LINKS.instagram, SOCIAL_LINKS.facebook],
       telephone: CONTACT_PHONE,
       address: {
         "@type": "PostalAddress",
