@@ -4,6 +4,7 @@ import { ArrowRightIcon, ButtonLink } from "@/components/marketing/button-link";
 import { ContactSection } from "@/components/marketing/contact-section";
 import { Container } from "@/components/marketing/container";
 import { HeroBoard } from "@/components/marketing/hero-board";
+import { TestimonialSection } from "@/components/marketing/testimonial-section";
 import {
   HowItWorks,
   type HowItWorksStep,
@@ -366,6 +367,9 @@ export default function LandingPage() {
           </div>
         </Container>
       </section>
+
+      {/* Prova social */}
+      <TestimonialSection />
 
       {/* Preço */}
       <Container className="grid grid-cols-1 items-center gap-y-12 py-20 md:py-28 lg:grid-cols-12 lg:gap-x-6">
