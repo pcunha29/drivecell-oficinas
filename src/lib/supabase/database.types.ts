@@ -71,6 +71,9 @@ export type ServiceOrderRow = {
   paid: boolean;
   created_at: string;
   updated_at: string;
+  /** Podem faltar se a migração de entrada/saída ainda não foi aplicada. */
+  checked_in_at?: string | null;
+  checked_out_at?: string | null;
   service_order_items?: ServiceOrderItemRow[];
 };
 

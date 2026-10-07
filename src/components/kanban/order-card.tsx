@@ -10,7 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatEuro } from "@/lib/format";
 import { usePreferencesStore } from "@/stores/preferences-store";
-import { CheckCircle2, GripVertical, Pencil } from "lucide-react";
+import { useState } from "react";
+import { AlertTriangle, CheckCircle2, Clock, GripVertical, Pencil } from "lucide-react";
+import { STALE_AFTER_DAYS, daysInWorkshop, inWorkshopLabel } from "@/lib/stay";
 import { Button } from "@/components/ui/button";
 import { useCanWrite } from "@/stores/workshop-store";
 
@@ -73,6 +75,31 @@ export function OrderCardPreview({ order }: { order: ServiceOrder }) {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+/** "Na oficina há N dias", com aviso a partir de STALE_AFTER_DAYS. */
+function StayLine({ order }: { order: ServiceOrder }) {
+  // Momento em que o cartão apareceu; fixo para o render ser puro.
+  const [now] = useState(() => new Date());
+  const days = daysInWorkshop(order, now);
+  if (days === null) return null;
+  const stale = days >= STALE_AFTER_DAYS;
+  return (
+    <p
+      className={cn(
+        "flex items-center gap-1.5 text-xs",
+        stale ? "font-medium text-amber-700 dark:text-amber-400" : "text-muted-foreground",
+      )}
+      title={stale ? `Está cá há ${STALE_AFTER_DAYS} dias ou mais` : undefined}
+    >
+      {stale ? (
+        <AlertTriangle className="size-3.5 shrink-0" aria-hidden />
+      ) : (
+        <Clock className="size-3.5 shrink-0" aria-hidden />
+      )}
+      {inWorkshopLabel(days)}
+    </p>
   );
 }
 
@@ -175,6 +202,7 @@ export function OrderCard({ order, onClick, onEdit }: OrderCardProps) {
             Nota: {order.notes}
           </p>
         )}
+        <StayLine order={order} />
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <Badge variant={order.status} className="text-xs shrink-0">
             {order.status === "waiting" && "Em espera"}

@@ -31,6 +31,8 @@ import { ProfitChart } from "@/components/faturacao/profit-chart";
 import { OrderMarginTable } from "@/components/faturacao/order-margin-table";
 import { TopCustomers } from "@/components/faturacao/top-customers";
 import { BelowCostCard } from "@/components/faturacao/below-cost-card";
+import { StayChart } from "@/components/faturacao/stay-chart";
+import { deliveredInPeriod, getStayByMonth, staySummary } from "@/lib/stay";
 import { BlockPicker } from "@/components/faturacao/block-picker";
 import {
   BILLING_BLOCKS,
@@ -146,6 +148,11 @@ export default function FaturacaoPage() {
       customers: totalsByCustomer(periodOrders),
       belowCost: linesBelowCost(periodOrders),
       owed: outstanding(orders),
+      // Tempo na oficina: pela data de SAÍDA (entrega), não pela criação da ordem.
+      stay: staySummary(deliveredInPeriod(orders, yearNum, monthNum)),
+      stayMonthly: getStayByMonth(orders).filter(
+        (d) => d.year === yearNum && (monthNum === null || d.month === monthNum),
+      ),
     };
   }, [orders, yearNum, monthNum]);
 
@@ -156,6 +163,11 @@ export default function FaturacaoPage() {
   const plate = useCallback(
     (id: string) => getVehicle(id)?.plate ?? "-",
     [getVehicle],
+  );
+  const describeOrder = useCallback(
+    (order: { vehicleId: string; customerId: string }) =>
+      `${plate(order.vehicleId)} · ${customerName(order.customerId)}`,
+    [plate, customerName],
   );
 
   const availableBlocks = BILLING_BLOCKS.filter(
@@ -312,6 +324,16 @@ export default function FaturacaoPage() {
         key="linha"
         data={data.chartData}
         emptyMessage={emptyMessage}
+      />
+    ),
+    show("tempo-oficina") && (
+      <StayChart
+        key="tempo"
+        data={data.stayMonthly}
+        summary={data.stay}
+        periodLabel={periodLabel}
+        emptyMessage="Sem viaturas entregues com data de entrada no período."
+        describeOrder={describeOrder}
       />
     ),
   ].filter(Boolean);

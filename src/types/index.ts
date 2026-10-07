@@ -41,4 +41,14 @@ export type ServiceOrder = {
   items: ServiceItem[];
   createdAt: string;
   updatedAt: string;
+  /** Entrada da viatura na oficina (marcada ao passar a "Em curso"; corrigível). */
+  checkedInAt?: string | null;
+  /** Saída (entrega) da viatura; só existe nas ordens entregues. */
+  checkedOutAt?: string | null;
+};
+
+/** Correção manual das datas: chave presente = grava (null apaga); ausente = não mexe. */
+export type OrderDates = {
+  checkedInAt?: string | null;
+  checkedOutAt?: string | null;
 };

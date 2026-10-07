@@ -10,6 +10,7 @@ export type BillingBlockId =
   | "lucro-mes"
   | "faturado-mes"
   | "evolucao"
+  | "tempo-oficina"
   | "margem-ordem"
   | "top-clientes";
 
@@ -27,6 +28,7 @@ export const BILLING_BLOCKS: readonly BillingBlock[] = [
   { id: "lucro-mes", label: "Lucro por mês", needsCosts: true },
   { id: "faturado-mes", label: "Faturado por mês" },
   { id: "evolucao", label: "Evolução da faturação" },
+  { id: "tempo-oficina", label: "Tempo na oficina" },
   { id: "margem-ordem", label: "Margem por ordem", needsCosts: true },
   { id: "top-clientes", label: "Melhores clientes" },
 ];

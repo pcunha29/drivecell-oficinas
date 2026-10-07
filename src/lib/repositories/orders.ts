@@ -1,14 +1,14 @@
 import { createClient } from "@/lib/supabase/client";
 import type { ServiceOrderRow } from "@/lib/supabase/database.types";
 import { mapServiceOrder } from "@/lib/supabase/mappers";
-import type { OrderStatus, ServiceItem, ServiceOrder } from "@/types";
+import type { OrderDates, OrderStatus, ServiceItem, ServiceOrder } from "@/types";
 
 const ORDER_SELECT = `
   *,
   service_order_items (*)
 `;
 
-type OrderUpdate = Partial<
+export type OrderUpdate = Partial<
   Pick<
     ServiceOrder,
     | "customerId"
@@ -19,7 +19,10 @@ type OrderUpdate = Partial<
     | "paid"
     | "items"
   >
->;
+> & {
+  /** Correção manual da entrada/saída (só as chaves alteradas). */
+  dates?: OrderDates;
+};
 
 export async function fetchOrders(): Promise<ServiceOrder[]> {
   const supabase = createClient();
@@ -77,6 +80,8 @@ async function saveOrder(
     p_notes: input.notes ?? null,
     p_paid: input.paid ?? null,
     p_items: input.items ? itemsToJson(input.items) : null,
+    // Só enviado quando há correções: assim funciona também antes da migração de entrada/saída.
+    ...(input.dates && Object.keys(input.dates).length > 0 ? { p_dates: input.dates } : {}),
   });
 
   if (error) throw error;
@@ -90,7 +95,7 @@ async function saveOrder(
 }
 
 export async function createOrder(
-  input: Omit<ServiceOrder, "id" | "createdAt" | "updatedAt">,
+  input: Omit<ServiceOrder, "id" | "createdAt" | "updatedAt"> & { dates?: OrderDates },
 ): Promise<ServiceOrder> {
   return saveOrder(null, {
     ...input,

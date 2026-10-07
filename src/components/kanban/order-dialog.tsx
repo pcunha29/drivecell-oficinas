@@ -25,7 +25,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { ServiceItem, OrderStatus } from "@/types";
+import type { OrderDates, ServiceItem, OrderStatus } from "@/types";
 import { useOrderStore } from "@/stores/order-store";
 import { useCustomerStore } from "@/stores/customer-store";
 import { useVehicleStore } from "@/stores/vehicle-store";
@@ -44,6 +44,7 @@ import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { formatEuro } from "@/lib/format";
+import { daysInWorkshop, fromDateTimeLocal, inWorkshopLabel, toDateTimeLocal } from "@/lib/stay";
 import { GripVertical, Plus, Trash2 } from "lucide-react";
 import {
   DialogDeleteConfirm,
@@ -117,6 +118,8 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
             description: order.description,
             notes: order.notes ?? "",
             paid: order.paid,
+            checkedInAt: toDateTimeLocal(order.checkedInAt),
+            checkedOutAt: toDateTimeLocal(order.checkedOutAt),
             items:
               order.items.length > 0
                 ? order.items.map((i) => ({
@@ -141,6 +144,8 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
             description: "",
             notes: "",
             paid: false,
+            checkedInAt: "",
+            checkedOutAt: "",
             items: [
               { description: "", quantity: 1, unitPrice: 0, unitCost: null },
             ],
@@ -194,6 +199,15 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
 
   const customerField = register("customerId");
   const paid = watch("paid") ?? false;
+  const status = watch("status");
+  const checkedInValue = watch("checkedInAt") ?? "";
+  const checkedOutValue = watch("checkedOutAt") ?? "";
+  // Momento de abertura do diálogo (para "na oficina há X dias"); fixo para o render ser puro.
+  const [openedAt] = useState(() => new Date());
+  const entryDays =
+    order && order.checkedInAt && checkedInValue === toDateTimeLocal(order.checkedInAt)
+      ? daysInWorkshop(order, openedAt)
+      : null;
   const watchedItems = watch("items");
   const orderTotal = (watchedItems ?? []).reduce((sum, item) => {
     const line = Number(item?.quantity) * Number(item?.unitPrice);
@@ -235,6 +249,18 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
               : Number(i.unitCost),
         }));
 
+      // Datas: só as que foram mexidas (vazias ficam para a marcação automática).
+      const dates: OrderDates = {};
+      if ((data.checkedInAt ?? "") !== (defaultValues.checkedInAt ?? "")) {
+        dates.checkedInAt = fromDateTimeLocal(data.checkedInAt);
+      }
+      if (
+        data.status === "delivered" &&
+        (data.checkedOutAt ?? "") !== (defaultValues.checkedOutAt ?? "")
+      ) {
+        dates.checkedOutAt = fromDateTimeLocal(data.checkedOutAt);
+      }
+
       const payload = {
         customerId: data.customerId,
         vehicleId: data.vehicleId,
@@ -243,6 +269,7 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
         notes: data.notes ?? "",
         paid: data.paid ?? false,
         items: orderItems,
+        dates,
       };
 
       if (isEdit && order) {
@@ -435,6 +462,49 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
                     }
                     aria-label="Serviço pago"
                   />
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid content-start gap-2">
+                  <Label htmlFor="checkedInAt">Entrada na oficina</Label>
+                  <Input
+                    id="checkedInAt"
+                    type="datetime-local"
+                    aria-describedby="checkedInAt-hint"
+                    {...register("checkedInAt")}
+                  />
+                  <p id="checkedInAt-hint" className="text-xs text-muted-foreground">
+                    {checkedInValue
+                      ? entryDays !== null
+                        ? inWorkshopLabel(entryDays)
+                        : "Corrige se o carro chegou noutra altura."
+                      : "Fica marcada quando a ordem passa a Em curso."}
+                  </p>
+                </div>
+                <div className="grid content-start gap-2">
+                  <Label htmlFor="checkedOutAt">Saída</Label>
+                  <Input
+                    id="checkedOutAt"
+                    type="datetime-local"
+                    disabled={status !== "delivered"}
+                    aria-invalid={errors.checkedOutAt ? true : undefined}
+                    aria-describedby="checkedOutAt-hint"
+                    {...register("checkedOutAt")}
+                  />
+                  {errors.checkedOutAt ? (
+                    <p id="checkedOutAt-hint" className="text-sm text-red-600 dark:text-red-400">
+                      {errors.checkedOutAt.message}
+                    </p>
+                  ) : (
+                    <p id="checkedOutAt-hint" className="text-xs text-muted-foreground">
+                      {status !== "delivered"
+                        ? "Fica marcada quando a ordem passa a Entregue."
+                        : checkedOutValue
+                          ? "Corrige se o carro saiu noutra altura."
+                          : "Fica marcada ao guardar."}
+                    </p>
+                  )}
                 </div>
               </div>
 

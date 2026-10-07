@@ -26,7 +26,7 @@ export const termsClauses: readonly TermsClause[] = [
     id: "t1",
     number: "01",
     title: "Quem somos",
-    body: "O DriveCell Oficinas é prestado pela Flachbau Unipessoal, Lda, NIF 518094650, com sede em Paços de Ferreira. Contacto: pcunhadev@gmail.com.",
+    body: "O DriveCell Oficinas é prestado pela Flachbau Unipessoal, Lda, NIF 518094650, com sede em Paços de Ferreira. Contacto: geral@drivecell.pt.",
   },
   {
     id: "t2",
@@ -87,6 +87,6 @@ export const privacySections: readonly PrivacySection[] = [
   },
   {
     title: "Os teus direitos",
-    body: "Podes pedir acesso, retificação, portabilidade ou eliminação dos teus dados através de pcunhadev@gmail.com, e apresentar reclamação à CNPD.",
+    body: "Podes pedir acesso, retificação, portabilidade ou eliminação dos teus dados através de geral@drivecell.pt, e apresentar reclamação à CNPD.",
   },
 ];

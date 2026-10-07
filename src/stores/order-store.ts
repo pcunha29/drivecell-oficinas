@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { ServiceOrder, OrderStatus } from "@/types";
+import type { OrderDates, ServiceOrder, OrderStatus } from "@/types";
 import * as ordersRepo from "@/lib/repositories/orders";
 
 type OrderStore = {
@@ -9,7 +9,7 @@ type OrderStore = {
   setOrders: (orders: ServiceOrder[]) => void;
   load: () => Promise<void>;
   addOrder: (
-    input: Omit<ServiceOrder, "id" | "createdAt" | "updatedAt">,
+    input: Omit<ServiceOrder, "id" | "createdAt" | "updatedAt"> & { dates?: OrderDates },
   ) => Promise<ServiceOrder>;
   updateOrder: (
     id: string,
@@ -24,7 +24,7 @@ type OrderStore = {
         | "paid"
         | "items"
       >
-    >,
+    > & { dates?: OrderDates },
   ) => Promise<ServiceOrder>;
   moveOrder: (id: string, status: OrderStatus) => Promise<void>;
   deleteOrder: (id: string) => Promise<void>;

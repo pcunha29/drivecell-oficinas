@@ -153,13 +153,15 @@ export type SaveOrderInput = {
   notes?: string | null;
   paid?: boolean | null;
   items?: unknown[] | null;
+  /** Datas de entrada/saída: chave presente = grava (null apaga); ausente = não mexe. */
+  dates?: { checkedInAt?: string | null; checkedOutAt?: string | null } | null;
 };
 
 /** Chama o RPC save_order com os mesmos parâmetros que a app (src/lib/repositories/orders.ts). */
 export async function saveOrder(actor: Actor, input: SaveOrderInput): Promise<string> {
   const [row] = await sql<{ id: string }>(
     actor,
-    "select public.save_order($1, $2, $3, $4, $5, $6, $7, $8) as id",
+    "select public.save_order($1, $2, $3, $4, $5, $6, $7, $8, $9) as id",
     [
       input.orderId ?? null,
       input.customerId,
@@ -169,6 +171,7 @@ export async function saveOrder(actor: Actor, input: SaveOrderInput): Promise<st
       input.notes ?? null,
       input.paid ?? null,
       input.items === undefined || input.items === null ? null : JSON.stringify(input.items),
+      input.dates ? JSON.stringify(input.dates) : null,
     ],
   );
   return row.id;

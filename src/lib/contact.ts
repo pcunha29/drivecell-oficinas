@@ -2,7 +2,7 @@
  * Contactos do DriveCell Oficinas (demonstrações, reativar contas).
  * Marcadores a substituir pelos valores reais antes de publicar.
  */
-export const CONTACT_EMAIL = "pcunhadev@gmail.com";
+export const CONTACT_EMAIL = "geral@drivecell.pt";
 /** Formato internacional sem espaços nem "+", como o wa.me exige (ex. 351912345678). */
 export const CONTACT_PHONE = "+351912079695";
 

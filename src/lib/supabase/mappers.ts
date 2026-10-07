@@ -51,6 +51,8 @@ export function mapServiceOrder(row: ServiceOrderRow): ServiceOrder {
       .map(mapServiceItem),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    checkedInAt: row.checked_in_at ?? null,
+    checkedOutAt: row.checked_out_at ?? null,
   };
 }
 
