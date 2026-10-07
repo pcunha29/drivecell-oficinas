@@ -62,7 +62,7 @@ export function BillingLineChart({ data, emptyMessage = "Sem dados" }: BillingLi
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(v) => `${v} €`}
-                width={48}
+                width={60}
               />
               <Tooltip
                 contentStyle={{
@@ -79,9 +79,9 @@ export function BillingLineChart({ data, emptyMessage = "Sem dados" }: BillingLi
               <Line
                 type="monotone"
                 dataKey="total"
-                stroke="var(--primary)"
+                stroke="var(--chart-revenue)"
                 strokeWidth={2}
-                dot={{ fill: "var(--primary)", r: 4 }}
+                dot={{ fill: "var(--chart-revenue)", r: 4 }}
                 activeDot={{ r: 6 }}
               />
             </RechartsLineChart>

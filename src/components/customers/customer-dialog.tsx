@@ -221,7 +221,7 @@ export function CustomerDialog({
                 {...register("name")}
               />
               {errors.name && (
-                <p className="text-sm text-red-600">{errors.name.message}</p>
+                <p className="text-sm text-red-600 dark:text-red-400">{errors.name.message}</p>
               )}
             </div>
             <div className="grid gap-2">
@@ -232,7 +232,7 @@ export function CustomerDialog({
                 {...register("phone")}
               />
               {errors.phone && (
-                <p className="text-sm text-red-600">{errors.phone.message}</p>
+                <p className="text-sm text-red-600 dark:text-red-400">{errors.phone.message}</p>
               )}
             </div>
             <div className="grid gap-2">
@@ -244,7 +244,7 @@ export function CustomerDialog({
                 {...register("email")}
               />
               {errors.email && (
-                <p className="text-sm text-red-600">{errors.email.message}</p>
+                <p className="text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
               )}
             </div>
             <div className="grid gap-2">

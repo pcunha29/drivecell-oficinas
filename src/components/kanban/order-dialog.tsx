@@ -369,7 +369,7 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
                     ))}
                   </Select>
                   {errors.customerId && (
-                    <p className="text-sm text-red-600">
+                    <p className="text-sm text-red-600 dark:text-red-400">
                       {errors.customerId.message}
                     </p>
                   )}
@@ -386,7 +386,7 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
                     ))}
                   </Select>
                   {errors.vehicleId && (
-                    <p className="text-sm text-red-600">
+                    <p className="text-sm text-red-600 dark:text-red-400">
                       {errors.vehicleId.message}
                     </p>
                   )}
@@ -401,7 +401,7 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
                   {...register("description")}
                 />
                 {errors.description && (
-                  <p className="text-sm text-red-600">
+                  <p className="text-sm text-red-600 dark:text-red-400">
                     {errors.description.message}
                   </p>
                 )}
@@ -568,7 +568,7 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
                   id="notes"
                   rows={2}
                   placeholder="Observações internas…"
-                  className="flex min-h-[64px] w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex min-h-[64px] w-full resize-y rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   {...register("notes")}
                 />
               </div>
@@ -676,7 +676,7 @@ function ServiceItemRow({
           className="min-w-0"
         />
         {errors.items?.[index]?.description && (
-          <p className="text-xs text-red-600">
+          <p className="text-xs text-red-600 dark:text-red-400">
             {errors.items[index]?.description?.message}
           </p>
         )}

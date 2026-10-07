@@ -121,6 +121,11 @@ export function useCanWrite(): boolean {
   return useWorkshopStore((s) => s.canWrite);
 }
 
+/** O utilizador é o dono da oficina (os mecânicos/membros não veem a faturação nem as definições). */
+export function useIsOwner(): boolean {
+  return useWorkshopStore((s) => s.role === "owner");
+}
+
 /** A oficina regista o custo das peças (coluna de custo e margem). */
 export function useTrackCosts(): boolean {
   return useWorkshopStore((s) => s.workshop?.track_costs ?? false);

@@ -11,7 +11,10 @@
   --border: #e2e8f0;
   --ring: #0d2c4a;
   --primary: #0d2c4a;
-  /* Gráficos de lucro: margem (azul) e custo (dourado). Validados para daltonismo e contraste. */
+  /* Contorno dos campos (input, select, textarea). */
+  --input: #e2e8f0;
+  /* Gráficos de faturação: faturado (azul-marinho), margem (azul) e custo (dourado). Validados para daltonismo e contraste. */
+  --chart-revenue: #0d2c4a;
   --chart-margin: #2a5a94;
   --chart-cost: #c4903f;
   --primary-foreground: #f8fafc;
@@ -21,19 +24,27 @@
   --content-max: 72rem;
 }
 
+/*
+ * Modo escuro na paleta da marca: fundos azul-marinho (em vez de cinzento-ardósia),
+ * texto creme e dourado como cor de ação. Contrastes (WCAG AA) verificados:
+ * texto 15,9:1 no fundo e 13,4:1 nos cartões; texto secundário 7:1; dourado 6,6:1;
+ * contorno dos campos 3,3:1 nos cartões.
+ */
 .dark {
-  --background: #0f172a;
-  --foreground: #f8fafc;
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
-  --border: #334155;
+  --background: #08182a;
+  --foreground: #f4f1ea;
+  --muted: #163352;
+  --muted-foreground: #9fb3c8;
+  --border: #26496b;
+  --input: #55799e;
   --ring: #c9a66b;
   --primary: #c9a66b;
+  --chart-revenue: #c8d1db;
   --chart-margin: #5f8fd6;
   --chart-cost: #b8862f;
   --primary-foreground: #0d2c4a;
-  --card: #1e293b;
-  --card-foreground: #f8fafc;
+  --card: #0f2740;
+  --card-foreground: #f4f1ea;
 }
 
 @theme inline {
@@ -42,6 +53,7 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
+  --color-input: var(--input);
   --color-ring: var(--ring);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);

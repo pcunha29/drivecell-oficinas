@@ -197,7 +197,7 @@ export function VehicleDialog({
                 ))}
               </Select>
               {errors.customerId && (
-                <p className="text-sm text-red-600">
+                <p className="text-sm text-red-600 dark:text-red-400">
                   {errors.customerId.message}
                 </p>
               )}
@@ -210,7 +210,7 @@ export function VehicleDialog({
                 {...register("plate")}
               />
               {errors.plate && (
-                <p className="text-sm text-red-600">{errors.plate.message}</p>
+                <p className="text-sm text-red-600 dark:text-red-400">{errors.plate.message}</p>
               )}
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -218,14 +218,14 @@ export function VehicleDialog({
                 <Label htmlFor="make">Marca</Label>
                 <Input id="make" placeholder="Ex.: Renault" {...register("make")} />
                 {errors.make && (
-                  <p className="text-sm text-red-600">{errors.make.message}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400">{errors.make.message}</p>
                 )}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="model">Modelo</Label>
                 <Input id="model" placeholder="Ex.: Clio" {...register("model")} />
                 {errors.model && (
-                  <p className="text-sm text-red-600">{errors.model.message}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400">{errors.model.message}</p>
                 )}
               </div>
             </div>
@@ -233,7 +233,7 @@ export function VehicleDialog({
               <Label htmlFor="year">Ano</Label>
               <Input id="year" type="number" {...register("year")} />
               {errors.year && (
-                <p className="text-sm text-red-600">{errors.year.message}</p>
+                <p className="text-sm text-red-600 dark:text-red-400">{errors.year.message}</p>
               )}
             </div>
             </fieldset>

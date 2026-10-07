@@ -83,7 +83,7 @@ export function TopCustomers({ rows, customerName, trackCosts }: Props) {
                         className="h-full rounded-full"
                         style={{
                           width: `${(Math.max(0, value) / max) * 100}%`,
-                          background: metric === "margin" ? "var(--chart-margin)" : "var(--primary)",
+                          background: metric === "margin" ? "var(--chart-margin)" : "var(--chart-revenue)",
                         }}
                       />
                     </div>

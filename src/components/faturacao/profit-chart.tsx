@@ -86,7 +86,7 @@ export function ProfitChart({ data, emptyMessage }: { data: ProfitMonth[]; empty
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(v) => `${v} €`}
-                  width={56}
+                  width={60}
                 />
                 <Tooltip cursor={{ fill: "var(--muted)", opacity: 0.6 }} content={<ProfitTooltip />} />
                 {/* Custo em baixo (âncora na linha de base), margem por cima; 2px de separação. */}

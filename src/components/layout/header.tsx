@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ProfileDialog } from "@/components/layout/profile-dialog";
 import { WorkshopSettingsDialog } from "@/components/layout/workshop-settings-dialog";
-import { useWorkshop } from "@/stores/workshop-store";
+import { useIsOwner, useWorkshop } from "@/stores/workshop-store";
 import { DrivecellIcon } from "@/components/brand/drivecell-logo";
 
 const navItems = [
@@ -61,6 +61,7 @@ function DemoBadge() {
 export function Header() {
   const pathname = usePathname();
   const { workshop } = useWorkshop();
+  const isOwner = useIsOwner();
   const workshopName = workshop?.name ?? "DriveCell Oficinas";
   const billingPortalUrl = getStripeBillingPortalUrl();
   const [userName, setUserName] = useState<string | null>(null);
@@ -176,15 +177,17 @@ export function Header() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem asChild>
-                <Link
-                  href="/app/faturacao"
-                  className="flex min-h-[44px] items-center gap-2 cursor-pointer"
-                >
-                  <BarChart3 className="h-4 w-4" />
-                  Faturação
-                </Link>
-              </DropdownMenuItem>
+              {isOwner && (
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/app/faturacao"
+                    className="flex min-h-[44px] items-center gap-2 cursor-pointer"
+                  >
+                    <BarChart3 className="h-4 w-4" />
+                    Faturação
+                  </Link>
+                </DropdownMenuItem>
+              )}
               {billingPortalUrl && (
                 <DropdownMenuItem asChild>
                   <a

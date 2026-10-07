@@ -57,7 +57,7 @@ export function BillingBarChart({ data, emptyMessage = "Sem dados" }: BillingBar
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(v) => `${v} €`}
-                width={48}
+                width={60}
               />
               <Tooltip
                 contentStyle={{
@@ -76,7 +76,7 @@ export function BillingBarChart({ data, emptyMessage = "Sem dados" }: BillingBar
                 {data.map((_, i) => (
                   <Cell
                     key={i}
-                    fill="var(--primary)"
+                    fill="var(--chart-revenue)"
                   />
                 ))}
               </Bar>

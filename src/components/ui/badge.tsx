@@ -18,7 +18,7 @@ const badgeVariants = cva(
         done:
           "border-transparent bg-emerald-100 text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-200",
         delivered:
-          "border-transparent bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200",
+          "border-transparent bg-slate-100 text-slate-800 dark:bg-white/10 dark:text-slate-200",
         outline: "text-foreground",
       },
     },
