@@ -163,6 +163,11 @@ export default async function AdminWorkshopDetailPage({
                         </TableCell>
                         <TableCell className="align-top whitespace-nowrap">
                           {m.lastSignInAt ? formatDateTime(m.lastSignInAt) : "Nunca"}
+                          <div className="mt-1 text-xs text-muted-foreground">
+                            {m.termsAcceptedAt
+                              ? `Termos aceites a ${formatDateTime(m.termsAcceptedAt)}`
+                              : "Termos por aceitar"}
+                          </div>
                         </TableCell>
                         <TableCell className="align-top text-right">
                           {!(m.role === "owner" && workshop.members.filter((x) => x.role === "owner").length <= 1) && (

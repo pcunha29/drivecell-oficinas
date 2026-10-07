@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { AuthSplit } from "@/components/auth/auth-split";
 import { SetPasswordForm } from "@/components/auth/set-password-form";
 import { createClient } from "@/lib/supabase/server";
+import { hasAcceptedCurrentTerms } from "@/lib/terms";
 
 export const metadata: Metadata = {
   title: "Definir palavra-passe",
@@ -22,6 +23,9 @@ export default async function DefinirPalavraPassePage() {
 
   if (!user) redirect(`/entrar?next=${encodeURIComponent(PATH)}`);
 
+  // Convidados pelo admin nunca aceitaram os termos: pede-se aqui, no primeiro acesso.
+  const needsTerms = !(await hasAcceptedCurrentTerms(supabase, user.id));
+
   return (
     <AuthSplit
       headline={
@@ -33,7 +37,7 @@ export default async function DefinirPalavraPassePage() {
       }
       asideFooter={<p className="m-0 font-mono text-[12px] text-on-dark-3">Dados alojados na União Europeia</p>}
     >
-      <SetPasswordForm email={user.email ?? ""} />
+      <SetPasswordForm email={user.email ?? ""} needsTerms={needsTerms} />
     </AuthSplit>
   );
 }

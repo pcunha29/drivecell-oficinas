@@ -1,5 +1,6 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { TERMS_VERSION } from "@/content/legal";
 
 /** Leituras do admin (service role). Só chamar depois de requireAdmin/requireAdminPage. */
 
@@ -32,6 +33,8 @@ export type AdminMember = {
   invitedAt: string | null;
   confirmedAt: string | null;
   lastSignInAt: string | null;
+  /** Quando aceitou a versão atual dos termos (null = ainda não aceitou). */
+  termsAcceptedAt: string | null;
 };
 
 export type AdminWorkshopDetail = AdminWorkshop & {
@@ -165,6 +168,19 @@ export async function getWorkshopDetail(id: string): Promise<AdminWorkshopDetail
   const { customers, service_orders, workshop_members, ...workshop } =
     data as unknown as WorkshopWithEmbeds;
 
+  const memberIds = (workshop_members ?? []).map((m) => m.user_id);
+  // Sem a migração da aceitação dos termos a consulta falha: fica tudo como "por aceitar".
+  const { data: acceptances } = memberIds.length
+    ? await admin
+        .from("terms_acceptances")
+        .select("user_id, accepted_at")
+        .eq("version", TERMS_VERSION)
+        .in("user_id", memberIds)
+    : { data: [] };
+  const acceptedAt = new Map(
+    ((acceptances ?? []) as { user_id: string; accepted_at: string }[]).map((a) => [a.user_id, a.accepted_at]),
+  );
+
   const members = await Promise.all(
     (workshop_members ?? []).map(async (m): Promise<AdminMember> => {
       const { data: userData } = await admin.auth.admin.getUserById(m.user_id);
@@ -178,6 +194,7 @@ export async function getWorkshopDetail(id: string): Promise<AdminWorkshopDetail
         invitedAt: user?.invited_at ?? null,
         confirmedAt: user?.email_confirmed_at ?? user?.confirmed_at ?? null,
         lastSignInAt: user?.last_sign_in_at ?? null,
+        termsAcceptedAt: acceptedAt.get(m.user_id) ?? null,
       };
     }),
   );

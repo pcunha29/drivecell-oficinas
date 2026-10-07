@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,21 +8,31 @@ import { z } from "zod";
 import type { AuthError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { buttonClasses } from "@/components/marketing/button-link";
+import { TERMS_REQUIRED_MESSAGE, TermsCheckbox } from "@/components/auth/terms-checkbox";
+import { acceptCurrentTerms } from "@/lib/terms";
 
 const MIN_LENGTH = 8;
 
-const schema = z
-  .object({
-    password: z
-      .string()
-      .min(MIN_LENGTH, `A palavra-passe precisa de pelo menos ${MIN_LENGTH} caracteres.`),
-    confirm: z.string().min(1, "Repete a palavra-passe."),
-  })
-  .refine((values) => values.password === values.confirm, {
-    path: ["confirm"],
-    message: "As palavras-passe não coincidem.",
-  });
-type Values = z.infer<typeof schema>;
+/** needsTerms: primeira vez (convite) ou versão nova dos termos; numa recuperação de conta já aceite não aparece. */
+function buildSchema(needsTerms: boolean) {
+  return z
+    .object({
+      password: z
+        .string()
+        .min(MIN_LENGTH, `A palavra-passe precisa de pelo menos ${MIN_LENGTH} caracteres.`),
+      confirm: z.string().min(1, "Repete a palavra-passe."),
+      terms: z.boolean(),
+    })
+    .refine((values) => values.password === values.confirm, {
+      path: ["confirm"],
+      message: "As palavras-passe não coincidem.",
+    })
+    .refine((values) => !needsTerms || values.terms, {
+      path: ["terms"],
+      message: TERMS_REQUIRED_MESSAGE,
+    });
+}
+type Values = z.infer<ReturnType<typeof buildSchema>>;
 
 function mapError(error: AuthError): string {
   const code = error.code ?? "";
@@ -49,10 +59,11 @@ const submitClass = `${buttonClasses("primary", "md")} w-full cursor-pointer dis
 
 const describedBy = (...ids: (string | false | undefined)[]) => ids.filter(Boolean).join(" ") || undefined;
 
-export function SetPasswordForm({ email }: { email: string }) {
+export function SetPasswordForm({ email, needsTerms = false }: { email: string; needsTerms?: boolean }) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const [redirecting, setRedirecting] = useState(false);
+  const schema = useMemo(() => buildSchema(needsTerms), [needsTerms]);
 
   const {
     register,
@@ -60,12 +71,22 @@ export function SetPasswordForm({ email }: { email: string }) {
     formState: { errors, isSubmitting },
   } = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { password: "", confirm: "" },
+    defaultValues: { password: "", confirm: "", terms: false },
   });
 
   const onSubmit = async (values: Values) => {
     setFormError(null);
     const supabase = createClient();
+
+    // Primeiro a aceitação (fica registada com a hora do servidor), depois a palavra-passe.
+    if (needsTerms) {
+      const termsError = await acceptCurrentTerms(supabase);
+      if (termsError) {
+        setFormError(termsError);
+        return;
+      }
+    }
+
     const { error } = await supabase.auth.updateUser({ password: values.password });
 
     if (error) {
@@ -135,6 +156,8 @@ export function SetPasswordForm({ email }: { email: string }) {
           </p>
         ) : null}
       </div>
+
+      {needsTerms ? <TermsCheckbox id="sp-terms" error={errors.terms?.message} {...register("terms")} /> : null}
 
       <div role="alert" className="empty:hidden">
         {formError ? (
