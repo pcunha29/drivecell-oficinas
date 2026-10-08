@@ -10,7 +10,22 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminLoginPage() {
+const NO_ACCESS = "Esta conta Google não tem acesso ao admin.";
+const ERROR_MESSAGES: Record<string, string> = {
+  auth: "Não foi possível concluir o login. Tenta outra vez.",
+  sem_conta: NO_ACCESS,
+  sem_acesso: NO_ACCESS,
+};
+
+export default async function AdminLoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const { error } = await searchParams;
+  const errorKey = Array.isArray(error) ? error[0] : error;
+  const initialError = (errorKey && ERROR_MESSAGES[errorKey]) || null;
+
   let otherEmail: string | null = null;
   try {
     const supabase = await createClient();
@@ -38,7 +53,7 @@ export default async function AdminLoginPage() {
             tem acesso ao admin. Entra com a conta de admin para continuar.
           </p>
         )}
-        <AdminLoginForm />
+        <AdminLoginForm initialError={initialError} />
       </div>
     </main>
   );

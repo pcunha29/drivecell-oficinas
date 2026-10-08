@@ -10,6 +10,7 @@ import { safeNextPath } from "@/lib/safe-next-path";
 import { createClient } from "@/lib/supabase/client";
 import { buttonClasses } from "@/components/marketing/button-link";
 import { Turnstile, TURNSTILE_SITE_KEY } from "@/components/auth/turnstile";
+import { GOOGLE_ENABLED, GoogleIcon } from "@/components/auth/google-icon";
 
 /** Página onde o link de recuperação (fluxo PKCE via /auth/callback) deixa o utilizador. */
 const RESET_PASSWORD_PATH = "/conta/definir-palavra-passe";
@@ -81,32 +82,6 @@ const textButtonClass =
 const headingClass =
   "display-serif m-0 text-[40px] leading-[1.05] outline-none sm:text-[48px]";
 const submitClass = `${buttonClasses("primary", "md")} w-full cursor-pointer disabled:cursor-wait disabled:opacity-70`;
-
-/** Login com Google só aparece quando o provider está ativo no Supabase. */
-const GOOGLE_ENABLED = process.env.NEXT_PUBLIC_AUTH_GOOGLE_ENABLED === "true";
-
-function GoogleIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        fill="#4285F4"
-        d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.4h6.5a5.6 5.6 0 0 1-2.4 3.6v3h3.9c2.3-2.1 3.5-5.2 3.5-8.7z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 24c3.2 0 6-1.1 8-2.9l-3.9-3c-1.1.7-2.5 1.2-4.1 1.2-3.1 0-5.8-2.1-6.7-5H1.3v3.1A12 12 0 0 0 12 24z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M5.3 14.3a7.2 7.2 0 0 1 0-4.6V6.6H1.3a12 12 0 0 0 0 10.8l4-3.1z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4A12 12 0 0 0 1.3 6.6l4 3.1c.9-2.9 3.6-4.9 6.7-4.9z"
-      />
-    </svg>
-  );
-}
 
 /** Caixa de erro do mockup (borda laranja, fundo rosado). */
 function ErrorBox({ message }: { message: string | null }) {
@@ -239,6 +214,8 @@ function LoginMode({
       provider: "google",
       options: {
         redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        // Deixa escolher a conta Google (computador da oficina partilhado).
+        queryParams: { prompt: "select_account" },
       },
     });
     if (error) {

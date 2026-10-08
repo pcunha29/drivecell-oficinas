@@ -11,6 +11,8 @@ export const metadata: Metadata = {
 
 const ERROR_MESSAGES: Record<string, string> = {
   auth: "Não foi possível concluir o login. Tenta outra vez.",
+  sem_conta:
+    "Não há nenhuma conta DriveCell com esse email Google. As contas são criadas por nós: entra com o email onde recebeste o convite ou pede-nos uma demonstração.",
 };
 
 function firstParam(value: string | string[] | undefined): string | undefined {
