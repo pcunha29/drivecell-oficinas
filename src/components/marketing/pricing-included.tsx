@@ -7,6 +7,7 @@ const INCLUDED = [
   "Computador, tablet e telemóvel",
   "Exportação de todos os dados",
   "Alojamento na UE com cópias de segurança diárias",
+  "Conta criada por nós e formação inicial da equipa",
   "Suporte por email e WhatsApp",
 ] as const;
 

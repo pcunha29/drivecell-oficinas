@@ -150,7 +150,7 @@ const features: { title: string; text: string; icon: React.ReactNode }[] = [
 const faqs = [
   {
     q: "Preciso de instalar alguma coisa?",
-    a: "Não. Funciona no navegador, no computador, tablet ou telemóvel. Nós configuramos a oficina e importamos os clientes e viaturas que já tens.",
+    a: "Não. Funciona no navegador, no computador, tablet ou telemóvel. Nós configuramos a oficina e, se quiseres, passamos para lá os clientes e viaturas que já tens.",
   },
   {
     q: "Emite faturas certificadas?",

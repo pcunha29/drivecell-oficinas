@@ -4,8 +4,8 @@
  * utilizador aceita os termos (ex.: no registo).
  */
 
-export const TERMS_VERSION = "1.0.0";
-export const TERMS_UPDATED_AT = "2026-09-28";
+export const TERMS_VERSION = "1.1.0";
+export const TERMS_UPDATED_AT = "2026-10-07";
 
 export type TermsClause = {
   /** Âncora na página /termos (ex.: "t1"). */
@@ -44,7 +44,7 @@ export const termsClauses: readonly TermsClause[] = [
     id: "t4",
     number: "04",
     title: "Preço e pagamento",
-    body: "49 € por mês ou 490 € por ano, IVA incluído, pagos no início de cada período pelo meio de pagamento combinado. A configuração inicial (criação da conta, importação de dados e formação) custa 99 €, pagos uma única vez, e é descontada se a oficina passar ao plano anual até ao 3.º mês. A subscrição renova-se automaticamente. Alterações de preço são avisadas com pelo menos 30 dias de antecedência.",
+    body: "49 € por mês ou 490 € por ano, IVA incluído, pagos no início de cada período pelo meio de pagamento combinado. A criação da conta e uma sessão de formação inicial (até 1 hora) estão incluídas. A importação de clientes e viaturas a partir de ficheiro digital é opcional e custa 99 €, IVA incluído, pagos uma única vez com o primeiro pagamento após o período de experiência; é gratuita quando a primeira subscrição é anual. Limpeza ou digitalização de dados fora deste âmbito é orçamentada e aceite antes de começar. A subscrição renova-se automaticamente. Alterações de preço são avisadas com pelo menos 30 dias de antecedência.",
   },
   {
     id: "t5",

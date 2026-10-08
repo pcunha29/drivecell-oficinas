@@ -19,7 +19,7 @@ const START_STEPS = [
   {
     step: "02",
     title: "Configuramos a oficina",
-    text: "Criamos a conta da tua oficina, importamos os clientes e viaturas que já tens e recebes um convite por email para entrar.",
+    text: "Criamos a conta da tua oficina e ensinamos a equipa a usar a app. Se quiseres, passamos para lá os clientes e viaturas que já tens.",
   },
   {
     step: "03",
@@ -39,11 +39,11 @@ const FAQ = [
   },
   {
     q: "Há custo de configuração?",
-    a: `Sim, ${PRICE_LABEL.setup} uma única vez. Inclui criar a conta da oficina, importar os clientes e viaturas que já tens e ensinar a equipa a usar a app.`,
+    a: `Não. Criar a conta e ensinar a tua equipa (até ${PRICING.trainingHours} hora, à distância ou na oficina) está incluído. Só pagas se quiseres que passemos para a app os clientes e viaturas que já tens num Excel ou no teu programa de faturação: ${PRICE_LABEL.importFee}, uma única vez, IVA incluído, com o primeiro pagamento depois da experiência. No plano anual é grátis. Não tens nada para passar? Começas do zero sem pagar nada. Se os dados precisarem de muita limpeza (por exemplo, estão em papel), dizemos-te o preço antes e decides tu.`,
   },
   {
     q: "Posso passar a anual?",
-    a: `Sim, a qualquer momento. Se passares a anual até ao ${PRICING.setupCreditMonths}.º mês, descontamos os ${PRICE_LABEL.setup} da configuração.`,
+    a: "Sim, a qualquer momento, e ficas com 2 meses grátis. Se começares logo no plano anual, a importação dos teus dados também é grátis.",
   },
   {
     q: "E se um pagamento falhar?",
