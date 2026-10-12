@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Copy, Link2, Mail } from "lucide-react";
+import { Copy, Mail, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import {
   generateAccessLinkAction,
@@ -69,10 +69,11 @@ export function ResendInviteButton({
           variant="outline"
           size="sm"
           disabled={isPending}
+          title="Cria um link novo de uso único. O link anterior deixa de funcionar."
           onClick={() => run(() => generateAccessLinkAction(workshopId, userId), "Não foi possível gerar o link.")}
         >
-          <Link2 aria-hidden />
-          Link de acesso
+          <RefreshCw aria-hidden className={isPending ? "animate-spin" : undefined} />
+          {result?.link ? "Gerar outro link" : "Gerar novo link"}
         </Button>
       </div>
       {result && <FormMessage state={result} />}

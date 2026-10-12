@@ -936,7 +936,7 @@ export async function generateAccessLinkAction(
 
     return {
       status: "success",
-      message: `Link de acesso para ${user.email} (uso único; abre a página para definir a palavra-passe):`,
+      message: `Novo link para ${user.email}. Uso único: o link anterior deixou de funcionar. Não o abras tu, envia-o ao cliente.`,
       link,
     };
   } catch (error) {

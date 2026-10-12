@@ -22,8 +22,7 @@ export function continueUrl(origin: string, tokenHash: string, type: EmailOtpTyp
 }
 
 export const CONFIRM_MESSAGES = {
-  expired:
-    "Este link já foi usado ou expirou. Pede-nos um link novo ou usa “Esqueceste-te?” na página de entrada.",
+  expired: "Este link já foi usado ou expirou. Pede-nos um link novo por WhatsApp ou email.",
   generic: "Não foi possível confirmar o acesso. Tenta outra vez dentro de momentos.",
 } as const;
 
