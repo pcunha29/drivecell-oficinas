@@ -42,10 +42,12 @@ type EventChipProps = {
   style?: CSSProperties;
   /** compact = bloco da grelha; row = linha da lista do dia. */
   variant: "compact" | "row";
+  /** Bloco curto na grelha: só uma linha (hora + título); o resto fica no aria-label. */
+  dense?: boolean;
   className?: string;
 };
 
-export function EventChip({ event, onClick, style, variant, className }: EventChipProps) {
+export function EventChip({ event, onClick, style, variant, dense = false, className }: EventChipProps) {
   const muted = isMuted(event);
   const status = eventStatusLabel(event);
   const struck = event.status === "canceled";
@@ -80,12 +82,12 @@ export function EventChip({ event, onClick, style, variant, className }: EventCh
         )}
         <span className={cn("truncate font-semibold", struck && "line-through")}>{heading}</span>
       </span>
-      {detail && (
+      {detail && !dense && (
         <span className={cn("truncate text-muted-foreground", variant === "compact" ? "pl-[18px]" : "pl-[18px] text-[13px]")}>
           {detail}
         </span>
       )}
-      {status && (
+      {status && !dense && (
         <span
           className={cn(
             "pl-[18px] font-medium uppercase tracking-wide text-muted-foreground",

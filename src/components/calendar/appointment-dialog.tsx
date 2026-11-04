@@ -64,7 +64,9 @@ export function AppointmentDialog({ open, onOpenChange, appointmentId, initialDa
   const appointment = useAppointmentStore((s) =>
     appointmentId ? s.appointments.find((a) => a.id === appointmentId) : undefined,
   );
-  const knownTypes = useAppointmentStore((s) => s.appointments.map((a) => a.serviceType));
+  // A lista em si (referência estável); os tipos calculam-se no useMemo abaixo. Um .map() aqui
+  // devolvia um array novo a cada leitura e o Zustand re-renderizava sem fim (React #185).
+  const loadedAppointments = useAppointmentStore((s) => s.appointments);
   const addAppointment = useAppointmentStore((s) => s.addAppointment);
   const updateAppointment = useAppointmentStore((s) => s.updateAppointment);
   const deleteAppointment = useAppointmentStore((s) => s.deleteAppointment);
@@ -138,8 +140,11 @@ export function AppointmentDialog({ open, onOpenChange, appointmentId, initialDa
     [customerId, vehicles],
   );
   const serviceTypes = useMemo(
-    () => Array.from(new Set([...SERVICE_TYPE_SUGGESTIONS, ...knownTypes])).sort((a, b) => a.localeCompare(b, "pt")),
-    [knownTypes],
+    () =>
+      Array.from(new Set([...SERVICE_TYPE_SUGGESTIONS, ...loadedAppointments.map((a) => a.serviceType)])).sort((a, b) =>
+        a.localeCompare(b, "pt"),
+      ),
+    [loadedAppointments],
   );
 
   // Cliente: texto livre; se coincidir com um cliente da lista, fica ligado e sugere telefone e matrícula.

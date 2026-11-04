@@ -26,7 +26,7 @@ import { useAppointmentStore } from "@/stores/appointment-store";
 import { useCustomerStore } from "@/stores/customer-store";
 import { useOrderStore } from "@/stores/order-store";
 import { useVehicleStore } from "@/stores/vehicle-store";
-import { useCalendarEnabled, useCanWrite } from "@/stores/workshop-store";
+import { useCalendarEnabled, useCanWrite, useWorkshopStore } from "@/stores/workshop-store";
 import { cn } from "@/lib/utils";
 
 type View = "semana" | "dia";
@@ -40,6 +40,7 @@ function initialView(): View {
 export function CalendarView() {
   const router = useRouter();
   const calendarEnabled = useCalendarEnabled();
+  const workshopLoaded = useWorkshopStore((s) => s.workshop !== null);
   const canWrite = useCanWrite();
 
   const [view, setView] = useState<View>(initialView);
@@ -66,9 +67,10 @@ export function CalendarView() {
   );
 
   // Opção desligada pelo admin enquanto a página está aberta: volta ao quadro.
+  // Só com a oficina carregada (sem ela, «desligada» seria só falta de dados).
   useEffect(() => {
-    if (!calendarEnabled) router.replace("/app");
-  }, [calendarEnabled, router]);
+    if (workshopLoaded && !calendarEnabled) router.replace("/app");
+  }, [workshopLoaded, calendarEnabled, router]);
 
   useEffect(() => {
     void loadRange(from, to);

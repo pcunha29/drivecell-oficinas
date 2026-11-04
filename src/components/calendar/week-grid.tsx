@@ -13,8 +13,10 @@ import {
 import { cn } from "@/lib/utils";
 import { EventChip } from "./event-chip";
 
-/** Altura de uma hora na grelha (px). */
-const HOUR_HEIGHT = 48;
+/** Altura de uma hora na grelha (px): meia hora = 28 px, o mínimo para uma linha legível. */
+const HOUR_HEIGHT = 56;
+/** Abaixo desta altura o bloco mostra só uma linha. */
+const DENSE_BELOW = 44;
 /** Clicar num espaço vazio arredonda para a meia hora. */
 const SLOT_MINUTES = 30;
 
@@ -136,6 +138,7 @@ export function WeekGrid({ days, events, today, nowMinutes, canCreate, onCreate,
                       key={event.key}
                       event={event}
                       variant="compact"
+                      dense={height < DENSE_BELOW}
                       onClick={() => onOpen(event)}
                       className="absolute z-[5] shadow-sm"
                       style={{
