@@ -110,6 +110,9 @@ export function WeekGrid({ days, events, today, nowMinutes, canCreate, onCreate,
             return (
               <div
                 key={day}
+                // Ganchos para o scripts/gravar-demo.mjs (sem efeito visual).
+                data-day={day}
+                data-start-hour={startHour}
                 className={cn("relative border-l border-border", canCreate && "cursor-pointer", isToday && "bg-primary/[0.03]")}
                 style={{ height: gridHeight }}
                 onClick={handleSlotClick(day)}

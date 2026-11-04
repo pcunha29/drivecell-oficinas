@@ -4,12 +4,12 @@
  * Decisão de 07/10/2026: criar a conta e a formação inicial ficam incluídas para todos;
  * a importação dos dados que a oficina já tem é opcional (99 €, uma vez) e grátis
  * para quem começa no plano anual. Acabou o desconto "até ao 3.º mês".
+ * Decisão de 04/11/2026: acaba a taxa de importação. Passar os clientes e viaturas
+ * que a oficina já tem (ficheiro digital) fica incluído para todos.
  */
 export const PRICING = {
   monthly: 49,
   yearly: 490,
-  /** Importação opcional de clientes e viaturas (uma vez; grátis no plano anual). */
-  importFee: 99,
   /** Duração máxima da formação inicial incluída. */
   trainingHours: 1,
 } as const;
@@ -23,9 +23,9 @@ const eur = (n: number) =>
 export const PRICE_LABEL = {
   monthly: eur(PRICING.monthly),
   yearly: eur(PRICING.yearly),
-  importFee: eur(PRICING.importFee),
   yearlyPerMonth: eur(Math.round((PRICING.yearly / 12) * 100) / 100),
 } as const;
 
 /** Frase curta sobre a configuração e a importação, por baixo do preço (landing e preços). */
-export const SETUP_NOTE = `Sem custo de entrada: criamos a conta e ensinamos a tua equipa. Já tens clientes num Excel ou noutro programa? Passamos tudo por ${PRICE_LABEL.importFee} (uma vez, IVA incl.). No plano anual é grátis.`;
+export const SETUP_NOTE =
+  "Sem custo de entrada: criamos a conta, ensinamos a tua equipa e passamos para a app os clientes e viaturas que já tens num Excel ou noutro programa. Está tudo incluído.";

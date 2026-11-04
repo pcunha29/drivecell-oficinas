@@ -39,11 +39,11 @@ const FAQ = [
   },
   {
     q: "Há custo de configuração?",
-    a: `Não. Criar a conta e ensinar a tua equipa (até ${PRICING.trainingHours} hora, à distância ou na oficina) está incluído. Só pagas se quiseres que passemos para a app os clientes e viaturas que já tens num Excel ou no teu programa de faturação: ${PRICE_LABEL.importFee}, uma única vez, IVA incluído, com o primeiro pagamento depois da experiência. No plano anual é grátis. Não tens nada para passar? Começas do zero sem pagar nada. Se os dados precisarem de muita limpeza (por exemplo, estão em papel), dizemos-te o preço antes e decides tu.`,
+    a: `Não. Criar a conta, ensinar a tua equipa (até ${PRICING.trainingHours} hora, à distância ou na oficina) e passar para a app os clientes e viaturas que já tens num Excel ou no teu programa de faturação está tudo incluído. Só se os dados estiverem em papel ou precisarem de muita limpeza é que te dizemos o preço antes, e decides tu.`,
   },
   {
     q: "Posso passar a anual?",
-    a: "Sim, a qualquer momento, e ficas com 2 meses grátis. Se começares logo no plano anual, a importação dos teus dados também é grátis.",
+    a: "Sim, a qualquer momento, e ficas com 2 meses grátis.",
   },
   {
     q: "E se um pagamento falhar?",

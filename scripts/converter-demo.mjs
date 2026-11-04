@@ -3,7 +3,9 @@
  * Requer ffmpeg (com libx264 e libvpx-vp9).
  *
  * Uso: npm run demo:converter
- * Saída: public/demo/passo-N.mp4, passo-N.webm e passo-N.jpg (imagem fixa)
+ * Saída: public/demo/<clip>.mp4, <clip>.webm e <clip>.jpg (imagem fixa), com
+ * <clip> = marcacao, cliente, ordem, entregue (o `clip` de cada passo em
+ * src/app/(marketing)/page.tsx). Só converte os clips que estão no manifest.
  */
 import { existsSync, mkdirSync, readFileSync, statSync } from "node:fs";
 import { resolve, dirname } from "node:path";
@@ -23,6 +25,8 @@ const out = resolve(root, "public/demo");
 mkdirSync(out, { recursive: true });
 
 const WIDTH = 1280; // resolução nativa da gravação (sem ampliar)
+/** Os mesmos nomes que o STEPS do scripts/gravar-demo.mjs. */
+const CLIPS = ["marcacao", "cliente", "ordem", "entregue"];
 
 function ffmpeg(args) {
   const r = spawnSync(
@@ -33,14 +37,14 @@ function ffmpeg(args) {
   if (r.status !== 0) throw new Error("ffmpeg falhou: " + args.join(" "));
 }
 
-for (const n of ["1", "2", "3"]) {
-  const clip = manifest[n];
+for (const name of CLIPS) {
+  const clip = manifest[name];
   if (!clip) continue;
   const src = resolve(root, "demo-recordings", clip.file);
   const from = Math.max(0, clip.start - 0.1).toFixed(2);
   const to = (clip.end + 0.2).toFixed(2);
   const vf = `scale=${WIDTH}:-2:flags=lanczos,fps=30`;
-  const base = resolve(out, `passo-${n}`);
+  const base = resolve(out, name);
 
   ffmpeg([
     "-i",
@@ -102,6 +106,6 @@ for (const n of ["1", "2", "3"]) {
 
   const kb = (f) => Math.round(statSync(f).size / 1024);
   console.log(
-    `Passo ${n}: mp4 ${kb(`${base}.mp4`)} KB · webm ${kb(`${base}.webm`)} KB · ${(clip.end - clip.start).toFixed(1)} s`,
+    `${name}: mp4 ${kb(`${base}.mp4`)} KB · webm ${kb(`${base}.webm`)} KB · ${(clip.end - clip.start).toFixed(1)} s`,
   );
 }

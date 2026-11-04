@@ -1,17 +1,29 @@
 /**
- * Grava os 3 clips da secção "Como funciona" da landing, usando a conta demo.
+ * Grava os 4 clips da secção "Como funciona" da landing, usando a conta demo.
  *
  * Requisitos:
  *   - `npm run dev` a correr (ou DEMO_BASE_URL a apontar para a app)
- *   - DEMO_EMAIL e DEMO_PASSWORD no .env.local (a conta da oficina demo)
+ *   - DEMO_EMAIL e DEMO_PASSWORD no .env.local: o dono da "Oficina Ferreira & Filhos"
+ *     (a oficina de todos os vídeos; outra via DEMO_WORKSHOP_NAME)
  *   - SUPABASE_SERVICE_ROLE_KEY no .env.local (para repor os dados antes e depois)
+ *
+ * Repor APAGA os clientes, viaturas e ordens da oficina e põe os de exemplo. Por isso
+ * só se repõe a oficina de que DEMO_EMAIL é dono, e só se tiver esse nome e estiver
+ * marcada como demonstração; caso contrário o script para sem mexer em nada.
  *   - uma vez: `npm install` e `npx playwright install chromium`
  *
- * Uso: npm run demo:gravar            (grava os 3)
- *      npm run demo:gravar -- 2       (grava só o passo 2)
+ * Uso: npm run demo:gravar                  (grava os 4)
+ *      npm run demo:gravar -- marcacao      (grava só esse clip; também aceita 1–4)
  *
- * Saída: demo-recordings/raw/passo-N.webm + demo-recordings/manifest.json
- * Depois: npm run demo:converter  (precisa de ffmpeg) → public/demo/
+ * Cada clip tem um nome fixo (marcacao, cliente, ordem, entregue), o mesmo que
+ * o `clip` de cada passo em src/app/(marketing)/page.tsx. Mudar a ordem dos
+ * passos na landing não troca os vídeos.
+ *
+ * O clip "marcacao" fica melhor gravado de segunda a quarta: as chegadas
+ * previstas da demo (amanhã, depois de amanhã…) caem na semana que se vê.
+ *
+ * Saída: demo-recordings/raw/<clip>.webm + demo-recordings/manifest.json
+ * Depois: npm run demo:converter  (precisa de ffmpeg) → public/demo/<clip>.*
  */
 import {
   readFileSync,
@@ -50,6 +62,8 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_KEY =
   process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY;
 const VIEWPORT = { width: 1280, height: 800 };
+/** A única oficina onde se grava (e que se repõe). Os vídeos da landing são todos desta. */
+const DEMO_WORKSHOP_NAME = process.env.DEMO_WORKSHOP_NAME ?? "Oficina Ferreira & Filhos";
 const HEADED = process.env.DEMO_HEADED === "1";
 
 if (!EMAIL || !PASSWORD) {
@@ -62,6 +76,48 @@ const rawDir = resolve(outDir, "raw");
 mkdirSync(rawDir, { recursive: true });
 
 // --- Repor dados da oficina demo ---------------------------------------------
+
+/**
+ * A oficina de que a conta `email` é dona. Para (lança erro) se não houver
+ * exatamente uma ou se não estiver marcada como demonstração.
+ */
+async function demoWorkshopOf(admin, email) {
+  const wanted = email.trim().toLowerCase();
+  let userId = null;
+  for (let page = 1; !userId; page += 1) {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+    if (error) throw error;
+    userId = data.users.find((u) => u.email?.toLowerCase() === wanted)?.id ?? null;
+    if (data.users.length < 1000) break;
+  }
+  if (!userId) throw new Error(`Não encontrei o utilizador ${email} (DEMO_EMAIL).`);
+
+  const { data: memberships, error } = await admin
+    .from("workshop_members")
+    .select("role, workshops (id, name, is_demo)")
+    .eq("user_id", userId)
+    .eq("role", "owner");
+  if (error) throw error;
+  if (!memberships || memberships.length !== 1) {
+    throw new Error(
+      `A conta ${email} tem de ser dona de exatamente uma oficina (tem ${memberships?.length ?? 0}). Não reponho nada.`,
+    );
+  }
+  const ws = Array.isArray(memberships[0].workshops) ? memberships[0].workshops[0] : memberships[0].workshops;
+  const sameName = (a, b) => (a ?? "").trim().toLowerCase() === b.trim().toLowerCase();
+  if (!sameName(ws?.name, DEMO_WORKSHOP_NAME)) {
+    throw new Error(
+      `A conta ${email} é dona de "${ws?.name ?? "?"}", não de "${DEMO_WORKSHOP_NAME}". Não gravo nem reponho nada.`,
+    );
+  }
+  if (!ws?.is_demo) {
+    throw new Error(
+      `A oficina "${ws?.name ?? "?"}" da conta ${email} não está marcada como demonstração. Não reponho nada.`,
+    );
+  }
+  return ws;
+}
+
 async function resetDemo() {
   if (!SUPABASE_URL || !SERVICE_KEY) {
     console.warn("Sem service role: não reponho os dados da demo.");
@@ -70,19 +126,9 @@ async function resetDemo() {
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const { data: ws, error } = await admin
-    .from("workshops")
-    .select("id, name")
-    .eq("is_demo", true)
-    .limit(1)
-    .maybeSingle();
-  if (error || !ws) {
-    console.warn(
-      "Oficina demo não encontrada:",
-      error?.message ?? "nenhuma com is_demo",
-    );
-    return;
-  }
+  // Só a oficina da conta DEMO_EMAIL (a mesma com que se grava) — nunca "uma qualquer
+  // com is_demo": seed_demo_data APAGA os clientes, viaturas e ordens da oficina.
+  const ws = await demoWorkshopOf(admin, EMAIL);
   const { error: seedErr } = await admin.rpc("seed_demo_data", {
     p_workshop_id: ws.id,
   });
@@ -154,7 +200,13 @@ async function select(page, locator, label) {
 // --- Aquecer o servidor de desenvolvimento ------------------------------------
 // Em `npm run dev` cada página compila no primeiro pedido (pode levar 10–30 s).
 async function warmUp() {
-  const paths = ["/entrar", "/app", "/app/clientes", "/app/viaturas"];
+  const paths = [
+    "/entrar",
+    "/app",
+    "/app/marcacoes",
+    "/app/clientes",
+    "/app/viaturas",
+  ];
   process.stdout.write("A preparar as páginas");
   for (const p of paths) {
     try {
@@ -246,9 +298,149 @@ async function login(browser) {
   }
 }
 
-// --- Os 3 passos ---------------------------------------------------------------
+// --- Marcação: escolher um horário livre na grelha da semana -------------------
+/** Altura de uma hora na grelha, em px. Tem de bater com HOUR_HEIGHT em src/components/calendar/week-grid.tsx. */
+const HOUR_HEIGHT = 56;
+/** Duração da marcação gravada (min). */
+const BOOKING_MINUTES = 120;
+/**
+ * Inícios a experimentar, de meia em meia hora entre as 08:00 e as 13:00, a começar
+ * pelas 10:00 (fica a meio do ecrã). As marcações da demo mudam com o dia da semana.
+ */
+const SLOT_STARTS = [10, 9, 11, 12, 8, 13, 10.5, 9.5, 11.5, 12.5, 8.5].map((h) => h * 60);
+
+const hhmm = (minutes) =>
+  `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+
+/** Hoje em Lisboa, AAAA-MM-DD (o mesmo formato do data-day da grelha). */
+function todayLisbon() {
+  return new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Lisbon" }).format(
+    new Date(),
+  );
+}
+
+/**
+ * Primeiro dia (de hoje em diante) com uma ordem prevista (azul) e 2 h livres.
+ * Devolve o ponto a clicar na coluna e as horas de início/fim.
+ */
+async function findFreeSlot(page) {
+  const today = todayLisbon();
+  const columns = page.locator("[data-day]");
+  const count = await columns.count();
+  for (let i = 0; i < count; i++) {
+    const col = columns.nth(i);
+    const day = await col.getAttribute("data-day");
+    if (!day || day < today) continue;
+    const hasOrder =
+      (await col.locator('button[aria-label^="Ordem de reparação"]').count()) >
+      0;
+    if (!hasOrder) continue;
+    const colBox = await col.boundingBox();
+    if (!colBox) continue;
+    const startHour = Number(await col.getAttribute("data-start-hour"));
+    const chips = [];
+    for (const chip of await col.locator("button").all()) {
+      const b = await chip.boundingBox();
+      if (b) chips.push(b);
+    }
+    for (const start of SLOT_STARTS) {
+      const top = colBox.y + ((start - startHour * 60) / 60) * HOUR_HEIGHT;
+      const bottom = top + (BOOKING_MINUTES / 60) * HOUR_HEIGHT;
+      if (top < colBox.y || bottom > colBox.y + colBox.height) continue;
+      // Sem scroll: a marcação toda tem de caber no ecrã.
+      if (bottom > VIEWPORT.height - 8) continue;
+      const busy = chips.some((b) => b.y < bottom && b.y + b.height > top);
+      if (busy) continue;
+      return {
+        day,
+        start: hhmm(start),
+        end: hhmm(start + BOOKING_MINUTES),
+        x: colBox.x + colBox.width / 2,
+        // +14 px: dentro da primeira meia hora, que a grelha arredonda para `start`.
+        y: top + 14,
+      };
+    }
+  }
+  throw new Error(
+    "Não encontrei um dia com uma ordem prevista e 2 h livres entre as 08:00 e as 15:00, visíveis sem scroll.",
+  );
+}
+
+// --- Os 4 passos (pela ordem da landing) ------------------------------------------
 const STEPS = {
-  1: {
+  marcacao: {
+    title: "Marcação",
+    url: "/app/marcacoes",
+    async run(page) {
+      // Semana com as ordens previstas (azul), as marcações (dourado) e «Sem hora».
+      await page.locator("[data-day] button").first().waitFor();
+      await pause(900);
+
+      // Só passar por cima de uma ordem prevista (sem abrir).
+      const order = page
+        .locator('button[aria-label^="Ordem de reparação: 09:00"]')
+        .first();
+      const orderBox = await order.boundingBox();
+      if (orderBox) {
+        await page.mouse.move(
+          orderBox.x + orderBox.width / 2,
+          orderBox.y + orderBox.height / 2,
+          { steps: 18 },
+        );
+        await pause(900);
+      }
+
+      // Tocar num horário livre. Rato "à mão": o click/moveTo fariam scroll à página.
+      const slot = await findFreeSlot(page);
+      await page.mouse.move(slot.x, slot.y, { steps: 18 });
+      await pause(180);
+      await page.mouse.click(slot.x, slot.y);
+
+      const dialog = page.getByRole("dialog");
+      await dialog.getByText("Nova marcação").first().waitFor();
+      await pause(500);
+      await type(page, page.locator("#ap-service"), "Lavagem completa");
+      // Cliente da lista: telefone e matrícula preenchem-se sozinhos.
+      await type(page, page.locator("#ap-customer"), "Ana Paula Silva");
+      await pause(700);
+
+      // Clicar à esquerda do input de hora, no campo das horas.
+      const end = page.locator("#ap-end");
+      await end.scrollIntoViewIfNeeded();
+      const endBox = await end.boundingBox();
+      if (!endBox) throw new Error("Campo Fim sem posição no ecrã");
+      const hours = { x: 16, y: endBox.height / 2 };
+      await page.mouse.move(endBox.x + hours.x, endBox.y + hours.y, {
+        steps: 18,
+      });
+      await pause(180);
+      await end.click({ position: hours });
+      await end.pressSequentially(slot.end.replace(":", ""), { delay: 90 });
+      if ((await end.inputValue()) !== slot.end) await end.fill(slot.end);
+      await pause(600);
+
+      await click(
+        page,
+        page.getByRole("button", { name: "Criar marcação", exact: true }),
+      );
+      await dialog.waitFor({ state: "hidden", timeout: 15000 });
+
+      // O bloco novo (dourado) na grelha.
+      const created = page
+        .locator(
+          'button[aria-label*="Ana Paula Silva"][aria-label*="Lavagem completa"]',
+        )
+        .first();
+      await created.waitFor();
+      const box = await created.boundingBox();
+      if (box)
+        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, {
+          steps: 18,
+        });
+      await pause(2000);
+    },
+  },
+  cliente: {
     title: "Cliente e viatura",
     url: "/app/clientes",
     async run(page) {
@@ -283,7 +475,7 @@ const STEPS = {
       await pause(1600);
     },
   },
-  2: {
+  ordem: {
     title: "Ordem de reparação",
     url: "/app",
     async run(page) {
@@ -332,7 +524,7 @@ const STEPS = {
       await pause(1800);
     },
   },
-  3: {
+  entregue: {
     title: "Arrastar até Entregue",
     url: "/app",
     async run(page) {
@@ -358,8 +550,8 @@ const STEPS = {
 };
 
 // --- Gravação ------------------------------------------------------------------
-async function record(browser, state, n) {
-  const step = STEPS[n];
+async function record(browser, state, clip) {
+  const step = STEPS[clip];
   const ctx = await browser.newContext({
     viewport: VIEWPORT,
     colorScheme: "light",
@@ -383,14 +575,14 @@ async function record(browser, state, n) {
   try {
     await step.run(page);
   } catch (e) {
-    const shot = resolve(outDir, `erro-passo-${n}.png`);
+    const shot = resolve(outDir, `erro-${clip}.png`);
     await page.screenshot({ path: shot }).catch(() => {});
     const msgs = await page
       .locator('[role="dialog"] .text-red-600, [role="alert"]')
       .allInnerTexts()
       .catch(() => []);
     console.error(
-      `\nO passo ${n} falhou em ${page.url()}. Captura em demo-recordings/erro-passo-${n}.png`,
+      `\nO clip "${clip}" falhou em ${page.url()}. Captura em demo-recordings/erro-${clip}.png`,
     );
     if (msgs.filter((m) => m.trim()).length)
       console.error(
@@ -404,31 +596,49 @@ async function record(browser, state, n) {
   const video = page.video();
   await ctx.close();
   const tmp = await video.path();
-  const dest = resolve(rawDir, `passo-${n}.webm`);
+  const dest = resolve(rawDir, `${clip}.webm`);
   renameSync(tmp, dest);
   console.log(
-    `Passo ${n} (${step.title}) gravado: ${(end - start).toFixed(1)} s`,
+    `Clip "${clip}" (${step.title}) gravado: ${(end - start).toFixed(1)} s`,
   );
-  return { file: `raw/passo-${n}.webm`, start, end, title: step.title };
+  return { file: `raw/${clip}.webm`, start, end, title: step.title };
 }
 
+// Aceita o nome do clip ou a posição na landing (1 = marcacao, 2 = cliente…).
+const CLIPS = Object.keys(STEPS);
 const only = process.argv
   .slice(2)
-  .map(Number)
-  .filter((n) => STEPS[n]);
-const which = only.length ? only : [1, 2, 3];
+  .map((arg) => (/^\d+$/.test(arg) ? CLIPS[Number(arg) - 1] : arg))
+  .filter((clip) => STEPS[clip]);
+const which = only.length ? only : CLIPS;
+
+if (which.includes("marcacao")) {
+  const weekday = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Lisbon",
+    weekday: "short",
+  }).format(new Date());
+  if (!["Mon", "Tue", "Wed"].includes(weekday))
+    console.warn(
+      'Aviso: o clip "marcacao" fica melhor de segunda a quarta (as chegadas previstas podem cair na semana seguinte).',
+    );
+}
 
 const browser = await chromium.launch({ headless: !HEADED });
 const manifestPath = resolve(outDir, "manifest.json");
-const manifest = existsSync(manifestPath)
-  ? JSON.parse(readFileSync(manifestPath, "utf8"))
-  : {};
+// Ignora as entradas antigas por número ("1", "2"…), de antes dos nomes fixos.
+const manifest = Object.fromEntries(
+  Object.entries(
+    existsSync(manifestPath)
+      ? JSON.parse(readFileSync(manifestPath, "utf8"))
+      : {},
+  ).filter(([key]) => STEPS[key]),
+);
 try {
   await warmUp();
   const state = await login(browser);
-  for (const n of which) {
+  for (const clip of which) {
     await resetDemo();
-    manifest[n] = await record(browser, state, n);
+    manifest[clip] = await record(browser, state, clip);
     writeFileSync(
       manifestPath,
       JSON.stringify({ ...manifest, viewport: VIEWPORT }, null, 2),

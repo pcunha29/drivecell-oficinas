@@ -6,8 +6,12 @@ export type HowItWorksStep = {
   n: string;
   title: string;
   text: string;
-  video: { mp4: string; webm: string; poster: string };
+  /** Sem vídeo (clip ainda por gravar), mostra o cartão do passo no lugar dele. */
+  video?: { mp4: string; webm: string; poster: string };
 };
+
+/** Tempo (ms) que um passo sem vídeo fica no ecrã antes de avançar. */
+const STATIC_STEP_MS = 6000;
 
 /**
  * "Como funciona" com vídeos da app demo: lista de passos à esquerda,
@@ -22,6 +26,8 @@ export function HowItWorks({ steps }: { steps: HowItWorksStep[] }) {
   const [reducedMotion, setReducedMotion] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  // Tempo já passado no passo sem vídeo (não recomeça se sair e voltar ao ecrã).
+  const staticElapsed = useRef(0);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -54,11 +60,28 @@ export function HowItWorks({ steps }: { steps: HowItWorksStep[] }) {
   }, [visible, reducedMotion, active]);
 
   const goTo = useCallback((i: number) => {
+    staticElapsed.current = 0;
     setProgress(0);
     setActive(i);
   }, []);
 
   const step = steps[active];
+  const hasVideo = Boolean(step.video);
+
+  // Passo sem vídeo: avança por tempo, com a mesma barra de progresso.
+  useEffect(() => {
+    if (hasVideo || !visible || reducedMotion) return;
+    let last = performance.now();
+    const id = window.setInterval(() => {
+      const now = performance.now();
+      staticElapsed.current += now - last;
+      last = now;
+      const p = Math.min(staticElapsed.current / STATIC_STEP_MS, 1);
+      setProgress(p);
+      if (p >= 1) goTo((active + 1) % steps.length);
+    }, 100);
+    return () => window.clearInterval(id);
+  }, [hasVideo, visible, reducedMotion, active, steps.length, goTo]);
 
   return (
     <div
@@ -134,26 +157,45 @@ export function HowItWorks({ steps }: { steps: HowItWorksStep[] }) {
               drivecell · oficina demo
             </span>
           </div>
-          <video
-            id="como-funciona-video"
-            key={step.n}
-            ref={videoRef}
-            className="block aspect-[8/5] w-full bg-paper"
-            poster={step.video.poster}
-            muted
-            playsInline
-            preload="metadata"
-            controls={reducedMotion}
-            aria-label={`Demonstração: ${step.title}`}
-            onTimeUpdate={(e) => {
-              const v = e.currentTarget;
-              if (v.duration) setProgress(v.currentTime / v.duration);
-            }}
-            onEnded={() => goTo((active + 1) % steps.length)}
-          >
-            <source src={step.video.webm} type="video/webm" />
-            <source src={step.video.mp4} type="video/mp4" />
-          </video>
+          {step.video ? (
+            <video
+              id="como-funciona-video"
+              key={step.n}
+              ref={videoRef}
+              className="block aspect-[8/5] w-full bg-paper"
+              poster={step.video.poster}
+              muted
+              playsInline
+              preload="metadata"
+              controls={reducedMotion}
+              aria-label={`Demonstração: ${step.title}`}
+              onTimeUpdate={(e) => {
+                const v = e.currentTarget;
+                if (v.duration) setProgress(v.currentTime / v.duration);
+              }}
+              onEnded={() => goTo((active + 1) % steps.length)}
+            >
+              <source src={step.video.webm} type="video/webm" />
+              <source src={step.video.mp4} type="video/mp4" />
+            </video>
+          ) : (
+            <div
+              id="como-funciona-video"
+              key={step.n}
+              className="flex aspect-[8/5] w-full flex-col justify-center gap-4 bg-paper p-6 sm:gap-5 sm:p-10 md:p-12"
+            >
+              <span className="display-serif text-[44px] leading-none text-accent sm:text-[64px] md:text-[72px]">
+                {step.n}
+              </span>
+              <span className="text-[20px] font-semibold sm:text-[26px]">
+                {step.title}
+              </span>
+              {/* No telemóvel o texto já está na lista, por cima. */}
+              <span className="hidden max-w-[520px] text-base leading-[1.6] text-ink-2 sm:block md:text-[17px]">
+                {step.text}
+              </span>
+            </div>
+          )}
         </div>
         <figcaption className="sr-only">
           Passo {step.n}: {step.text}

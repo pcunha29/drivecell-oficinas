@@ -17,7 +17,7 @@ import { join } from "node:path";
 
 const title = "DriveCell Oficinas - Gestão simples para oficinas";
 const description =
-  "Ordens de reparação, clientes, viaturas e pagamentos num só quadro. Software simples para oficinas independentes, no computador ou no telemóvel. Pede uma demonstração.";
+  "Marcações, ordens de reparação, clientes, viaturas e pagamentos num só sítio. Software simples para oficinas, no computador ou no telemóvel. Pede uma demonstração.";
 
 export const metadata: Metadata = {
   title: { absolute: title },
@@ -46,44 +46,61 @@ const questions = [
   },
 ];
 
+/**
+ * `clip` é o nome dos ficheiros em public/demo ({clip}.mp4/.webm/.jpg), o mesmo
+ * que os scripts gravar-demo/converter-demo usam. Mudar a ordem dos passos não
+ * troca os vídeos.
+ */
 const steps = [
   {
     n: "01",
-    title: "Cliente e viatura",
-    text: "Registas o cliente uma vez, com os carros dele. Da próxima vez, está tudo lá.",
+    title: "Marcação",
+    text: "O cliente liga e tocas num horário livre. Fica na semana, ao lado dos carros que já têm chegada prevista.",
+    clip: "marcacao",
   },
   {
     n: "02",
-    title: "Ordem de reparação",
-    text: "Descreves o trabalho, acrescentas peças e mão de obra com quantidades e preços, e juntas notas internas.",
+    title: "Cliente e viatura",
+    text: "Registas o cliente uma vez, com os carros dele. Da próxima vez, está tudo lá.",
+    clip: "cliente",
   },
   {
     n: "03",
+    title: "Ordem de reparação",
+    text: "Descreves o trabalho, acrescentas peças e mão de obra com quantidades e preços, e juntas notas internas.",
+    clip: "ordem",
+  },
+  {
+    n: "04",
     title: "Arrastar até “Entregue”",
     text: "Em espera, em curso, concluída, entregue. Arrastas o cartão e toda a equipa vê o ponto da situação.",
+    clip: "entregue",
   },
 ];
 
-/** Vídeos da demo (npm run demo:gravar + demo:converter). Sem vídeos, mostra os cartões. */
+/**
+ * Vídeos da demo (npm run demo:gravar + demo:converter), procurados pelo `clip`
+ * de cada passo. Um passo sem os três ficheiros fica sem vídeo (o HowItWorks
+ * mostra o cartão no lugar dele). Sem vídeo nenhum, mostra só os cartões.
+ */
 function stepsWithVideo(): HowItWorksStep[] | null {
   const dir = join(process.cwd(), "public", "demo");
-  const withVideo = steps.map((step, i) => {
-    const base = `passo-${i + 1}`;
+  const withVideo = steps.map(({ clip, ...step }) => {
     const ok = ["mp4", "webm", "jpg"].every((ext) =>
-      existsSync(join(dir, `${base}.${ext}`)),
+      existsSync(join(dir, `${clip}.${ext}`)),
     );
     return ok
       ? {
           ...step,
           video: {
-            mp4: `/demo/${base}.mp4`,
-            webm: `/demo/${base}.webm`,
-            poster: `/demo/${base}.jpg`,
+            mp4: `/demo/${clip}.mp4`,
+            webm: `/demo/${clip}.webm`,
+            poster: `/demo/${clip}.jpg`,
           },
         }
-      : null;
+      : step;
   });
-  return withVideo.every(Boolean) ? (withVideo as HowItWorksStep[]) : null;
+  return withVideo.some((s) => "video" in s) ? withVideo : null;
 }
 
 const features: { title: string; text: string; icon: React.ReactNode }[] = [
@@ -95,6 +112,16 @@ const features: { title: string; text: string; icon: React.ReactNode }[] = [
         <rect x="3" y="4" width="5" height="16" rx="1" />
         <rect x="10" y="4" width="5" height="10" rx="1" />
         <rect x="17" y="4" width="4" height="13" rx="1" />
+      </>
+    ),
+  },
+  {
+    title: "Marcações",
+    text: "Calendário da semana com as chegadas previstas das ordens e os serviços marcados, como lavagens.",
+    icon: (
+      <>
+        <rect x="3" y="5" width="18" height="16" rx="2" />
+        <path d="M3 10h18M8 3v4M16 3v4M7 14h3M13 14h4M7 17h3" />
       </>
     ),
   },
@@ -145,6 +172,11 @@ const features: { title: string; text: string; icon: React.ReactNode }[] = [
       </>
     ),
   },
+  {
+    title: "Exportação dos dados",
+    text: "Tiras clientes, viaturas e ordens quando quiseres. Os dados são teus.",
+    icon: <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />,
+  },
 ];
 
 const faqs = [
@@ -155,6 +187,10 @@ const faqs = [
   {
     q: "Emite faturas certificadas?",
     a: "Não. Continuas a usar o teu programa de faturação. O DriveCell organiza o trabalho da oficina.",
+  },
+  {
+    q: "Os clientes marcam sozinhos?",
+    a: "Não. As marcações são feitas pela oficina, quando o cliente liga ou passa por lá. A agenda fica sempre do teu lado.",
   },
   {
     q: "Como começo?",
@@ -192,7 +228,8 @@ const jsonLd = JSON.stringify({
       name: SITE_NAME,
       description:
         SITE_TAGLINE +
-        " Ordens de reparação, clientes, viaturas e pagamentos num só quadro.",
+        " Marcações, ordens de reparação, clientes, viaturas e pagamentos num só sítio.",
+      featureList: features.map((f) => f.title),
       url: SITE_URL,
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web",
@@ -298,13 +335,13 @@ export default function LandingPage() {
         <div className="flex flex-col gap-4">
           <span className="eyebrow">Como funciona</span>
           <h2 className="display-serif m-0 text-display-md">
-            Do telefonema à entrega, em três passos.
+            Do telefonema à entrega, em quatro passos.
           </h2>
         </div>
         {videoSteps ? (
           <HowItWorks steps={videoSteps} />
         ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-4">
             {steps.map((step) => (
               <div
                 key={step.n}
@@ -338,7 +375,7 @@ export default function LandingPage() {
               para manter.
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 md:gap-12 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 md:gap-12 xl:grid-cols-4">
             {features.map((f) => (
               <div
                 key={f.title}

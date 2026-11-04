@@ -1,6 +1,7 @@
 const INCLUDED = [
   "Ordens de reparação, clientes e viaturas sem limite",
   "Quadro de ordens com arrastar e largar",
+  "Agenda de marcações, com as chegadas previstas das ordens",
   "Peças e mão de obra em cada ordem",
   "Controlo do que está pago e por pagar",
   "Faturação por mês e por ano, com margem opcional",
