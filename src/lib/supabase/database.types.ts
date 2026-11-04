@@ -26,6 +26,8 @@ export type WorkshopRow = {
   is_demo: boolean;
   /** A oficina regista o custo das peças (margem). */
   track_costs: boolean;
+  /** Menu Marcações visível (só o admin altera). */
+  calendar_enabled: boolean;
   admin_notes: string;
   created_at: string;
 };
@@ -74,6 +76,9 @@ export type ServiceOrderRow = {
   /** Podem faltar se a migração de entrada/saída ainda não foi aplicada. */
   checked_in_at?: string | null;
   checked_out_at?: string | null;
+  /** Chegada prevista: "AAAA-MM-DD" e "HH:MM:SS". Podem faltar antes da migração das marcações. */
+  expected_on?: string | null;
+  expected_time?: string | null;
   service_order_items?: ServiceOrderItemRow[];
 };
 
@@ -87,4 +92,27 @@ export type ServiceOrderItemRow = {
   unit_price: number;
   unit_cost: number | null;
   created_at: string;
+};
+
+export type AppointmentStatusDb = "scheduled" | "canceled" | "no_show";
+
+export type AppointmentRow = {
+  id: string;
+  workshop_id: string;
+  service_type: string;
+  customer_name: string;
+  phone: string;
+  plate: string;
+  customer_id: string | null;
+  vehicle_id: string | null;
+  /** "AAAA-MM-DD" (hora de parede, sem fuso). */
+  day: string;
+  /** "HH:MM:SS" ou null (sem hora). */
+  start_time: string | null;
+  end_time: string | null;
+  status: AppointmentStatusDb;
+  notes: string;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
 };

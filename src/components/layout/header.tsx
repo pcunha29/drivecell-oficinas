@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { getStripeBillingPortalUrl } from "@/lib/stripe";
 import { getUserDisplayName } from "@/lib/supabase/user-display-name";
 import {
+  CalendarDays,
   LayoutDashboard,
   Users,
   Car,
@@ -30,11 +31,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ProfileDialog } from "@/components/layout/profile-dialog";
 import { WorkshopSettingsDialog } from "@/components/layout/workshop-settings-dialog";
-import { useIsOwner, useWorkshop } from "@/stores/workshop-store";
+import { useCalendarEnabled, useIsOwner, useWorkshop } from "@/stores/workshop-store";
 import { DrivecellIcon } from "@/components/brand/drivecell-logo";
 
 const navItems = [
   { href: "/app", label: "Quadro", icon: LayoutDashboard },
+  { href: "/app/marcacoes", label: "Marcações", icon: CalendarDays },
   { href: "/app/clientes", label: "Clientes", icon: Users },
   { href: "/app/viaturas", label: "Viaturas", icon: Car },
 ];
@@ -62,6 +64,7 @@ export function Header() {
   const pathname = usePathname();
   const { workshop } = useWorkshop();
   const isOwner = useIsOwner();
+  const calendarEnabled = useCalendarEnabled();
   const workshopName = workshop?.name ?? "DriveCell Oficinas";
   const billingPortalUrl = getStripeBillingPortalUrl();
   const [userName, setUserName] = useState<string | null>(null);
@@ -122,7 +125,9 @@ export function Header() {
           </Link>
 
           <nav className="hidden items-center gap-1 md:flex" aria-label="Principal">
-            {navItems.map((item) => {
+            {navItems
+              .filter((item) => calendarEnabled || item.href !== "/app/marcacoes")
+              .map((item) => {
               const Icon = item.icon;
               const isActive =
                 item.href === "/app"

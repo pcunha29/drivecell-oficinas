@@ -51,7 +51,8 @@ import {
   DialogFormActions,
 } from "@/components/ui/dialog-form-actions";
 import { ReadOnlyDialogFooter } from "@/components/layout/read-only-dialog-footer";
-import { useCanWrite, useTrackCosts } from "@/stores/workshop-store";
+import { useCalendarEnabled, useCanWrite, useTrackCosts } from "@/stores/workshop-store";
+import { ExpectedArrivalFields } from "@/components/kanban/expected-arrival-fields";
 
 /**
  * Colunas das linhas de peças.
@@ -101,6 +102,7 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
   const deleteOrder = useOrderStore((s) => s.deleteOrder);
   const canWrite = useCanWrite();
   const trackCosts = useTrackCosts();
+  const calendarEnabled = useCalendarEnabled();
   const customers = useCustomerStore((s) => s.customers);
   const getVehiclesByCustomerId = useVehicleStore(
     (s) => s.getVehiclesByCustomerId,
@@ -120,6 +122,8 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
             paid: order.paid,
             checkedInAt: toDateTimeLocal(order.checkedInAt),
             checkedOutAt: toDateTimeLocal(order.checkedOutAt),
+            expectedOn: order.expectedOn ?? "",
+            expectedTime: order.expectedTime ?? "",
             items:
               order.items.length > 0
                 ? order.items.map((i) => ({
@@ -146,6 +150,8 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
             paid: false,
             checkedInAt: "",
             checkedOutAt: "",
+            expectedOn: "",
+            expectedTime: "",
             items: [
               { description: "", quantity: 1, unitPrice: 0, unitCost: null },
             ],
@@ -259,6 +265,17 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
         (data.checkedOutAt ?? "") !== (defaultValues.checkedOutAt ?? "")
       ) {
         dates.checkedOutAt = fromDateTimeLocal(data.checkedOutAt);
+      }
+      // Chegada prevista: só com as Marcações ligadas (desligadas, a chave não vai e nada se apaga).
+      if (calendarEnabled) {
+        const expectedOn = data.expectedOn ?? "";
+        const expectedTime = expectedOn ? (data.expectedTime ?? "") : "";
+        if (expectedOn !== (defaultValues.expectedOn ?? "")) {
+          dates.expectedOn = expectedOn || null;
+        }
+        if (expectedTime !== (defaultValues.expectedTime ?? "")) {
+          dates.expectedTime = expectedTime || null;
+        }
       }
 
       const payload = {
@@ -464,6 +481,14 @@ export function OrderDialog({ open, onOpenChange, orderId }: OrderDialogProps) {
                   />
                 </div>
               </div>
+
+              {calendarEnabled && (
+                <ExpectedArrivalFields
+                  register={register}
+                  errors={errors}
+                  arrived={Boolean(order?.checkedInAt)}
+                />
+              )}
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="grid content-start gap-2">

@@ -2,17 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, Car } from "lucide-react";
+import { CalendarDays, LayoutDashboard, Users, Car } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCalendarEnabled } from "@/stores/workshop-store";
 
 const items = [
   { href: "/app", label: "Quadro", icon: LayoutDashboard, exact: true },
+  { href: "/app/marcacoes", label: "Marcações", icon: CalendarDays, exact: false },
   { href: "/app/clientes", label: "Clientes", icon: Users, exact: false },
   { href: "/app/viaturas", label: "Viaturas", icon: Car, exact: false },
 ] as const;
 
 export function MobileNav() {
   const pathname = usePathname();
+  const calendarEnabled = useCalendarEnabled();
+  const visibleItems = items.filter((item) => calendarEnabled || item.href !== "/app/marcacoes");
 
   return (
     <nav
@@ -20,7 +24,7 @@ export function MobileNav() {
       aria-label="Navegação principal"
     >
       <div className="mx-auto flex max-w-lg items-stretch justify-around px-2 pb-safe pt-1">
-        {items.map((item) => {
+        {visibleItems.map((item) => {
           const Icon = item.icon;
           const isActive = item.exact
             ? pathname === item.href

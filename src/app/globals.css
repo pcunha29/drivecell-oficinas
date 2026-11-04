@@ -17,6 +17,12 @@
   --chart-revenue: #0d2c4a;
   --chart-margin: #2a5a94;
   --chart-cost: #c4903f;
+  /* Marcações: ordens com chegada prevista (azul-marinho) e marcações manuais (dourado).
+     Fundo suave + barra à esquerda na cor forte; o texto fica em foreground (AA). */
+  --event-order: #0d2c4a;
+  --event-order-bg: #e6ecf3;
+  --event-manual: #86652f;
+  --event-manual-bg: #efe6d6;
   --primary-foreground: #f8fafc;
   --card: #ffffff;
   --card-foreground: #0f172a;
@@ -42,6 +48,10 @@
   --chart-revenue: #c8d1db;
   --chart-margin: #5f8fd6;
   --chart-cost: #b8862f;
+  --event-order: #5f8fd6;
+  --event-order-bg: #163352;
+  --event-manual: #c9a66b;
+  --event-manual-bg: #c9a66b26;
   --primary-foreground: #0d2c4a;
   --card: #0f2740;
   --card-foreground: #f4f1ea;
@@ -59,6 +69,10 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-event-order: var(--event-order);
+  --color-event-order-bg: var(--event-order-bg);
+  --color-event-manual: var(--event-manual);
+  --color-event-manual-bg: var(--event-manual-bg);
   --font-sans: var(--font-geist), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --font-serif: var(--font-instrument-serif), Georgia, serif;

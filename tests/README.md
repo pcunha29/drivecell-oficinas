@@ -4,8 +4,8 @@ Dois conjuntos, ambos com [Vitest](https://vitest.dev):
 
 | Comando | O que testa | Precisa de |
 | --- | --- | --- |
-| `npm test` | Lógica pura: faturação e margem, CSV (exportar e importar), formulários, modo em construção, `workshopCanWrite`. | Nada. |
-| `npm run test:db` | As migrações de `supabase/migrations` num Postgres descartável: isolamento entre oficinas (RLS), `save_order`, apagar em cascata, oficina só de leitura quando o período acaba, repor a demo, retenção de 90 dias. | Um Postgres local e `TEST_DATABASE_URL`. |
+| `npm test` | Lógica pura: faturação e margem, CSV (exportar e importar), formulários, modo em construção, `workshopCanWrite`, datas e grelha das marcações. | Nada. |
+| `npm run test:db` | As migrações de `supabase/migrations` num Postgres descartável: isolamento entre oficinas (RLS), `save_order`, apagar em cascata, oficina só de leitura quando o período acaba, repor a demo, retenção de 90 dias, marcações. | Um Postgres local e `TEST_DATABASE_URL`. |
 
 Os dois correm no GitHub em cada push (`.github/workflows/ci.yml`), com tipos, lint e build.
 

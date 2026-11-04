@@ -130,3 +130,11 @@ export function useIsOwner(): boolean {
 export function useTrackCosts(): boolean {
   return useWorkshopStore((s) => s.workshop?.track_costs ?? false);
 }
+
+/**
+ * O menu Marcações está ligado (o admin controla). Sem a coluna (migração por aplicar)
+ * fica desligado: o save_order antigo ignoraria a chegada prevista.
+ */
+export function useCalendarEnabled(): boolean {
+  return useWorkshopStore((s) => s.workshop?.calendar_enabled ?? false);
+}

@@ -153,8 +153,13 @@ export type SaveOrderInput = {
   notes?: string | null;
   paid?: boolean | null;
   items?: unknown[] | null;
-  /** Datas de entrada/saída: chave presente = grava (null apaga); ausente = não mexe. */
-  dates?: { checkedInAt?: string | null; checkedOutAt?: string | null } | null;
+  /** Datas (entrada/saída, chegada prevista): chave presente = grava (null apaga); ausente = não mexe. */
+  dates?: {
+    checkedInAt?: string | null;
+    checkedOutAt?: string | null;
+    expectedOn?: string | null;
+    expectedTime?: string | null;
+  } | null;
 };
 
 /** Chama o RPC save_order com os mesmos parâmetros que a app (src/lib/repositories/orders.ts). */

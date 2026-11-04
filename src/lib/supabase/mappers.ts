@@ -1,5 +1,6 @@
-import type { Customer, ServiceItem, ServiceOrder, Vehicle } from "@/types";
+import type { Appointment, AppointmentInput, Customer, ServiceItem, ServiceOrder, Vehicle } from "@/types";
 import type {
+  AppointmentRow,
   CustomerRow,
   ServiceOrderItemRow,
   ServiceOrderRow,
@@ -53,6 +54,61 @@ export function mapServiceOrder(row: ServiceOrderRow): ServiceOrder {
     updatedAt: row.updated_at,
     checkedInAt: row.checked_in_at ?? null,
     checkedOutAt: row.checked_out_at ?? null,
+    expectedOn: row.expected_on ?? null,
+    expectedTime: shortTime(row.expected_time),
+  };
+}
+
+/** "09:30:00" (Postgres) → "09:30"; null fica null. */
+export function shortTime(value: string | null | undefined): string | null {
+  return value ? value.slice(0, 5) : null;
+}
+
+export function mapAppointment(row: AppointmentRow): Appointment {
+  return {
+    id: row.id,
+    serviceType: row.service_type,
+    customerName: row.customer_name,
+    phone: row.phone ?? "",
+    plate: row.plate ?? "",
+    customerId: row.customer_id,
+    vehicleId: row.vehicle_id,
+    day: row.day,
+    startTime: shortTime(row.start_time),
+    endTime: shortTime(row.end_time),
+    status: row.status,
+    notes: row.notes ?? "",
+  };
+}
+
+export function appointmentToRow(
+  data: AppointmentInput,
+): Pick<
+  AppointmentRow,
+  | "service_type"
+  | "customer_name"
+  | "phone"
+  | "plate"
+  | "customer_id"
+  | "vehicle_id"
+  | "day"
+  | "start_time"
+  | "end_time"
+  | "status"
+  | "notes"
+> {
+  return {
+    service_type: data.serviceType,
+    customer_name: data.customerName,
+    phone: data.phone,
+    plate: data.plate,
+    customer_id: data.customerId,
+    vehicle_id: data.vehicleId,
+    day: data.day,
+    start_time: data.startTime,
+    end_time: data.startTime ? data.endTime : null,
+    status: data.status,
+    notes: data.notes,
   };
 }
 

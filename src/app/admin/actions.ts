@@ -203,6 +203,7 @@ export async function updateWorkshopAction(
     currentPeriodEnd: formString(formData, "currentPeriodEnd"),
     adminNotes: formString(formData, "adminNotes"),
     isDemo: formBoolean(formData, "isDemo"),
+    calendarEnabled: formBoolean(formData, "calendarEnabled"),
   });
   if (!parsed.success) return validationError(parsed.error);
   const input = parsed.data;
@@ -222,6 +223,7 @@ export async function updateWorkshopAction(
           : null,
         admin_notes: input.adminNotes,
         is_demo: input.isDemo,
+        calendar_enabled: input.calendarEnabled,
       })
       .eq("id", input.id)
       .select("id");
@@ -236,6 +238,7 @@ export async function updateWorkshopAction(
         status: input.subscriptionStatus,
         trial_ends_at: input.trialEndsAt || null,
         current_period_end: input.currentPeriodEnd || null,
+        calendar_enabled: input.calendarEnabled,
       },
     });
   } catch (error) {

@@ -13,6 +13,8 @@ export type AdminWorkshop = {
   trial_ends_at: string | null;
   current_period_end: string | null;
   is_demo: boolean;
+  /** Menu Marcações visível na app da oficina. */
+  calendar_enabled: boolean;
   admin_notes: string;
   created_at: string;
   /** Preenchido pela BD quando o estado passa a "canceled". */
@@ -44,7 +46,7 @@ export type AdminWorkshopDetail = AdminWorkshop & {
 };
 
 const WORKSHOP_COLUMNS =
-  "id, name, phone, nif, subscription_status, trial_ends_at, current_period_end, is_demo, admin_notes, created_at, canceled_at";
+  "id, name, phone, nif, subscription_status, trial_ends_at, current_period_end, is_demo, calendar_enabled, admin_notes, created_at, canceled_at";
 
 type CountEmbed = { count: number }[] | null | undefined;
 type MemberEmbed = { user_id: string; role: string }[] | null | undefined;

@@ -109,6 +109,7 @@ export default async function AdminWorkshopDetailPage({
             currentPeriodEnd: toLisbonDateInput(workshop.current_period_end),
             adminNotes: workshop.admin_notes ?? "",
             isDemo: workshop.is_demo,
+            calendarEnabled: workshop.calendar_enabled,
           }}
         />
 

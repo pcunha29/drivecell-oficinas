@@ -26,6 +26,13 @@ export const orderFormSchema = z
     /** Entrada e saída da viatura, como "AAAA-MM-DDTHH:mm" (hora local) ou "" (automático). */
     checkedInAt: z.string().optional().default(""),
     checkedOutAt: z.string().optional().default(""),
+    /** Chegada prevista: "AAAA-MM-DD" e "HH:MM" (opcional), ou "". */
+    expectedOn: z.string().optional().default(""),
+    expectedTime: z.string().optional().default(""),
+  })
+  .refine((v) => !v.expectedTime || Boolean(v.expectedOn), {
+    path: ["expectedOn"],
+    message: "Escolhe o dia para a hora prevista.",
   })
   .refine(
     (v) =>

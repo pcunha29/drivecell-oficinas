@@ -66,6 +66,7 @@ export const updateWorkshopSchema = z.object({
     .refine((v) => v === "" || dateInput.test(v), { error: "Data inválida." }),
   adminNotes: z.string().max(5000, { error: "Máximo 5000 caracteres." }),
   isDemo: z.boolean(),
+  calendarEnabled: z.boolean(),
 });
 
 export const demoAccountSchema = z.object({

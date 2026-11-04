@@ -11,10 +11,11 @@ import { cn } from "@/lib/utils";
 import { formatEuro } from "@/lib/format";
 import { usePreferencesStore } from "@/stores/preferences-store";
 import { useState } from "react";
-import { AlertTriangle, CheckCircle2, Clock, GripVertical, Pencil } from "lucide-react";
+import { AlertTriangle, CalendarClock, CheckCircle2, Clock, GripVertical, Pencil } from "lucide-react";
 import { STALE_AFTER_DAYS, daysInWorkshop, inWorkshopLabel } from "@/lib/stay";
 import { Button } from "@/components/ui/button";
-import { useCanWrite } from "@/stores/workshop-store";
+import { useCalendarEnabled, useCanWrite } from "@/stores/workshop-store";
+import { formatDayMonth } from "@/lib/calendar";
 
 type OrderCardProps = {
   order: ServiceOrder;
@@ -99,6 +100,21 @@ function StayLine({ order }: { order: ServiceOrder }) {
         <Clock className="size-3.5 shrink-0" aria-hidden />
       )}
       {inWorkshopLabel(days)}
+    </p>
+  );
+}
+
+/** "Chega a 12 nov., 09:30" nas ordens em espera (com as Marcações ligadas). */
+function ExpectedLine({ order }: { order: ServiceOrder }) {
+  const calendarEnabled = useCalendarEnabled();
+  if (!calendarEnabled || order.status !== "waiting" || order.checkedInAt || !order.expectedOn) return null;
+  const when = order.expectedTime
+    ? `${formatDayMonth(order.expectedOn)}, ${order.expectedTime}`
+    : formatDayMonth(order.expectedOn);
+  return (
+    <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <CalendarClock className="size-3.5 shrink-0" aria-hidden />
+      Chega a {when}
     </p>
   );
 }
@@ -203,6 +219,7 @@ export function OrderCard({ order, onClick, onEdit }: OrderCardProps) {
           </p>
         )}
         <StayLine order={order} />
+        <ExpectedLine order={order} />
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <Badge variant={order.status} className="text-xs shrink-0">
             {order.status === "waiting" && "Em espera"}

@@ -26,12 +26,14 @@ export type WorkshopEditValues = {
   currentPeriodEnd: string;
   adminNotes: string;
   isDemo: boolean;
+  calendarEnabled: boolean;
 };
 
 export function WorkshopEditForm({ values }: { values: WorkshopEditValues }) {
   const [state, formAction, isPending] = useActionState(updateWorkshopAction, initialState);
   const [, startTransition] = useTransition();
   const [isDemo, setIsDemo] = useState(values.isDemo);
+  const [calendarEnabled, setCalendarEnabled] = useState(values.calendarEnabled);
   const errors = state.fieldErrors ?? {};
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -44,6 +46,7 @@ export function WorkshopEditForm({ values }: { values: WorkshopEditValues }) {
     <form onSubmit={handleSubmit} className="space-y-6" noValidate>
       <input type="hidden" name="id" value={values.id} />
       <input type="hidden" name="isDemo" value={isDemo ? "true" : "false"} />
+      <input type="hidden" name="calendarEnabled" value={calendarEnabled ? "true" : "false"} />
 
       <Card>
         <CardHeader>
@@ -112,6 +115,33 @@ export function WorkshopEditForm({ values }: { values: WorkshopEditValues }) {
               defaultValue={values.currentPeriodEnd}
             />
             <FieldError errors={errors.currentPeriodEnd} />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Funcionalidades</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-start gap-3">
+            <Switch
+              id="calendarEnabled"
+              checked={calendarEnabled}
+              onCheckedChange={setCalendarEnabled}
+              aria-labelledby="calendarEnabled-label"
+              aria-describedby="calendarEnabled-hint"
+              className="mt-0.5"
+            />
+            <div className="space-y-1">
+              <span id="calendarEnabled-label" className="text-sm font-medium">
+                Marcações
+              </span>
+              <p id="calendarEnabled-hint" className="text-sm text-muted-foreground">
+                Calendário de marcações e «Chegada prevista» nas ordens. Desligar esconde o menu, mas
+                não apaga as marcações.
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
