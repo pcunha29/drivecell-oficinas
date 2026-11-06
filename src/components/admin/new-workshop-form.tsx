@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import type { AdminFormState } from "@/lib/admin/schemas";
+import { PRICING } from "@/lib/pricing";
 
 const initialState: AdminFormState = { status: "idle" };
 
@@ -99,7 +100,7 @@ export function NewWorkshopForm() {
                 type="number"
                 min={1}
                 max={365}
-                defaultValue={14}
+                defaultValue={PRICING.trialDays}
               />
               <FieldError errors={errors.trialDays} />
             </div>

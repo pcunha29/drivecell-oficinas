@@ -10,7 +10,7 @@ import {
   HowItWorks,
   type HowItWorksStep,
 } from "@/components/marketing/how-it-works";
-import { PRICE_LABEL, PRICING, SETUP_NOTE, YEARLY_FREE_LABEL } from "@/lib/pricing";
+import { INVOICING_NOTE, PRICE_LABEL, PRICING, SETUP_NOTE, TRIAL_NOTE, YEARLY_FREE_LABEL } from "@/lib/pricing";
 import { CONTACT_EMAIL, CONTACT_PHONE, SOCIAL_LINKS } from "@/lib/contact";
 import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 import { existsSync } from "node:fs";
@@ -187,7 +187,7 @@ const faqs = [
   },
   {
     q: "Emite faturas certificadas?",
-    a: "Não. Continuas a usar o teu programa de faturação. O DriveCell organiza o trabalho da oficina.",
+    a: `Não. ${INVOICING_NOTE}`,
   },
   {
     q: "Os clientes marcam sozinhos?",
@@ -195,7 +195,7 @@ const faqs = [
   },
   {
     q: "Como começo?",
-    a: "Marcas uma demonstração connosco. Se fizer sentido, configuramos a tua oficina e combinamos um período de experiência. Se no fim não continuares, a conta passa a só-leitura e não perdes nada.",
+    a: `Marcas uma demonstração connosco. Se fizer sentido, configuramos a tua oficina e tens ${PRICING.trialDays} dias de experiência com os teus dados, sem cartão. Se no fim não continuares, a conta passa a só-leitura e não perdes nada.`,
   },
   {
     q: "Os dados são meus?",
@@ -278,6 +278,9 @@ export default function LandingPage() {
             Ordens de reparação, clientes, viaturas e pagamentos num só quadro.
             No computador da receção ou no telemóvel, ao lado do elevador.
           </p>
+          <p className="m-0 max-w-[520px] border-l-2 border-gold pl-4 text-[15px] leading-[1.55] text-ink-2">
+            {INVOICING_NOTE}
+          </p>
           <div className="flex flex-wrap items-center gap-3">
             <TrackedCtaLink href="/#contacto" origin="hero">
               Pedir demonstração
@@ -288,6 +291,8 @@ export default function LandingPage() {
             </ButtonLink>
           </div>
           <div className="flex flex-wrap gap-x-5 gap-y-1 font-mono text-[13px] text-ink-muted">
+            <span>{PRICING.trialDays} dias grátis</span>
+            <span aria-hidden="true">·</span>
             <span>Configuramos por ti</span>
             <span aria-hidden="true">·</span>
             <span>Sem instalação</span>
@@ -417,7 +422,7 @@ export default function LandingPage() {
             Um plano. Tudo incluído.
           </h2>
           <p className="m-0 text-[17px] leading-[1.6] text-ink-2">
-            Começas com um período de experiência combinado connosco. Depois,
+            Começas com {TRIAL_NOTE.charAt(0).toLowerCase() + TRIAL_NOTE.slice(1)} Depois,
             escolhes mensal ou anual e cancelas quando quiseres.
           </p>
           <p className="m-0 text-[15px] leading-[1.6] text-ink-muted">

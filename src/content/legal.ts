@@ -38,7 +38,7 @@ export const termsClauses: readonly TermsClause[] = [
     id: "t3",
     number: "03",
     title: "Conta e teste gratuito",
-    body: "A conta de cada oficina é criada por nós, depois de uma demonstração, e o acesso é enviado por email ao responsável. Pode haver um período de experiência gratuito, combinado caso a caso. Sem subscrição ativa, a conta passa a só-leitura: consultas e exportas os dados, mas não crias nem alteras registos.",
+    body: "A conta de cada oficina é criada por nós, depois de uma demonstração, e o acesso é enviado por email ao responsável. Cada oficina tem um período de experiência gratuito de 30 dias, sem dados de pagamento; no fim, decide se subscreve. Sem subscrição ativa, a conta passa a só-leitura: consultas e exportas os dados, mas não crias nem alteras registos.",
   },
   {
     id: "t4",

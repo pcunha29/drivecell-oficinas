@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { DemoAccountCard } from "@/components/admin/demo-account-card";
 import { FormMessage } from "@/components/admin/form-feedback";
-import { DemoBadge, StatusBadge } from "@/components/admin/status-badge";
+import { ActivityBadge, DemoBadge, StatusBadge } from "@/components/admin/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -91,6 +91,7 @@ export default async function AdminWorkshopsPage() {
                     <TableHead>Estado</TableHead>
                     <TableHead className="text-right">Clientes</TableHead>
                     <TableHead className="text-right">Ordens</TableHead>
+                    <TableHead>Uso (7 dias)</TableHead>
                     <TableHead>Criada em</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -129,6 +130,9 @@ export default async function AdminWorkshopsPage() {
                       </TableCell>
                       <TableCell className="text-right tabular-nums">
                         {w.orderCount}
+                      </TableCell>
+                      <TableCell>
+                        <ActivityBadge count={w.recentOrderCount} />
                       </TableCell>
                       <TableCell className="whitespace-nowrap">
                         {formatDate(w.created_at)}

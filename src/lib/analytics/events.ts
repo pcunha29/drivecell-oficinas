@@ -1,6 +1,7 @@
 "use client";
 
 import { track } from "@vercel/analytics";
+import { demoContactTag, withContactTag } from "@/lib/contact";
 
 /** De onde veio o pedido de demonstração (para comparar no painel da Vercel). */
 export type DemoOrigin = "cabecalho" | "bloco-contacto" | "entrar";
@@ -29,6 +30,20 @@ export function trackDemoCta(origin: DemoCtaOrigin) {
     track("cta_demonstracao", { origem: origin, fonte: currentAttribution().fonte });
   } catch {
     // idem
+  }
+}
+
+/**
+ * No clique num link de contacto (wa.me/mailto): acrescenta a etiqueta "fonte · página"
+ * à mensagem/assunto, a partir do href original (cliques repetidos não acumulam).
+ */
+export function tagContactLink(link: HTMLAnchorElement) {
+  try {
+    link.dataset.baseHref ??= link.href;
+    const tag = demoContactTag(currentAttribution().fonte, window.location.pathname);
+    link.href = withContactTag(link.dataset.baseHref, tag);
+  } catch {
+    // Sem etiqueta, o link original continua a funcionar.
   }
 }
 
@@ -95,7 +110,7 @@ export function rememberAttribution() {
   }
 }
 
-function currentAttribution(): Attribution {
+export function currentAttribution(): Attribution {
   try {
     const saved = JSON.parse(sessionStorage.getItem(STORAGE_KEY) ?? "null") as Partial<Attribution> | null;
     if (saved?.fonte) return { fonte: clean(saved.fonte) || "direto", campanha: clean(saved.campanha) || "-" };

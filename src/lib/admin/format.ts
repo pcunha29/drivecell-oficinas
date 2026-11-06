@@ -115,3 +115,7 @@ export function describeStatus(
       return { label: status, tone: "muted" };
   }
 }
+
+/** Janela da métrica de atividade (plano de marketing: "ativa" = 5+ ordens em 7 dias). */
+export const ACTIVITY_DAYS = 7;
+export const ACTIVE_MIN_ORDERS = 5;

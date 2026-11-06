@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { mailtoUrl, whatsappUrl, CONTACT_EMAIL } from "@/lib/contact";
 import { cn } from "@/lib/utils";
-import { trackDemoRequest, type DemoOrigin } from "@/lib/analytics/events";
+import { tagContactLink, trackDemoRequest, type DemoOrigin } from "@/lib/analytics/events";
 import { MailIcon, WhatsAppIcon } from "./contact-icons";
 
 type ContactMenuProps = {
@@ -105,7 +105,8 @@ export function ContactMenu({
           href={whatsappUrl(whatsappText)}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() => {
+          onClick={(e) => {
+            tagContactLink(e.currentTarget);
             trackDemoRequest("whatsapp", origin);
             setOpen(false);
           }}
@@ -119,7 +120,8 @@ export function ContactMenu({
         </a>
         <a
           href={mailtoUrl(emailSubject)}
-          onClick={() => {
+          onClick={(e) => {
+            tagContactLink(e.currentTarget);
             trackDemoRequest("email", origin);
             setOpen(false);
           }}

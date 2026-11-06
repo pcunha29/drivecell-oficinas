@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { describeStatus, type StatusTone } from "@/lib/admin/format";
+import { ACTIVE_MIN_ORDERS, ACTIVITY_DAYS, describeStatus, type StatusTone } from "@/lib/admin/format";
 import { cn } from "@/lib/utils";
 
 const TONE_CLASSES: Record<StatusTone, string> = {
@@ -39,6 +39,25 @@ export function DemoBadge({ className }: { className?: string }) {
       )}
     >
       Demo
+    </Badge>
+  );
+}
+
+/**
+ * Atividade da oficina: ordens criadas ou alteradas nos últimos ACTIVITY_DAYS dias.
+ * "Ativa" a partir de ACTIVE_MIN_ORDERS (métrica do plano de marketing).
+ */
+export function ActivityBadge({ count, className }: { count: number | null; className?: string }) {
+  if (count === null) return <span className="text-sm text-muted-foreground">—</span>;
+  const tone: StatusTone = count >= ACTIVE_MIN_ORDERS ? "active" : count > 0 ? "warning" : "muted";
+  const label = count >= ACTIVE_MIN_ORDERS ? "Ativa" : count > 0 ? "Pouco uso" : "Sem uso";
+  return (
+    <Badge
+      variant="outline"
+      className={cn("whitespace-nowrap tabular-nums", TONE_CLASSES[tone], className)}
+      title={`${count} ${count === 1 ? "ordem criada ou alterada" : "ordens criadas ou alteradas"} nos últimos ${ACTIVITY_DAYS} dias`}
+    >
+      {label} · {count}
     </Badge>
   );
 }

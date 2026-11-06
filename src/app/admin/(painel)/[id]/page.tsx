@@ -8,7 +8,7 @@ import { DeleteWorkshopDialog } from "@/components/admin/delete-workshop-dialog"
 import { ImportCustomersCard } from "@/components/admin/import-customers-card";
 import { AddMemberForm } from "@/components/admin/add-member-form";
 import { RemoveMemberButton } from "@/components/admin/remove-member-button";
-import { DemoBadge, StatusBadge } from "@/components/admin/status-badge";
+import { ActivityBadge, DemoBadge, StatusBadge } from "@/components/admin/status-badge";
 import { WorkshopEditForm } from "@/components/admin/workshop-edit-form";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -79,6 +79,7 @@ export default async function AdminWorkshopDetailPage({
           <h1 className="text-2xl font-semibold tracking-tight">{workshop.name}</h1>
           <StatusBadge status={workshop.subscription_status} trialEndsAt={workshop.trial_ends_at} />
           {workshop.is_demo && <DemoBadge />}
+          <ActivityBadge count={workshop.recentOrderCount} />
         </div>
         <p className="text-sm text-muted-foreground">
           Criada em {formatDateTime(workshop.created_at)} · {workshop.customerCount} clientes ·{" "}

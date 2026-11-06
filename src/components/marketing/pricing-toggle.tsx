@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { buttonClasses } from "@/components/marketing/button-link";
-import { PRICE_LABEL, SETUP_NOTE, YEARLY_FREE_LABEL } from "@/lib/pricing";
+import { PRICE_LABEL, SETUP_NOTE, TRIAL_NOTE, YEARLY_FREE_LABEL } from "@/lib/pricing";
 import { trackDemoCta } from "@/lib/analytics/events";
 
 type Billing = "monthly" | "yearly";
@@ -88,7 +88,7 @@ export function PricingToggle({ aside }: PricingToggleProps) {
           </div>
 
           <p className="m-0 border-t border-night-line pt-5 text-[14px] leading-[1.6] text-on-dark-2">
-            {SETUP_NOTE}
+            <strong className="font-medium text-on-dark">{TRIAL_NOTE}</strong> {SETUP_NOTE}
           </p>
 
           <Link

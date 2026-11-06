@@ -1,6 +1,7 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { TERMS_VERSION } from "@/content/legal";
+import { ACTIVITY_DAYS } from "./format";
 
 /** Leituras do admin (service role). Só chamar depois de requireAdmin/requireAdminPage. */
 
@@ -25,6 +26,8 @@ export type AdminWorkshopListItem = AdminWorkshop & {
   ownerEmails: string[];
   customerCount: number;
   orderCount: number;
+  /** Ordens criadas ou alteradas nos últimos ACTIVITY_DAYS dias (a oficina está a usar a app?). null = não foi possível contar. */
+  recentOrderCount: number | null;
 };
 
 export type AdminMember = {
@@ -42,6 +45,7 @@ export type AdminMember = {
 export type AdminWorkshopDetail = AdminWorkshop & {
   customerCount: number;
   orderCount: number;
+  recentOrderCount: number | null;
   members: AdminMember[];
 };
 
@@ -54,11 +58,21 @@ type MemberEmbed = { user_id: string; role: string }[] | null | undefined;
 type WorkshopWithEmbeds = AdminWorkshop & {
   customers?: CountEmbed;
   service_orders?: CountEmbed;
+  recent_orders?: CountEmbed;
   workshop_members?: MemberEmbed;
 };
 
 function embeddedCount(value: CountEmbed): number {
   return value?.[0]?.count ?? 0;
+}
+
+/** Contagens embebidas: clientes, ordens e membros (+ ordens com movimento recente, à parte). */
+const WORKSHOP_EMBEDS = "customers(count), service_orders(count), workshop_members(user_id, role)";
+const RECENT_ORDERS_EMBED = "recent_orders:service_orders(count)";
+
+/** Início da janela de atividade (ISO). O filtro aplica-se só à contagem recent_orders. */
+function activitySince(): string {
+  return new Date(Date.now() - ACTIVITY_DAYS * 86_400_000).toISOString();
 }
 
 const USERS_PER_PAGE = 1000;
@@ -116,14 +130,29 @@ export async function findMembershipForUser(
   return { workshopId: data.workshop_id as string, workshopName: name ?? "sem nome" };
 }
 
+/**
+ * Oficinas com as contagens. Primeiro tenta incluir a atividade recente (contagem filtrada
+ * por updated_at); se essa consulta falhar, carrega sem ela — o admin nunca parte por causa
+ * da métrica (recentOrderCount fica null).
+ */
+async function selectWorkshops(admin: SupabaseClient, id?: string) {
+  const run = (withRecent: boolean) => {
+    let query = admin
+      .from("workshops")
+      .select(`${WORKSHOP_COLUMNS}, ${WORKSHOP_EMBEDS}${withRecent ? `, ${RECENT_ORDERS_EMBED}` : ""}`);
+    if (withRecent) query = query.gte("recent_orders.updated_at", activitySince());
+    if (id) query = query.eq("id", id);
+    return query.order("created_at", { ascending: false });
+  };
+  const withRecent = await run(true);
+  if (!withRecent.error) return { ...withRecent, hasRecent: true };
+  console.warn("[admin] Contagem de atividade indisponível:", withRecent.error.message);
+  return { ...(await run(false)), hasRecent: false };
+}
+
 export async function listWorkshops(): Promise<AdminWorkshopListItem[]> {
   const admin = createAdminClient();
-  const { data, error } = await admin
-    .from("workshops")
-    .select(
-      `${WORKSHOP_COLUMNS}, customers(count), service_orders(count), workshop_members(user_id, role)`,
-    )
-    .order("created_at", { ascending: false });
+  const { data, error, hasRecent } = await selectWorkshops(admin);
   if (error) throw new Error(`Erro ao carregar oficinas: ${error.message}`);
 
   const rows = (data ?? []) as unknown as WorkshopWithEmbeds[];
@@ -134,10 +163,11 @@ export async function listWorkshops(): Promise<AdminWorkshopListItem[]> {
     }
   }
 
-  return rows.map(({ customers, service_orders, workshop_members, ...workshop }) => ({
+  return rows.map(({ customers, service_orders, recent_orders, workshop_members, ...workshop }) => ({
     ...workshop,
     customerCount: embeddedCount(customers),
     orderCount: embeddedCount(service_orders),
+    recentOrderCount: hasRecent ? embeddedCount(recent_orders) : null,
     ownerEmails: (workshop_members ?? [])
       .filter((m) => m.role === "owner")
       .map((m) => emailById.get(m.user_id) ?? "(utilizador apagado)"),
@@ -157,17 +187,12 @@ export async function hasDemoWorkshop(admin?: SupabaseClient): Promise<boolean> 
 
 export async function getWorkshopDetail(id: string): Promise<AdminWorkshopDetail | null> {
   const admin = createAdminClient();
-  const { data, error } = await admin
-    .from("workshops")
-    .select(
-      `${WORKSHOP_COLUMNS}, customers(count), service_orders(count), workshop_members(user_id, role)`,
-    )
-    .eq("id", id)
-    .maybeSingle();
+  const { data: rows, error, hasRecent } = await selectWorkshops(admin, id);
+  const data = rows?.[0] ?? null;
   if (error) throw new Error(`Erro ao carregar a oficina: ${error.message}`);
   if (!data) return null;
 
-  const { customers, service_orders, workshop_members, ...workshop } =
+  const { customers, service_orders, recent_orders, workshop_members, ...workshop } =
     data as unknown as WorkshopWithEmbeds;
 
   const memberIds = (workshop_members ?? []).map((m) => m.user_id);
@@ -206,6 +231,7 @@ export async function getWorkshopDetail(id: string): Promise<AdminWorkshopDetail
     ...workshop,
     customerCount: embeddedCount(customers),
     orderCount: embeddedCount(service_orders),
+    recentOrderCount: hasRecent ? embeddedCount(recent_orders) : null,
     members,
   };
 }

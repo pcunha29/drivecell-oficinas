@@ -16,6 +16,47 @@ export function mailtoUrl(subject?: string): string {
   return subject ? `${base}?subject=${encodeURIComponent(subject)}` : base;
 }
 
+/**
+ * Etiqueta curta para a mensagem/assunto de um pedido de demonstração, para quem responde
+ * saber de onde veio o contacto: "Google · preços", "site · página inicial".
+ * `fonte` vem da atribuição da visita (utm_source ou domínio de origem; "direto" se nenhum).
+ */
+export function demoContactTag(fonte: string, pathname: string): string {
+  const f = fonte.toLowerCase();
+  const source =
+    f === "direto" || !f
+      ? "site"
+      : f.includes("google")
+        ? "Google"
+        : f.includes("facebook") || f === "fb"
+          ? "Facebook"
+          : f.includes("instagram") || f === "ig"
+            ? "Instagram"
+            : f;
+  const place: Record<string, string> = {
+    "/": "página inicial",
+    "/precos": "preços",
+    "/entrar": "entrar",
+  };
+  return `${source} · ${place[pathname] ?? "site"}`;
+}
+
+/**
+ * Acrescenta "(etiqueta)" ao texto do WhatsApp (`text`) ou ao assunto do email (`subject`)
+ * de um link wa.me/mailto. Codifica com encodeURIComponent (o "+" de URLSearchParams
+ * aparece literal em alguns clientes de email).
+ */
+export function withContactTag(href: string, tag: string): string {
+  const [base, query = ""] = href.split("?");
+  const params = new URLSearchParams(query);
+  const key = href.startsWith("mailto:") ? "subject" : "text";
+  const current = params.get(key) ?? "";
+  params.delete(key);
+  const value = current ? `${current} (${tag})` : `(${tag})`;
+  const rest = [...params].map(([k, v]) => `${k}=${encodeURIComponent(v)}`);
+  return `${base}?${[`${key}=${encodeURIComponent(value)}`, ...rest].join("&")}`;
+}
+
 /** Partilhar um texto no WhatsApp escolhendo o contacto (não abre a conversa com a DriveCell). */
 export function whatsappShareUrl(text: string): string {
   return `https://wa.me/?text=${encodeURIComponent(text)}`;

@@ -25,6 +25,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { logAdminEvent } from "@/lib/admin/audit";
 import { customerKey, IMPORT_MAX_ROWS } from "@/lib/import/customers-csv";
 import { isAdminEmail } from "@/lib/admin/emails";
+import { PRICING } from "@/lib/pricing";
 
 // Todas as actions começam por requireAdmin(): o layout de /admin não protege
 // chamadas diretas às server actions.
@@ -111,7 +112,7 @@ export async function createWorkshopAction(
     ownerName: formString(formData, "ownerName"),
     ownerEmail: formString(formData, "ownerEmail"),
     initialStatus: formString(formData, "initialStatus"),
-    trialDays: formString(formData, "trialDays") || "14",
+    trialDays: formString(formData, "trialDays") || String(PRICING.trialDays),
     isDemo: formBoolean(formData, "isDemo"),
   });
   if (!parsed.success) return validationError(parsed.error);

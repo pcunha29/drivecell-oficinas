@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Container } from "@/components/marketing/container";
 import { PricingIncluded } from "@/components/marketing/pricing-included";
 import { PricingToggle } from "@/components/marketing/pricing-toggle";
-import { PRICE_LABEL, PRICING, YEARLY_FREE_LABEL } from "@/lib/pricing";
+import { INVOICING_NOTE, PRICE_LABEL, PRICING, YEARLY_FREE_LABEL } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "Preços",
@@ -24,7 +24,7 @@ const START_STEPS = [
   {
     step: "03",
     title: "Experimentas e decides",
-    text: "Usas a app durante o período de experiência que combinarmos. Se não continuares, a conta passa a só-leitura e os dados ficam guardados.",
+    text: `Usas a app ${PRICING.trialDays} dias com os dados da tua oficina, sem cartão. Se não continuares, a conta passa a só-leitura e os dados ficam guardados.`,
   },
 ] as const;
 
@@ -32,6 +32,10 @@ const FAQ = [
   {
     q: "Como pago?",
     a: "Por transferência bancária ou por cartão, com fatura emitida em cada período.",
+  },
+  {
+    q: "Passa faturas?",
+    a: `Não. ${INVOICING_NOTE}`,
   },
   {
     q: "Há fidelização?",
