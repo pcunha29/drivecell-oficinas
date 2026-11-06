@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { buttonClasses } from "@/components/marketing/button-link";
-import { PRICE_LABEL, SETUP_NOTE } from "@/lib/pricing";
+import { PRICE_LABEL, SETUP_NOTE, YEARLY_FREE_LABEL } from "@/lib/pricing";
 
 type Billing = "monthly" | "yearly";
 
@@ -22,7 +22,7 @@ const PLANS: Record<Billing, { price: string; period: string; note: string }> = 
 
 const OPTIONS: { value: Billing; label: string }[] = [
   { value: "monthly", label: "Mensal" },
-  { value: "yearly", label: "Anual · 2 meses grátis" },
+  { value: "yearly", label: `Anual · ${YEARLY_FREE_LABEL}` },
 ];
 
 type PricingToggleProps = {

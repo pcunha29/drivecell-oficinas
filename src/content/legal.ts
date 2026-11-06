@@ -5,7 +5,7 @@
  */
 
 export const TERMS_VERSION = "1.1.0";
-export const TERMS_UPDATED_AT = "2026-11-04";
+export const TERMS_UPDATED_AT = "2026-11-06";
 
 export type TermsClause = {
   /** Âncora na página /termos (ex.: "t1"). */
@@ -44,7 +44,7 @@ export const termsClauses: readonly TermsClause[] = [
     id: "t4",
     number: "04",
     title: "Preço e pagamento",
-    body: "49 € por mês ou 490 € por ano, IVA incluído, pagos no início de cada período pelo meio de pagamento combinado. A criação da conta, uma sessão de formação inicial (até 1 hora) e a importação de clientes e viaturas a partir de ficheiro digital estão incluídas, sem custo adicional. Limpeza ou digitalização de dados fora deste âmbito é orçamentada e aceite antes de começar. A subscrição renova-se automaticamente. Alterações de preço são avisadas com pelo menos 30 dias de antecedência.",
+    body: "39 € por mês ou 349 € por ano, IVA incluído, pagos no início de cada período pelo meio de pagamento combinado. A criação da conta, uma sessão de formação inicial (até 1 hora) e a importação de clientes e viaturas a partir de ficheiro digital estão incluídas, sem custo adicional. Limpeza ou digitalização de dados fora deste âmbito é orçamentada e aceite antes de começar. A subscrição renova-se automaticamente. Alterações de preço são avisadas com pelo menos 30 dias de antecedência.",
   },
   {
     id: "t5",

@@ -9,7 +9,7 @@ import {
   HowItWorks,
   type HowItWorksStep,
 } from "@/components/marketing/how-it-works";
-import { PRICE_LABEL, PRICING, SETUP_NOTE } from "@/lib/pricing";
+import { PRICE_LABEL, PRICING, SETUP_NOTE, YEARLY_FREE_LABEL } from "@/lib/pricing";
 import { CONTACT_EMAIL, CONTACT_PHONE, SOCIAL_LINKS } from "@/lib/contact";
 import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 import { existsSync } from "node:fs";
@@ -446,7 +446,7 @@ export default function LandingPage() {
             <div className="flex min-h-7 items-center justify-between gap-3">
               <span className="eyebrow text-on-dark-3!">Anual</span>
               <span className="rounded-[3px] bg-gold px-2 py-1 font-mono text-[11px] text-night">
-                2 MESES GRÁTIS
+                {YEARLY_FREE_LABEL.toUpperCase()}
               </span>
             </div>
             <div className="flex items-baseline gap-1.5">

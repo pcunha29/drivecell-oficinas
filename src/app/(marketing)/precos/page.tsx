@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Container } from "@/components/marketing/container";
 import { PricingIncluded } from "@/components/marketing/pricing-included";
 import { PricingToggle } from "@/components/marketing/pricing-toggle";
-import { PRICE_LABEL, PRICING } from "@/lib/pricing";
+import { PRICE_LABEL, PRICING, YEARLY_FREE_LABEL } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "Preços",
@@ -43,7 +43,7 @@ const FAQ = [
   },
   {
     q: "Posso passar a anual?",
-    a: "Sim, a qualquer momento, e ficas com 2 meses grátis.",
+    a: `Sim, a qualquer momento, e ficas com ${YEARLY_FREE_LABEL}.`,
   },
   {
     q: "E se um pagamento falhar?",
