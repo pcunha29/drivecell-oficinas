@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { Analytics, type BeforeSendEvent } from "@vercel/analytics/next";
+import { rememberAttribution } from "@/lib/analytics/events";
 
 /** Caminhos que não contam para as estatísticas (as tuas visitas ao admin e à conta). */
 const EXCLUDED_PREFIXES = ["/admin", "/conta", "/auth"];
@@ -25,5 +27,9 @@ function beforeSend(event: BeforeSendEvent): BeforeSendEvent | null {
 
 /** Vercel Web Analytics: visitas anónimas, sem cookies. */
 export function SiteAnalytics() {
+  // Fonte da visita (utm_source ou site de origem), para os eventos de demonstração.
+  useEffect(() => {
+    rememberAttribution();
+  }, []);
   return <Analytics beforeSend={beforeSend} />;
 }

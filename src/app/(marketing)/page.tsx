@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRightIcon, ButtonLink } from "@/components/marketing/button-link";
+import { TrackedCtaLink } from "@/components/marketing/tracked-cta-link";
 import { ContactSection } from "@/components/marketing/contact-section";
 import { Container } from "@/components/marketing/container";
 import { HeroBoard } from "@/components/marketing/hero-board";
@@ -278,10 +279,10 @@ export default function LandingPage() {
             No computador da receção ou no telemóvel, ao lado do elevador.
           </p>
           <div className="flex flex-wrap items-center gap-3">
-            <ButtonLink href="/#contacto">
+            <TrackedCtaLink href="/#contacto" origin="hero">
               Pedir demonstração
               <ArrowRightIcon />
-            </ButtonLink>
+            </TrackedCtaLink>
             <ButtonLink href="/precos" variant="ghost" className="px-5">
               Ver preços
             </ButtonLink>

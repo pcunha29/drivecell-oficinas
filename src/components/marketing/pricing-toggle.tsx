@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { buttonClasses } from "@/components/marketing/button-link";
 import { PRICE_LABEL, SETUP_NOTE, YEARLY_FREE_LABEL } from "@/lib/pricing";
+import { trackDemoCta } from "@/lib/analytics/events";
 
 type Billing = "monthly" | "yearly";
 
@@ -90,7 +91,11 @@ export function PricingToggle({ aside }: PricingToggleProps) {
             {SETUP_NOTE}
           </p>
 
-          <Link href="/#contacto" className={`${buttonClasses("light", "lg")} w-full`}>
+          <Link
+            href="/#contacto"
+            onClick={() => trackDemoCta("precos")}
+            className={`${buttonClasses("light", "lg")} w-full`}
+          >
             Pedir demonstração
           </Link>
           <p className="m-0 text-center font-mono text-xs text-on-dark-3">
