@@ -41,3 +41,46 @@ export function confirmErrorMessage(error: { code?: string; status?: number; mes
   }
   return CONFIRM_MESSAGES.generic;
 }
+
+// ---------------------------------------------------------------------------
+// Links com a sessão no fragmento (#access_token=…).
+//
+// Com o template de email por omissão ({{ .ConfirmationURL }}), a Supabase confirma o link
+// no próprio domínio e volta ao redirectTo com a sessão no fragmento do URL (fluxo
+// "implicit"). O fragmento nunca chega ao servidor, por isso é lido no browser. Também traz
+// os erros (#error_code=otp_expired…). Assim os convites funcionam mesmo sem o template
+// personalizado com token_hash.
+// ---------------------------------------------------------------------------
+
+/** Onde o convidado (ou quem recupera a conta) define a palavra-passe. */
+export const SET_PASSWORD_PATH = "/conta/definir-palavra-passe";
+
+export type AuthHash =
+  | { kind: "session"; accessToken: string; refreshToken: string; type: string | null }
+  | { kind: "error"; code: string; description: string };
+
+/** Lê o fragmento devolvido pela Supabase; null se não for um retorno de autenticação. */
+export function parseAuthHash(hash: string): AuthHash | null {
+  const params = new URLSearchParams(hash.startsWith("#") ? hash.slice(1) : hash);
+  const accessToken = params.get("access_token");
+  const refreshToken = params.get("refresh_token");
+  if (accessToken && refreshToken) {
+    return { kind: "session", accessToken, refreshToken, type: params.get("type") };
+  }
+  const code = params.get("error_code") || params.get("error");
+  if (code) {
+    return { kind: "error", code, description: params.get("error_description") ?? "" };
+  }
+  return null;
+}
+
+/** Destino depois de abrir a sessão: convites e recuperações vão definir a palavra-passe. */
+export function hashDestination(type: string | null, next: string): string {
+  if (type === "invite" || type === "recovery") return SET_PASSWORD_PATH;
+  return next;
+}
+
+/** Mensagem para um erro vindo no fragmento (a Supabase usa otp_expired para usado/expirado). */
+export function hashErrorMessage(error: { code: string; description: string }): string {
+  return confirmErrorMessage({ code: error.code, message: error.description, status: error.code === "access_denied" ? 403 : undefined });
+}

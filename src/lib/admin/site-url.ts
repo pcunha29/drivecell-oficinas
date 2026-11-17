@@ -1,5 +1,6 @@
-/** Caminho onde o dono convidado define a palavra-passe. */
-export const SET_PASSWORD_PATH = "/conta/definir-palavra-passe";
+import { SET_PASSWORD_PATH } from "@/lib/auth-confirm";
+
+export { SET_PASSWORD_PATH };
 
 /** URL pública da app (sem barra final), a partir de NEXT_PUBLIC_SITE_URL. */
 export function getSiteUrl(): string {

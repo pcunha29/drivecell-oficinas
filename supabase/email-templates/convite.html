@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>O teu acesso ao DriveCell Oficinas</title>
+</head>
+<body style="margin:0; padding:0; background:#f4f1ea; -webkit-text-size-adjust:100%;">
+<!-- Pré-visualização na caixa de entrada -->
+<div style="display:none; max-height:0; overflow:hidden; opacity:0;">A tua oficina já está criada. Define a palavra-passe e começa a usar o DriveCell Oficinas.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f1ea;">
+  <tr>
+    <td align="center" style="padding:32px 16px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
+        <!-- Logótipo -->
+        <tr>
+          <td style="padding:0 4px 20px;">
+            <a href="{{ .SiteURL }}" style="text-decoration:none;">
+              <img src="{{ .SiteURL }}/logos/logo-full-color.png" width="150" alt="DriveCell" style="display:inline-block; width:150px; height:auto; border:0; vertical-align:middle;">
+            </a>
+            <span style="font-family:Arial,Helvetica,sans-serif; font-size:11px; font-weight:bold; letter-spacing:2px; color:#b18d56; vertical-align:middle; padding-left:6px;">OFICINAS</span>
+          </td>
+        </tr>
+        <!-- Cartão -->
+        <tr>
+          <td style="background:#ffffff; border:1px solid #e3ddd0; border-top:4px solid #b18d56; border-radius:6px; padding:36px 36px 32px;">
+            <p style="margin:0 0 8px; font-family:Arial,Helvetica,sans-serif; font-size:12px; font-weight:bold; letter-spacing:1.5px; text-transform:uppercase; color:#b18d56;">O teu acesso</p>
+            <h1 style="margin:0 0 20px; font-family:Georgia,'Times New Roman',serif; font-size:30px; line-height:1.15; font-weight:normal; color:#0d2c4a;">
+              {{ if .Data.workshop_name }}A {{ .Data.workshop_name }} já está pronta.{{ else }}A tua oficina já está pronta.{{ end }}
+            </h1>
+            <p style="margin:0 0 16px; font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:1.6; color:#344150;">
+              {{ if .Data.full_name }}Olá, {{ .Data.full_name }}.{{ else }}Olá.{{ end }}
+            </p>
+            <p style="margin:0 0 28px; font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:1.6; color:#344150;">
+              Criámos a conta da tua oficina no DriveCell Oficinas. Falta só um passo: definir a tua palavra-passe. Depois entras com o email <strong style="color:#0d2c4a;">{{ .Email }}</strong>.
+            </p>
+            <!-- Botão (tabela: funciona também no Outlook) -->
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px;">
+              <tr>
+                <td align="center" bgcolor="#0d2c4a" style="border-radius:4px;">
+                  <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=invite&amp;next=/conta/definir-palavra-passe" style="display:inline-block; padding:15px 28px; font-family:Arial,Helvetica,sans-serif; font-size:16px; font-weight:bold; color:#ffffff; text-decoration:none; border-radius:4px;">Definir palavra-passe</a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:0 0 6px; font-family:Arial,Helvetica,sans-serif; font-size:13px; line-height:1.6; color:#5b6672;">
+              O botão não funciona? Copia este endereço para o browser:
+            </p>
+            <p style="margin:0 0 24px; font-family:Arial,Helvetica,sans-serif; font-size:13px; line-height:1.5; word-break:break-all;">
+              <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=invite&amp;next=/conta/definir-palavra-passe" style="color:#0d2c4a;">{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=invite&amp;next=/conta/definir-palavra-passe</a>
+            </p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="border-top:1px solid #e3ddd0; padding-top:18px; font-family:Arial,Helvetica,sans-serif; font-size:13px; line-height:1.6; color:#5b6672;">
+                  O link só pode ser usado uma vez e é válido durante 24 horas. Se expirar, manda-nos uma mensagem para o <strong style="color:#0d2c4a;">912 079 695</strong> (WhatsApp) ou escreve para <a href="mailto:geral@drivecell.pt" style="color:#0d2c4a;">geral@drivecell.pt</a> e enviamos outro.
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- Rodapé -->
+        <tr>
+          <td style="padding:20px 4px 0; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:1.6; color:#7a838c;">
+            Recebeste este email porque criámos uma conta para a tua oficina no DriveCell Oficinas. Se não estavas à espera dele, podes ignorá-lo: sem definires a palavra-passe ninguém entra na conta.<br>
+            <a href="{{ .SiteURL }}" style="color:#7a838c;">drivecell.pt</a> · <a href="mailto:geral@drivecell.pt" style="color:#7a838c;">geral@drivecell.pt</a>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { AuthSplit } from "@/components/auth/auth-split";
 import { ConfirmAccessForm } from "@/components/auth/confirm-access-form";
-import { CONFIRM_MESSAGES, isOtpType } from "@/lib/auth-confirm";
+import { isOtpType } from "@/lib/auth-confirm";
 import { safeNextPath } from "@/lib/safe-next-path";
 
 export const metadata: Metadata = {
@@ -18,6 +18,8 @@ function firstParam(value: string | string[] | undefined): string {
 /**
  * Destino dos links de uso único (via /auth/confirm). Não usa o token ao abrir:
  * só o botão "Continuar" (POST) o troca por sessão, para as pré-visualizações não o gastarem.
+ * Sem token na query, a sessão (ou o erro) pode vir no fragmento #access_token=… — o
+ * formulário lê-o no browser (ver parseAuthHash).
  */
 export default async function ContinuarPage({
   searchParams,
@@ -41,12 +43,7 @@ export default async function ContinuarPage({
           </>
         }
       >
-        <ConfirmAccessForm
-          tokenHash={tokenHash}
-          type={type}
-          next={next}
-          initialError={valid ? null : CONFIRM_MESSAGES.expired}
-        />
+        <ConfirmAccessForm tokenHash={tokenHash} type={type} next={next} hasToken={valid} />
       </AuthSplit>
     </div>
   );

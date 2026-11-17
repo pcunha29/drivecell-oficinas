@@ -65,9 +65,25 @@ type InviteOutcome =
   | { ok: true; user: User; emailed: boolean; emailError?: string }
   | { ok: false; code?: string; message: string };
 
+/**
+ * Dados do convidado guardados no utilizador e usados no template de email do Supabase
+ * ({{ .Data.full_name }}, {{ .Data.workshop_name }} — ver supabase/email-templates/).
+ */
+function inviteMetadata(fullName?: string, workshopName?: string): Record<string, string> | undefined {
+  const data: Record<string, string> = {};
+  if (fullName) data.full_name = fullName;
+  if (workshopName) data.workshop_name = workshopName;
+  return Object.keys(data).length > 0 ? data : undefined;
+}
+
 /** Convida por email; se o envio falhar, cria a conta na mesma (o admin usa o link). */
-async function inviteUser(admin: SupabaseClient, email: string, fullName?: string): Promise<InviteOutcome> {
-  const metadata = fullName ? { full_name: fullName } : undefined;
+async function inviteUser(
+  admin: SupabaseClient,
+  email: string,
+  fullName?: string,
+  workshopName?: string,
+): Promise<InviteOutcome> {
+  const metadata = inviteMetadata(fullName, workshopName);
   const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
     data: metadata,
     redirectTo: getInviteRedirectUrl(),
@@ -127,7 +143,7 @@ export async function createWorkshopAction(
     let user = await findUserByEmail(admin, input.ownerEmail);
 
     if (!user) {
-      const outcome = await inviteUser(admin, input.ownerEmail, input.ownerName);
+      const outcome = await inviteUser(admin, input.ownerEmail, input.ownerName, input.name);
       if (!outcome.ok && outcome.code === "email_exists") {
         // Criado entretanto (corrida): usa o existente sem reenviar.
         user = await findUserByEmail(admin, input.ownerEmail);
@@ -276,12 +292,14 @@ export async function resendInviteAction(
     const admin = createAdminClient();
     const { data: member, error: memberError } = await admin
       .from("workshop_members")
-      .select("user_id")
+      .select("user_id, workshops(name)")
       .eq("workshop_id", workshopId)
       .eq("user_id", userId)
       .maybeSingle();
     if (memberError) return { status: "error", message: memberError.message };
     if (!member) return { status: "error", message: "Este utilizador não é membro desta oficina." };
+    const workshopEmbed = member.workshops as unknown as { name: string } | { name: string }[] | null;
+    const workshopName = Array.isArray(workshopEmbed) ? workshopEmbed[0]?.name : workshopEmbed?.name;
 
     const { data: userData, error: userError } = await admin.auth.admin.getUserById(userId);
     const user = userData?.user;
@@ -296,7 +314,7 @@ export async function resendInviteAction(
     if (!user.email_confirmed_at) {
       const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
       const { error } = await admin.auth.admin.inviteUserByEmail(user.email, {
-        data: typeof meta.full_name === "string" ? { full_name: meta.full_name } : undefined,
+        data: inviteMetadata(typeof meta.full_name === "string" ? meta.full_name : undefined, workshopName),
         redirectTo: getInviteRedirectUrl(),
       });
       if (!error) {

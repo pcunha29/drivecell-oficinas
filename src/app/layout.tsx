@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 import { SiteAnalytics } from "@/components/site-analytics";
+import { AuthHashRedirect } from "@/components/auth-hash-redirect";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 const geist = Geist({
@@ -61,6 +62,7 @@ export default function RootLayout({
         <ThemeProvider>{children}</ThemeProvider>
         <Toaster richColors position="bottom-right" />
         <SiteAnalytics />
+        <AuthHashRedirect />
       </body>
     </html>
   );

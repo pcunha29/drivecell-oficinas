@@ -19,6 +19,8 @@ function beforeSend(event: BeforeSendEvent): BeforeSendEvent | null {
       if (key.startsWith("utm_")) kept.set(key, value);
     });
     url.search = kept.toString();
+    // Nunca o fragmento: pode trazer tokens de sessão (#access_token=… dos links da Supabase).
+    url.hash = "";
     return { ...event, url: url.toString() };
   } catch {
     return event;
