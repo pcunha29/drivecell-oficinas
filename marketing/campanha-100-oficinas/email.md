@@ -29,12 +29,12 @@ Uma nota honesta: estamos a começar e, para já, não passa faturas nem se liga
 faturação. Continua a faturar no programa de sempre.
 
 Se quiser ver em 15 minutos, responda a este email ou mande-me uma mensagem:
-- WhatsApp: https://wa.me/351912079695?text=Ol%C3%A1%21%20Quero%20uma%20demonstra%C3%A7%C3%A3o%20do%20DriveCell.%20%28email%29
+- WhatsApp: https://wa.me/351913614963?text=Ol%C3%A1%21%20Quero%20uma%20demonstra%C3%A7%C3%A3o%20do%20DriveCell.%20%28email%29
 - Ver como funciona: https://drivecell.pt/?utm_source=email&utm_campaign=100-oficinas
 
 Com os melhores cumprimentos,
 [O seu nome]
-DriveCell Oficinas · 912 079 695 · drivecell.pt
+DriveCell Oficinas · 913 614 963 · drivecell.pt
 
 —
 Recebeu este email porque o contacto da [Nome da oficina] é público. Se não quiser receber

@@ -4,7 +4,7 @@
  */
 export const CONTACT_EMAIL = "geral@drivecell.pt";
 /** Formato internacional sem espaços nem "+", como o wa.me exige (ex. 351912345678). */
-export const CONTACT_PHONE = "+351912079695";
+export const CONTACT_PHONE = "+351913614963";
 
 export function whatsappUrl(text?: string): string {
   const base = `https://wa.me/${CONTACT_PHONE.replace(/\D/g, "")}`;

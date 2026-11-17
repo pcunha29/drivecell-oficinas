@@ -31,8 +31,8 @@ from qrcode.constants import ERROR_CORRECT_L
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
 
-PHONE = "351912079695"
-PHONE_LABEL = "912 079 695"
+PHONE = "351913614963"
+PHONE_LABEL = "913 614 963"
 QR_MESSAGE = "Olá! Quero ver o DriveCell. (folheto)"
 WA_URL = f"https://wa.me/{PHONE}?text={urllib.parse.quote(QR_MESSAGE)}"
 
