@@ -1,18 +1,22 @@
 "use client";
 
+import Link from "next/link";
 import { AlertTriangle, Clock } from "lucide-react";
 import { mailtoUrl, whatsappUrl } from "@/lib/contact";
 import { pageContainer } from "@/lib/layout";
 import { cn } from "@/lib/utils";
 import { formatDatePt, trialDaysLeft } from "@/lib/workshop";
-import { useWorkshop } from "@/stores/workshop-store";
+import { useIsOwner, useWorkshop } from "@/stores/workshop-store";
 
 const TRIAL_WARNING_DAYS = 7;
 
 /** Aviso no topo da app: fim do teste próximo, ou conta em só-leitura. */
 export function WorkshopBanner() {
   const { workshop, canWrite } = useWorkshop();
+  const isOwner = useIsOwner();
   if (!workshop) return null;
+  // O admin ligou o pagamento na app: o dono ativa a subscrição sozinho.
+  const canCheckout = isOwner && workshop.checkout_enabled === true && !workshop.is_demo;
 
   if (!canWrite) {
     return (
@@ -28,9 +32,21 @@ export function WorkshopBanner() {
         >
           <p className="flex items-start gap-2">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-            <span>Conta em só-leitura. Contacta-nos para reativar.</span>
+            <span>
+              {canCheckout
+                ? "Conta em só-leitura. Ativa a subscrição para voltar a criar e alterar registos."
+                : "Conta em só-leitura. Contacta-nos para reativar."}
+            </span>
           </p>
           <div className="flex shrink-0 items-center gap-4 pl-6 font-medium sm:pl-0">
+            {canCheckout && (
+              <Link
+                href="/app/subscricao"
+                className="rounded-md bg-amber-900 px-3 py-1.5 text-amber-50 hover:bg-amber-800 dark:bg-amber-200 dark:text-amber-950 dark:hover:bg-amber-100"
+              >
+                Ativar subscrição
+              </Link>
+            )}
             <a
               href={mailtoUrl(`Reativar conta - ${workshop.name}`)}
               className="underline underline-offset-4 hover:no-underline"
@@ -72,8 +88,18 @@ export function WorkshopBanner() {
             className="h-4 w-4 shrink-0 text-muted-foreground"
             aria-hidden
           />
-          O teu período de teste termina a{" "}
-          {formatDatePt(workshop.trial_ends_at)}.
+          <span>
+            O teu período de teste termina a{" "}
+            {formatDatePt(workshop.trial_ends_at)}.
+          </span>
+          {canCheckout && (
+            <Link
+              href="/app/subscricao"
+              className="ml-auto shrink-0 font-medium underline underline-offset-4 hover:no-underline"
+            >
+              Ativar subscrição
+            </Link>
+          )}
         </p>
       </div>
     );
