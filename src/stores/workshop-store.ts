@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/client";
 import {
   WORKSHOP_SELECT,
   WORKSHOP_SELECT_BASE,
+  WORKSHOP_SELECT_PRE_BILLING,
   workshopCanWrite,
   type Workshop,
 } from "@/lib/workshop";
@@ -57,16 +58,16 @@ export const useWorkshopStore = create<WorkshopStore>((set, get) => ({
           .limit(1)
           .maybeSingle();
 
+      // Coluna em falta (migração ainda por aplicar, erro 42703): desce um nível de cada vez
+      // (sem os pagamentos, depois só o essencial) em vez de deixar a app em só-leitura.
       let { data, error } = await fetchMembership(WORKSHOP_SELECT);
-
-      // Coluna em falta (migração ainda por aplicar, erro 42703): carrega sem as colunas
-      // opcionais em vez de deixar a app inteira em só-leitura.
-      if (error?.code === "42703") {
+      for (const fallback of [WORKSHOP_SELECT_PRE_BILLING, WORKSHOP_SELECT_BASE]) {
+        if (error?.code !== "42703") break;
         console.warn(
           "[oficina] Falta uma coluna na tabela workshops - aplica as migrações em falta.",
           error.message,
         );
-        ({ data, error } = await fetchMembership(WORKSHOP_SELECT_BASE));
+        ({ data, error } = await fetchMembership(fallback));
       }
 
       if (error) throw error;
@@ -129,6 +130,18 @@ export function useIsOwner(): boolean {
 /** A oficina regista o custo das peças (coluna de custo e margem). */
 export function useTrackCosts(): boolean {
   return useWorkshopStore((s) => s.workshop?.track_costs ?? false);
+}
+
+/**
+ * Mostrar a entrada "Subscrição" ao dono: o admin ligou o pagamento na app, ou a oficina
+ * já tem cliente na Stripe (para gerir o cartão, ver recibos ou cancelar).
+ */
+export function useShowSubscription(): boolean {
+  return useWorkshopStore(
+    (s) =>
+      s.role === "owner" &&
+      (s.workshop?.checkout_enabled === true || Boolean(s.workshop?.stripe_customer_id)),
+  );
 }
 
 /**

@@ -14,14 +14,21 @@ export type Workshop = Pick<
   | "is_demo"
   | "track_costs"
   | "calendar_enabled"
+  | "checkout_enabled"
+  | "billing_interval"
+  | "cancel_at_period_end"
+  | "stripe_customer_id"
 >;
 
 /** Colunas essenciais (existem desde a primeira migração). */
 export const WORKSHOP_SELECT_BASE =
   "id, name, subscription_status, trial_ends_at, current_period_end, is_demo";
 
+/** Antes da migração dos pagamentos (20261118100000): usado se essas colunas ainda não existirem. */
+export const WORKSHOP_SELECT_PRE_BILLING = `${WORKSHOP_SELECT_BASE}, track_costs, calendar_enabled`;
+
 /** Tudo o que a app usa, incluindo opções mais recentes (ex.: track_costs, calendar_enabled). */
-export const WORKSHOP_SELECT = `${WORKSHOP_SELECT_BASE}, track_costs, calendar_enabled`;
+export const WORKSHOP_SELECT = `${WORKSHOP_SELECT_BASE}, stripe_customer_id, track_costs, calendar_enabled, checkout_enabled, billing_interval, cancel_at_period_end`;
 
 const WRITABLE_STATUSES: SubscriptionStatusDb[] = ["active", "past_due"];
 
