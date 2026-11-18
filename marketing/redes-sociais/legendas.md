@@ -78,7 +78,7 @@ E não passa faturas: funciona ao lado do programa de faturação que já usa, p
 
 👉 Quer ver como fica com os dados da sua oficina? Fale connosco por mensagem.
 
-#oficina #oficinaautomovel #mecanica #gestaodeoficina #pacosdeferreira
+#oficina #oficinaautomovel #mecanica #gestaodeoficina #oficinasportugal
 
 ---
 
@@ -88,8 +88,8 @@ Olá! Somos a DriveCell Oficinas 👋
 
 Fizemos um programa simples para gerir a oficina: todos os carros num quadro, quanto tem por cobrar e as marcações da semana. Funciona no telemóvel ou no computador, sem instalar nada.
 
-Somos de Paços de Ferreira e estamos a começar com oficinas da região. Respondemos nós, não um robô.
+Somos uma equipa portuguesa e fizemos o DriveCell a pensar nas oficinas independentes. Respondemos nós, não um robô.
 
 👉 30 dias grátis, com os dados da sua oficina. Nós passamos os seus clientes e viaturas e ensinamos a equipa. Depois, 39 € por mês, sem fidelização.
 
-#oficina #oficinaautomovel #mecanica #pacosdeferreira #valedosousa
+#oficina #oficinaautomovel #mecanica #gestaodeoficina #oficinasportugal
