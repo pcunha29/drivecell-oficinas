@@ -10,6 +10,7 @@ import {
 
 export const metadata: Metadata = {
   title: "Termos e privacidade",
+  alternates: { canonical: "/termos" },
   description:
     "Termos de serviço e política de privacidade do DriveCell Oficinas: período de experiência, preço e pagamento, cancelamento, dados dos teus clientes e os teus direitos ao abrigo do RGPD.",
 };

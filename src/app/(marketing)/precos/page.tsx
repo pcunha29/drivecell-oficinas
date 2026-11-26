@@ -5,7 +5,8 @@ import { PricingToggle } from "@/components/marketing/pricing-toggle";
 import { INVOICING_NOTE, PRICE_LABEL, PRICING, YEARLY_FREE_LABEL } from "@/lib/pricing";
 
 export const metadata: Metadata = {
-  title: "Preços",
+  title: "Preços do software para oficinas",
+  alternates: { canonical: "/precos" },
   description:
     `Um preço, tudo incluído: ${PRICE_LABEL.monthly} por mês ou ${PRICE_LABEL.yearly} por ano, IVA incluído. Pede uma demonstração do DriveCell Oficinas: configuramos a tua oficina e cancelas quando quiseres.`,
 };

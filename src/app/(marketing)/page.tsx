@@ -16,19 +16,23 @@ import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
-const title = "DriveCell Oficinas - Gestão simples para oficinas";
+// "Software" e "programa de gestão" são o que os donos de oficina pesquisam no Google.
+const title = "Software para oficinas auto, simples e no telemóvel · DriveCell";
 const description =
-  "Marcações, ordens de reparação, clientes, viaturas e pagamentos num só sítio. Software simples para oficinas, no computador ou no telemóvel. Pede uma demonstração.";
+  "Programa de gestão para oficinas auto: marcações, ordens de reparação, clientes e pagamentos num só quadro, no computador ou no telemóvel. 30 dias grátis.";
 
 export const metadata: Metadata = {
   title: { absolute: title },
   description,
+  alternates: { canonical: "/" },
   openGraph: {
     title,
     description,
     type: "website",
     locale: "pt_PT",
     siteName: "DriveCell Oficinas",
+    // Ao definir openGraph aqui, a imagem de src/app/opengraph-image.tsx deixa de ser herdada: indica-se à mão.
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: `${SITE_NAME} - ${SITE_TAGLINE}` }],
   },
 };
 
@@ -268,15 +272,15 @@ export default function LandingPage() {
       {/* Hero */}
       <Container className="grid grid-cols-1 items-center gap-y-14 pt-14 pb-20 md:pt-24 md:pb-28 lg:grid-cols-12 lg:gap-x-6">
         <div className="flex flex-col gap-7 md:gap-8 lg:col-span-6">
-          <span className="eyebrow">Gestão para oficinas independentes</span>
+          <span className="eyebrow">Software de gestão para oficinas auto</span>
           <h1 className="display-serif m-0 text-display-xl">
             A oficina organizada.
             <br />
             <em className="text-accent">Sem papelada.</em>
           </h1>
           <p className="m-0 max-w-[520px] text-lg leading-[1.55] text-ink-2 md:text-xl">
-            Ordens de reparação, clientes, viaturas e pagamentos num só quadro.
-            No computador da receção ou no telemóvel, ao lado do elevador.
+            Um programa de gestão para oficinas com as ordens de reparação, os clientes, as viaturas e
+            os pagamentos num só quadro. No computador da receção ou no telemóvel, ao lado do elevador.
           </p>
           <p className="m-0 max-w-[520px] border-l-2 border-gold pl-4 text-[15px] leading-[1.55] text-ink-2">
             {INVOICING_NOTE}
@@ -371,7 +375,7 @@ export default function LandingPage() {
         <Container className="flex flex-col gap-12 py-20 md:gap-16 md:py-28">
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between md:gap-12">
             <div className="flex flex-col gap-4">
-              <span className="eyebrow text-on-dark-3!">Funcionalidades</span>
+              <span className="eyebrow text-on-dark-3!">Funcionalidades do programa</span>
               <h2 className="display-serif m-0 max-w-[700px] text-display-md">
                 Só o que uma oficina pequena usa. Nada mais.
               </h2>
