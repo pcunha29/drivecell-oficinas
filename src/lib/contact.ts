@@ -38,6 +38,8 @@ export function demoContactTag(fonte: string, pathname: string): string {
     "/precos": "preços",
     "/entrar": "entrar",
     "/modelos/folha-de-obra-oficina": "folha de obra",
+    "/modelos/ordem-de-reparacao": "ordem de reparação",
+    "/modelos/orcamento-oficina": "orçamento",
   };
   return `${source} · ${place[pathname] ?? "site"}`;
 }
