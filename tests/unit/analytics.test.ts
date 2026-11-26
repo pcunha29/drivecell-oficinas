@@ -50,6 +50,8 @@ describe("etiqueta no WhatsApp/email do pedido de demonstração", () => {
     expect(demoContactTag("instagram", "/entrar")).toBe("Instagram · entrar");
     expect(demoContactTag("folheto", "/termos")).toBe("folheto · site");
     expect(demoContactTag("direto", "/")).toBe("site · página inicial");
+    expect(demoContactTag("google.com", "/modelos/folha-de-obra-oficina")).toBe("Google · folha de obra");
+    expect(demoContactTag("direto", "/modelos/orcamento-oficina")).toBe("site · orçamento");
   });
 
   it("acrescenta a etiqueta à mensagem do WhatsApp e ao assunto do email, sem '+'", () => {

@@ -4,7 +4,7 @@ import { track } from "@vercel/analytics";
 import { demoContactTag, withContactTag } from "@/lib/contact";
 
 /** De onde veio o pedido de demonstração (para comparar no painel da Vercel). */
-export type DemoOrigin = "cabecalho" | "bloco-contacto" | "entrar";
+export type DemoOrigin = "cabecalho" | "bloco-contacto" | "entrar" | "modelos";
 export type DemoChannel = "whatsapp" | "email";
 /** Botões "Pedir demonstração" que levam à secção de contacto (ainda não é o pedido). */
 export type DemoCtaOrigin = "hero" | "precos";
@@ -44,6 +44,17 @@ export function tagContactLink(link: HTMLAnchorElement) {
     link.href = withContactTag(link.dataset.baseHref, tag);
   } catch {
     // Sem etiqueta, o link original continua a funcionar.
+  }
+}
+
+/** Modelos grátis para descarregar (páginas /modelos/...). */
+export type TemplateFormat = "pdf" | "xlsx" | "docx";
+
+export function trackTemplateDownload(modelo: string, formato: TemplateFormat) {
+  try {
+    track("modelo_descarregado", { modelo, formato });
+  } catch {
+    // idem
   }
 }
 
