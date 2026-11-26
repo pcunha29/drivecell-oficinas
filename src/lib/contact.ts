@@ -37,6 +37,7 @@ export function demoContactTag(fonte: string, pathname: string): string {
     "/": "página inicial",
     "/precos": "preços",
     "/entrar": "entrar",
+    "/modelos/folha-de-obra-oficina": "folha de obra",
   };
   return `${source} · ${place[pathname] ?? "site"}`;
 }

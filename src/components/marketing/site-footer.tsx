@@ -40,6 +40,9 @@ export function SiteFooter() {
           </ul>
         </div>
         <nav className="flex flex-wrap gap-x-7 gap-y-3" aria-label="Rodapé">
+          <Link href="/modelos/folha-de-obra-oficina" className={footerLink}>
+            Folha de obra grátis
+          </Link>
           <Link href="/termos" className={footerLink}>
             Termos
           </Link>
