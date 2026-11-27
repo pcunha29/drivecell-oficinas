@@ -10,6 +10,8 @@ import { AddMemberForm } from "@/components/admin/add-member-form";
 import { RemoveMemberButton } from "@/components/admin/remove-member-button";
 import { ActivityBadge, DemoBadge, StatusBadge } from "@/components/admin/status-badge";
 import { WorkshopEditForm } from "@/components/admin/workshop-edit-form";
+import { StripeCard } from "@/components/admin/stripe-card";
+import { isStripeTestMode } from "@/lib/stripe-server";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -111,10 +113,13 @@ export default async function AdminWorkshopDetailPage({
             adminNotes: workshop.admin_notes ?? "",
             isDemo: workshop.is_demo,
             calendarEnabled: workshop.calendar_enabled,
+            checkoutEnabled: workshop.checkout_enabled,
           }}
         />
 
         <div className="space-y-6">
+          <StripeCard workshop={workshop} testMode={isStripeTestMode()} />
+
           <Card>
             <CardHeader>
               <CardTitle>Membros</CardTitle>

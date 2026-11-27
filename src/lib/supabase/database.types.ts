@@ -28,6 +28,12 @@ export type WorkshopRow = {
   track_costs: boolean;
   /** Menu Marcações visível (só o admin altera). */
   calendar_enabled: boolean;
+  /** Ecrã "Subscrição" (pagamento na app) visível ao dono (só o admin altera). */
+  checkout_enabled: boolean;
+  /** Plano da subscrição Stripe (escrito pelo webhook). */
+  billing_interval: "month" | "year" | null;
+  /** Cancelamento pedido no portal Stripe; ativa até current_period_end. */
+  cancel_at_period_end: boolean;
   admin_notes: string;
   created_at: string;
 };

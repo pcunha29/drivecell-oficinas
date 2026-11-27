@@ -67,6 +67,7 @@ export const updateWorkshopSchema = z.object({
   adminNotes: z.string().max(5000, { error: "Máximo 5000 caracteres." }),
   isDemo: z.boolean(),
   calendarEnabled: z.boolean(),
+  checkoutEnabled: z.boolean(),
 });
 
 export const demoAccountSchema = z.object({

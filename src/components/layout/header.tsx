@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { getStripeBillingPortalUrl } from "@/lib/stripe";
 import { getUserDisplayName } from "@/lib/supabase/user-display-name";
 import {
   CalendarDays,
@@ -31,7 +30,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ProfileDialog } from "@/components/layout/profile-dialog";
 import { WorkshopSettingsDialog } from "@/components/layout/workshop-settings-dialog";
-import { useCalendarEnabled, useIsOwner, useWorkshop } from "@/stores/workshop-store";
+import { useCalendarEnabled, useIsOwner, useShowSubscription, useWorkshop } from "@/stores/workshop-store";
 import { DrivecellIcon } from "@/components/brand/drivecell-logo";
 
 const navItems = [
@@ -66,7 +65,7 @@ export function Header() {
   const isOwner = useIsOwner();
   const calendarEnabled = useCalendarEnabled();
   const workshopName = workshop?.name ?? "DriveCell Oficinas";
-  const billingPortalUrl = getStripeBillingPortalUrl();
+  const showSubscription = useShowSubscription();
   const [userName, setUserName] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -193,17 +192,15 @@ export function Header() {
                   </Link>
                 </DropdownMenuItem>
               )}
-              {billingPortalUrl && (
+              {showSubscription && (
                 <DropdownMenuItem asChild>
-                  <a
-                    href={billingPortalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    href="/app/subscricao"
                     className="flex min-h-[44px] items-center gap-2 cursor-pointer"
                   >
                     <CreditCard className="h-4 w-4" />
                     Subscrição
-                  </a>
+                  </Link>
                 </DropdownMenuItem>
               )}
               <DropdownMenuItem

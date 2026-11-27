@@ -16,6 +16,12 @@ export type AdminWorkshop = {
   is_demo: boolean;
   /** Menu Marcações visível na app da oficina. */
   calendar_enabled: boolean;
+  /** Ecrã «Subscrição» (pagamento na app) visível ao dono. */
+  checkout_enabled: boolean;
+  billing_interval: "month" | "year" | null;
+  cancel_at_period_end: boolean;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
   admin_notes: string;
   created_at: string;
   /** Preenchido pela BD quando o estado passa a "canceled". */
@@ -50,7 +56,7 @@ export type AdminWorkshopDetail = AdminWorkshop & {
 };
 
 const WORKSHOP_COLUMNS =
-  "id, name, phone, nif, subscription_status, trial_ends_at, current_period_end, is_demo, calendar_enabled, admin_notes, created_at, canceled_at";
+  "id, name, phone, nif, subscription_status, trial_ends_at, current_period_end, is_demo, calendar_enabled, checkout_enabled, billing_interval, cancel_at_period_end, stripe_customer_id, stripe_subscription_id, admin_notes, created_at, canceled_at";
 
 type CountEmbed = { count: number }[] | null | undefined;
 type MemberEmbed = { user_id: string; role: string }[] | null | undefined;

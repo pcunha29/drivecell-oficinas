@@ -27,6 +27,7 @@ export type WorkshopEditValues = {
   adminNotes: string;
   isDemo: boolean;
   calendarEnabled: boolean;
+  checkoutEnabled: boolean;
 };
 
 export function WorkshopEditForm({ values }: { values: WorkshopEditValues }) {
@@ -34,6 +35,7 @@ export function WorkshopEditForm({ values }: { values: WorkshopEditValues }) {
   const [, startTransition] = useTransition();
   const [isDemo, setIsDemo] = useState(values.isDemo);
   const [calendarEnabled, setCalendarEnabled] = useState(values.calendarEnabled);
+  const [checkoutEnabled, setCheckoutEnabled] = useState(values.checkoutEnabled);
   const errors = state.fieldErrors ?? {};
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -47,6 +49,7 @@ export function WorkshopEditForm({ values }: { values: WorkshopEditValues }) {
       <input type="hidden" name="id" value={values.id} />
       <input type="hidden" name="isDemo" value={isDemo ? "true" : "false"} />
       <input type="hidden" name="calendarEnabled" value={calendarEnabled ? "true" : "false"} />
+      <input type="hidden" name="checkoutEnabled" value={checkoutEnabled ? "true" : "false"} />
 
       <Card>
         <CardHeader>
@@ -140,6 +143,26 @@ export function WorkshopEditForm({ values }: { values: WorkshopEditValues }) {
               <p id="calendarEnabled-hint" className="text-sm text-muted-foreground">
                 Calendário de marcações e «Chegada prevista» nas ordens. Desligar esconde o menu, mas
                 não apaga as marcações.
+              </p>
+            </div>
+          </div>
+          <div className="mt-5 flex items-start gap-3">
+            <Switch
+              id="checkoutEnabled"
+              checked={checkoutEnabled}
+              onCheckedChange={setCheckoutEnabled}
+              aria-labelledby="checkoutEnabled-label"
+              aria-describedby="checkoutEnabled-hint"
+              className="mt-0.5"
+            />
+            <div className="space-y-1">
+              <span id="checkoutEnabled-label" className="text-sm font-medium">
+                Pagamento na app
+              </span>
+              <p id="checkoutEnabled-hint" className="text-sm text-muted-foreground">
+                Mostra ao dono o ecrã «Subscrição» para pagar com cartão ou débito direto (Stripe), e
+                o botão «Ativar subscrição» nos avisos de fim do teste e de só-leitura. Depois de
+                pagar, o estado atualiza-se sozinho.
               </p>
             </div>
           </div>

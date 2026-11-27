@@ -9,7 +9,8 @@ export type AuditAction =
   | "workshop.import"
   | "workshop.member_add"
   | "workshop.member_remove"
-  | "workshop.access_link";
+  | "workshop.access_link"
+  | "workshop.billing_sync";
 
 /** Texto das ações no painel. */
 export const AUDIT_ACTION_LABELS: Record<string, string> = {
@@ -22,6 +23,7 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   "workshop.member_add": "Membro adicionado",
   "workshop.member_remove": "Membro removido",
   "workshop.access_link": "Link de acesso gerado",
+  "workshop.billing_sync": "Subscrição atualizada (Stripe)",
 };
 
 /**
